@@ -1,12 +1,10 @@
 package com.example.demo.model;
 
 import lombok.Data;
-import java.util.Map;
-import java.util.HashMap;
 @Data
-public class OrderItem {
+public class OrderItem { //テーブルは外部キーとしてorderIdを持つ
 	/** 商品番号 */
-	private Long itemId;
+	private Long itemId; //主キー
 	/** 商品名 */
 	private String itemName;
 	/** 注文量 */

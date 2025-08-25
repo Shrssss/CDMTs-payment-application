@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 @Data
-public class Order {
+public class Order { //テーブルは外部キーとしてuserIdを持つ
 	/** 注文番号 */
-	private Long orderId;
+	private Long orderId; //主キー
 	/** 注文日時 */
 	private LocalDateTime orderDate;
 	/** 決済方法 */
