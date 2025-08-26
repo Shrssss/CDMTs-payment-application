@@ -7,11 +7,11 @@ import com.example.demo.model.OrderItem;
 import java.util.List;
 @Mapper
 public interface UserMapper {
-	/** ユーザIDでユーザと注文情報を取得 */
+	/** ユーザIDでUserTabelの情報を取得 */
 	public List<UserTable> selectById(long userId);
-
+	/** ユーザIDでOrderTabelの情報を取得 */
 	public List<Order> selectOrdersByUserId(long userId);
-	
+	/** ユーザIDでOrderItemTabelの情報を取得 */
 	public List<OrderItem> selectOrderItemsByOrderId(long orderId);
 	/** ユーザを登録 */
 	public int insert(UserTable userTable);
