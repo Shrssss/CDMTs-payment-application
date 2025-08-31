@@ -2,7 +2,7 @@ package com.example.demo.model;
 
 import lombok.Data;
 @Data
-public class OrderItem { //テーブルは外部キーとしてorderIdを持つ
+public class OrderItem { 
 	/** 商品番号 */
 	private Long itemId; //主キー
 	/** 商品名 */
