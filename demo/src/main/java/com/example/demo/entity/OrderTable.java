@@ -1,15 +1,16 @@
-package com.example.demo.model;
+package com.example.demo.entity;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.demo.model.OrderItem;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode; // <-lombokでgetter,setterを生成
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.ArrayList;
 @Data
-@EqualsAndHashCode(callSuper=true)
-public class Order extends CommonData{ //テーブルは外部キーとしてitemを持つ
+public class OrderTable { // <-DB用
 	/** 注文番号 */
-	private Long orderId; //主キー
+	private Long orderId;
 	/** 注文日時 */
 	private LocalDateTime orderDate;
 	/** 決済方法 */

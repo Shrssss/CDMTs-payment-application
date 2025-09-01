@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.example.demo.entity.mapper.OrderMapper">
+	<!-- ORDERマップ（およびORDERITEMマップとのリレーション） -->
+	<resultMap id="orderMap" type="com.example.demo.model.Order">
+		<id column="ORDERID" property="orderId"/>
+		<result column="ORDER_DATE" property="orderDate"/>
+		<result column="PAYMENT_METHOD" property="paymentMethod"/>
+		<result column="PAYMENT_STATUS" property="paymentStatus"/>
+		<result column="SERVING_STATUS" property="servingStatus"/>
+		<result column="USERID" property="userId"/>
+		<collection property="items" ofType="com.example.demo.model.OrderItem"
+					column="ORDERID" select="selectOrderItemsByOrderId"/>
+	</resultMap>
+	
+	<select id="selectOrdersByOrderId" resultMap="orderMap" parameterType="java.lang.Long">
+		SELECT ORDERID, USERID, ORDER_DATE, PAYMENT_METHOD, PAYMENT_STATUS, SERVING_STATUS, USERID
+		FROM ORDER_TABLE
+		WHERE ORDERID = #{orderId}
+	</select>
+	
+	<select id="selectOrderItemsByOrderId" resultType="com.example.demo.model.OrderItem" parameterType="java.lang.Long">
+		SELECT ITEMID, ITEM_NAME, QUANTITY, PRICE
+		FROM ORDER_ITEM_TABLE
+		WHERE ORDERID= #{orderId}
+	</select>
+	
+	<insert id="insertOrder" parameterType="com.example.demo.model.Order">
+		INSERT INTO ORDER_TABLE (ORDERID, ORDER_DATE, PAYMENT_METHOD, PAYMENT_STATUS, SERVING_STATUS, USERID)
+		VALUES (ORDER_SEQ.NEXTVAL, #{orderDate}, #{paymentMethod}, #{paymentStatus}, #{servingStatus}, #{userId})
+	</insert>
+	
+	<insert id="insertOrderItem" parameterType="com.example.demo.model.OrderItem">
+		INSERT INTO ORDER_ITEM_TABLE (ITEMID, ORDERID, ITEM_NAME, QUANTITY, PRICE)
+		VALUES (ITEM_SEQ.NEXTVAL, #{orderId}, #{itemName}, #{quantity}, #{price})
+	</insert>
+	
+</mapper>

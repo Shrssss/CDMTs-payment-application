@@ -1,20 +1,18 @@
 package com.example.demo.entity.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
-import com.example.demo.entity.UserTable;
+import com.example.demo.entity.OrderTable;
 import com.example.demo.model.Order;
 import com.example.demo.model.OrderItem;
 import java.util.List;
 @Mapper
-public interface UserMapper {
-	/** ユーザIDでUserTabelの情報を取得 */
-	public List<UserTable> selectById(long userId);
+public interface OrderMapper {
 	/** ユーザIDでOrderTabelの情報を取得 */
-	public List<Order> selectOrdersByUserId(long userId);
+	public List<OrderTable> selectOrdersByOrderId(long orderId);
 	/** ユーザIDでOrderItemTabelの情報を取得 */
 	public List<OrderItem> selectOrderItemsByOrderId(long orderId);
-	/** ユーザを登録 */
-	public int insert(UserTable userTable);
+//	/** ユーザを登録 */
+//	public int insert(OrderTable userTable);
 	/** 注文を登録 */
 	public int insertOrder(Order order);
 	/** 注文商品を登録 */

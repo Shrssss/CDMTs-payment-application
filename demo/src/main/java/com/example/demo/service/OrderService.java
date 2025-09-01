@@ -5,24 +5,23 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demo.entity.UserTable;
-import com.example.demo.entity.mapper.UserMapper;
-import com.example.demo.model.Order;
+import com.example.demo.entity.OrderTable;
+import com.example.demo.entity.mapper.OrderMapper;
 import com.example.demo.model.OrderItem;
 @Transactional
 @Service
-public class UserService {
-	private final UserMapper mapper;
+public class OrderService {
+	private final OrderMapper mapper;
 	
-    public UserService(UserMapper mapper) {
+    public OrderService(OrderMapper mapper) {
         this.mapper = mapper;
     }
 
-    public List<UserTable> selectById(long userId){
-    	return mapper.selectById(userId);
-    }
-    public List<Order> selectOrdersByUserId(long userId){
-    	return mapper.selectOrdersByUserId(userId);
+//    public List<OrderTable> selectById(long userId){
+//    	return mapper.selectById(userId);
+//    }
+    public List<OrderTable> selectOrdersByOrderId(long orderId){
+    	return mapper.selectOrdersByOrderId(orderId);
     }
     public List<OrderItem> selectOrderItemsByOrderId(long orderId){
     	return mapper.selectOrderItemsByOrderId(orderId);
