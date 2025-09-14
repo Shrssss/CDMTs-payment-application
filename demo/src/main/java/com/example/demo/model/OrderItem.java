@@ -11,6 +11,8 @@ public class OrderItem {
 	private Integer quantity;
 	/** 単価 */
 	private Integer price;
+	/** 在庫の有無*/
+	private Boolean available;
 	
 	/** 総額を算出 */
 	public int getTotalPrice() {

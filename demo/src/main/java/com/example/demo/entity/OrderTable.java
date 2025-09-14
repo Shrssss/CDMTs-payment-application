@@ -13,10 +13,6 @@ public class OrderTable { // <-DB用
 	private Long orderId;
 	/** 注文日時 */
 	private LocalDateTime orderDate;
-	/** 決済方法 */
-	private String paymentMethod;
-	/** 決済の有無 */
-	private Boolean paymentStatus;
 	/** 受け渡しの有無 */
 	private Boolean servingStatus;
 	/** ユーザID */

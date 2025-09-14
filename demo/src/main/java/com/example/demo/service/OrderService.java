@@ -16,10 +16,6 @@ public class OrderService {
     public OrderService(OrderMapper mapper) {
         this.mapper = mapper;
     }
-
-//    public List<OrderTable> selectById(long userId){
-//    	return mapper.selectById(userId);
-//    }
     public List<OrderTable> selectOrdersByOrderId(long orderId){
     	return mapper.selectOrdersByOrderId(orderId);
     }
