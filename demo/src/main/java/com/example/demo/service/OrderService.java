@@ -22,7 +22,7 @@ public class OrderService {
     public List<OrderItem> selectOrderItemsByOrderId(long orderId){
     	return mapper.selectOrderItemsByOrderId(orderId);
     }
-    
-    //追加予定
-    
+    public List<OrderTable> selectAllOrders(){
+    	return mapper.selectAllOrders();
+    }
 }

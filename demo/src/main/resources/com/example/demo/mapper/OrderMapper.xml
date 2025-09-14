@@ -13,7 +13,7 @@
 	</resultMap>
 	
 	<select id="selectOrdersByOrderId" resultMap="orderMap" parameterType="java.lang.Long">
-		SELECT ORDERID, USERID, ORDER_DATE, PAYMENT_METHOD, USERID
+		SELECT ORDERID, USERID, ORDER_DATES, SERVING_STATUS, USERID
 		FROM ORDER_TABLE
 		WHERE ORDERID = #{orderId}
 	</select>
@@ -24,8 +24,13 @@
 		WHERE ORDERID= #{orderId}
 	</select>
 	
+	<select id="selectAllOrders" resultMap="orderId">
+		SELECT ORDERID, USERID, ORDER_DATES, SERVING_STATUS, USERID
+		FROM ORDER_TABLE
+	</select>
+	
 	<insert id="insertOrder" parameterType="com.example.demo.model.Order" useGeneratedKeys="true" keyProperty="orderId">
-		INSERT INTO ORDER_TABLE (ORDER_DATE, PAYMENT_METHOD, USERID)
+		INSERT INTO ORDER_TABLE (ORDER_DATE, SERVING_STATUS, USERID)
 		VALUES (#{orderDate}, #{paymentMethod}, #{paymentStatus}, #{servingStatus}, #{userId})
 	</insert>
 	

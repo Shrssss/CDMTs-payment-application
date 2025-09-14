@@ -11,8 +11,8 @@ public interface OrderMapper {
 	public List<OrderTable> selectOrdersByOrderId(long orderId);
 	/** ユーザIDでOrderItemTabelの情報を取得 */
 	public List<OrderItem> selectOrderItemsByOrderId(long orderId);
-//	/** ユーザを登録 */
-//	public int insert(OrderTable userTable);
+	/** 全オーダーを取得 */
+	public List<OrderTable> selectAllOrders();
 	/** 注文を登録 */
 	public int insertOrder(Order order);
 	/** 注文商品を登録 */
