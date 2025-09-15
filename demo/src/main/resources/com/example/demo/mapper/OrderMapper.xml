@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
 <mapper namespace="com.example.demo.entity.mapper.OrderMapper">
-	<!-- ORDERマップ（およびORDERITEMマップとのリレーション） -->
+	<!-- ORDERマップ -->
 	<resultMap id="orderMap" type="com.example.demo.model.Order">
 		<id column="ORDERID" property="orderId"/>
 		<result column="ORDER_DATE" property="orderDate"/>
@@ -11,32 +11,68 @@
 		<collection property="items" ofType="com.example.demo.model.OrderItem"
 					column="ORDERID" select="selectOrderItemsByOrderId"/>
 	</resultMap>
+	<!-- ORDER_ITEMマップ -->
+	<resultMap id="orderItemMap" type="com.example.demo.model.OrderItem">
+		<id column="ORDER_ITEM_ID" property="orderItemId"/>
+		<result column="ORDERID" property="orderId"/>
+		<result column="ITEMID" property="itemId"/>
+		<result column="QUANTITY" property="quantity"/>
+	</resultMap>
+	<!-- ITEMマップ -->
+	<resultMap id="itemMap" type="com.example.demo.model.Item">
+		<id column="ITEMID" property="itemId"/>
+		<result column="ITEM_NAME" property="itemName"/>
+		<result column="PRICE" property="price"/>
+		<result column="AVAILABLE" property="available"/>
+	</resultMap>
+	
+	
 	
 	<select id="selectOrdersByOrderId" resultMap="orderMap" parameterType="java.lang.Long">
-		SELECT ORDERID, USERID, ORDER_DATES, SERVING_STATUS, USERID
+		SELECT ORDERID, USERID, ORDER_DATE, SERVING_STATUS
 		FROM ORDER_TABLE
 		WHERE ORDERID = #{orderId}
 	</select>
 	
-	<select id="selectOrderItemsByOrderId" resultType="com.example.demo.model.OrderItem" parameterType="java.lang.Long">
-		SELECT ITEMID, ITEM_NAME, QUANTITY, PRICE
+	<select id="selectOrderItemsByOrderId" resultMap="orderItemMap" parameterType="java.lang.Long">
+		SELECT ORDER_ITEM_ID, ORDERID, ITEMID, QUANTITY
 		FROM ORDER_ITEM_TABLE
 		WHERE ORDERID= #{orderId}
 	</select>
 	
-	<select id="selectAllOrders" resultMap="orderId">
-		SELECT ORDERID, USERID, ORDER_DATES, SERVING_STATUS, USERID
+	<select id="selectAllOrders" resultMap="orderMap">
+		SELECT ORDERID, USERID, ORDER_DATE, SERVING_STATUS
 		FROM ORDER_TABLE
 	</select>
 	
+	<select id="selectAllItems" resultMap="itemMap">
+		SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
+		FROM ITEM_TABLE
+	</select>
+	
+	
+	
 	<insert id="insertOrder" parameterType="com.example.demo.model.Order" useGeneratedKeys="true" keyProperty="orderId">
 		INSERT INTO ORDER_TABLE (ORDER_DATE, SERVING_STATUS, USERID)
-		VALUES (#{orderDate}, #{paymentMethod}, #{paymentStatus}, #{servingStatus}, #{userId})
+		VALUES (#{orderDate}, #{servingStatus}, #{userId})
 	</insert>
 	
-	<insert id="insertOrderItem" parameterType="com.example.demo.model.OrderItem">
-		INSERT INTO ORDER_ITEM_TABLE (ITEMID, ORDERID, ITEM_NAME, QUANTITY, PRICE)
-		VALUES (#{orderId}, #{itemName}, #{quantity}, #{price})
+	<insert id="insertOrderItem" parameterType="com.example.demo.model.OrderItem" useGeneratedKeys="true" keyProperty="orderItemId">
+		INSERT INTO ORDER_ITEM_TABLE (ITEMID , ORDERID, QUANTITY)
+		VALUES (#{itemId}, #{orderId}, #{quantity})
 	</insert>
+	
+	<insert id="insertItem" parameterType="com.example.demo.model.Item">
+		INSERT INTO ITEM_TABLE (ITEMID ,ITEM_NAME, PRICE, AVAILABLE)
+		VALUES (#{itemId}, #{itemName}, #{price}, #{available})
+	</insert>
+	
+	
+	
+	<update id="updateItemAvailablitybyItemId" parameterType="com.example.demo.model.Item">
+    	UPDATE ITEM_TABLE
+    	SET AVAILABLE=#{available}
+    	WHERE ITEMID=#{itemId}
+	</update>
 	
 </mapper>

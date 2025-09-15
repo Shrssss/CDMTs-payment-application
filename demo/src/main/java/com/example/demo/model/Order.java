@@ -1,7 +1,7 @@
 package com.example.demo.model;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode; // <-lombokでgetter,setterを生成
+import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;

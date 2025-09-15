@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.entity.OrderTable;
 import com.example.demo.entity.mapper.OrderMapper;
 import com.example.demo.model.OrderItem;
+import com.example.demo.model.Item;
 @Transactional
 @Service
 public class OrderService {
@@ -24,5 +25,11 @@ public class OrderService {
     }
     public List<OrderTable> selectAllOrders(){
     	return mapper.selectAllOrders();
+    }
+    public List<Item> selectAllItems(){
+    	return mapper.selectAllItems();
+    }
+    public int updateItemAvailabilitybyItemId(long itemId) {
+    	return mapper.updateItemAvailabilitybyItemId(itemId);
     }
 }
