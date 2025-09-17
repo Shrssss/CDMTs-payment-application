@@ -8,8 +8,6 @@
 		<result column="ORDER_DATE" property="orderDate"/>
 		<result column="SERVING_STATUS" property="servingStatus"/>
 		<result column="USERID" property="userId"/>
-		<collection property="items" ofType="com.example.demo.model.OrderItem"
-					column="ORDERID" select="selectOrderItemsByOrderId"/>
 	</resultMap>
 	<!-- ORDER_ITEMマップ -->
 	<resultMap id="orderItemMap" type="com.example.demo.model.OrderItem">

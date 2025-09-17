@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import com.example.demo.dto.OrderRequest;
 import com.example.demo.entity.OrderTable;
 import com.example.demo.entity.mapper.OrderMapper;
 import com.example.demo.model.OrderItem;
 import com.example.demo.model.Item;
+import com.example.demo.model.Order;
 @Transactional
 @Service
 public class OrderService {
@@ -31,5 +34,28 @@ public class OrderService {
     }
     public int updateItemAvailabilitybyItemId(long itemId) {
     	return mapper.updateItemAvailabilitybyItemId(itemId);
+    }
+    
+    
+    /** 注文の取得とDB保存*/
+    public Order createOrder(OrderRequest request) {
+    	Order order=new Order();
+    	order.setOrderId(request.getOrderId());
+    	order.setOrderDate(request.getOrderDate());
+    	order.setServingStatus(request.getServingStatus());
+    	order.setUserId(request.getUserId());
+    	
+    	mapper.insertOrder(order);
+    	
+    	for(OrderRequest.OrderItemRequest orderItemRequest:request.getItems()) {
+    		OrderItem orderitem=new OrderItem();
+    		orderitem.setOrderId(order.getOrderId());
+    		orderitem.setItemId(orderItemRequest.getItemId());
+    		orderitem.setQuantity(orderItemRequest.getQuantity());
+    		
+    		mapper.insertOrderItem(orderitem);
+    	}
+    	
+    	return order;
     }
 }
