@@ -19,7 +19,7 @@ public class OrderService {
     public OrderService(OrderMapper mapper) {
         this.mapper = mapper;
     }
-    public List<OrderTable> selectOrdersByOrderId(long orderId){
+    public OrderTable selectOrdersByOrderId(long orderId){
     	return mapper.selectOrdersByOrderId(orderId);
     }
     public List<OrderItem> selectOrderItemsByOrderId(long orderId){
@@ -54,6 +54,19 @@ public class OrderService {
     		
     		mapper.insertOrderItem(orderitem);
     	}
+    	
+    	return order;
+    }
+    
+    /** DBからの注文取得と受け渡し*/
+    public Order getOrder(long orderId) {
+    	OrderTable table=mapper.selectOrdersByOrderId(orderId);
+    	
+    	Order order=new Order();
+    	order.setOrderId(table.getOrderId());
+    	order.setOrderDate(table.getOrderDate());
+    	order.setServingStatus(table.getServingStatus());
+    	order.setUserId(table.getUserId());
     	
     	return order;
     }
