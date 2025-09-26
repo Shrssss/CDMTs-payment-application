@@ -25,5 +25,5 @@ public interface OrderMapper {
 	public int insertItem(Item item);
 	
 	/** 在庫情報を更新 */
-	public int updateItemAvailabilitybyItemId(long itemId);
+	public int updateItemAvailabilityByItemId(long itemId);
 }

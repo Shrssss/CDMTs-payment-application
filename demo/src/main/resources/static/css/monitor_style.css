@@ -1,0 +1,45 @@
+/* 基本的なスタイルリセットとページ全体のデザイン */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #000000;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 3rem;
+    color: #0056b3;
+    border-bottom: 4px solid #0056b3;
+    display: inline-block;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+}
+
+/* チケット番号を表示するコンテナのスタイル */
+#ticket-board-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+/* 個々のチケット番号のスタイル (iPadでも見やすいように大きく表示) */
+.ticket-number {
+    background-color: #ffffff;
+    color: #d9534f;
+    font-size: 6rem; /* 番号の文字サイズを非常に大きくする */
+    font-weight: bold;
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    min-width: 300px; /* 番号が少なくても一定の幅を保つ */
+}
+
+/* ステータスメッセージのスタイル */
+#status-message {
+    font-size: 2.5rem;
+    color: #666;
+    margin-top: 50px;
+}

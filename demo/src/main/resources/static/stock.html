@@ -1,0 +1,69 @@
+<!--現在json-serverの不具合でitemIdと書くところをidと書いている、-before参照-->
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品提供ステータス管理</title>
+    <link rel="stylesheet" href="stock.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>商品提供ステータス管理画面</h1>
+        <p>スイッチを切り替えると、リアルタイムで提供状況が更新されます。</p>
+        
+        <div id="item-list" class="item-list-container">
+            <div class="item-card">
+                <span class="item-name">角煮</span>
+                <label class="switch">
+                    <input type="checkbox" class="availability-toggle" data-id="10">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="item-card">
+                <span class="item-name">角煮大盛り</span>
+                <label class="switch">
+                    <input type="checkbox" class="availability-toggle" data-id="20">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="item-card">
+                <span class="item-name">オレンジジュース</span>
+                <label class="switch">
+                    <input type="checkbox" class="availability-toggle" data-id="31">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="item-card">
+                <span class="item-name">三ツ矢サイダー</span>
+                <label class="switch">
+                    <input type="checkbox" class="availability-toggle" data-id="32">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="item-card">
+                <span class="item-name">コーラ</span>
+                <label class="switch">
+                    <input type="checkbox" class="availability-toggle" data-id="33">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="item-card">
+                <span class="item-name">ジンジャーエール</span>
+                <label class="switch">
+                    <input type="checkbox" class="availability-toggle" data-id="34">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            </div>
+
+        <div id="error-message" class="error-message"></div>
+    </div>
+
+    <script src="stock.js"></script>
+</body>
+</html>

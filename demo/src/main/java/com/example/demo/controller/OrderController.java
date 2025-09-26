@@ -20,6 +20,7 @@ public class OrderController {
     public Order createOrder(@RequestBody OrderRequest request) {
     	return service.createOrder(request);
     }
-
+    
+    // @GetMapping("/${orderId}")
 	
 }

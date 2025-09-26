@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.demo.dto.OrderRequest;
 import com.example.demo.entity.OrderTable;
@@ -32,8 +31,8 @@ public class OrderService {
     public List<Item> selectAllItems(){
     	return mapper.selectAllItems();
     }
-    public int updateItemAvailabilitybyItemId(long itemId) {
-    	return mapper.updateItemAvailabilitybyItemId(itemId);
+    public int updateItemAvailabilityByItemId(long itemId) {
+    	return mapper.updateItemAvailabilityByItemId(itemId);
     }
     
     
