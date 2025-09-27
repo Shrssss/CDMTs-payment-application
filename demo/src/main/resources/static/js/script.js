@@ -1,37 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- İ’è ---
-    const API_BASE_URL = '/api/v1'; // API‚Ìƒx[ƒXURLiŠÂ‹«‚É‡‚í‚¹‚Ä•ÏXj
-    const POLLING_INTERVAL = 10000; // 10•b‚²‚Æ‚Éƒf[ƒ^‚ğ©“®XV
+    // --- è¨­å®š ---
+    const API_BASE_URL = '/api/v1'; // APIã®ãƒ™ãƒ¼ã‚¹URLï¼ˆç’°å¢ƒã«åˆã‚ã›ã¦å¤‰æ›´ï¼‰
+    const POLLING_INTERVAL = 10000; // 10ç§’ã”ã¨ã«ãƒ‡ãƒ¼ã‚¿ã‚’è‡ªå‹•æ›´æ–°
 
-    // --- DOM—v‘f‚Ìæ“¾ ---
+    // --- DOMè¦ç´ ã®å–å¾— ---
     const upcomingContainer = document.getElementById('upcoming-orders-container');
     const overdueContainer = document.getElementById('overdue-orders-container');
 
-    // --- API’ÊMŠÖ” ---
+    // --- APIé€šä¿¡é–¢æ•° ---
 
     /**
-     * COOKINGó‘Ô‚Ìƒ`ƒPƒbƒg‚ğƒT[ƒo[‚©‚çæ“¾‚·‚é
-     * @returns {Promise<Array>} ƒ`ƒPƒbƒgƒf[ƒ^‚Ì”z—ñ
+     * COOKINGçŠ¶æ…‹ã®ãƒã‚±ãƒƒãƒˆã‚’ã‚µãƒ¼ãƒãƒ¼ã‹ã‚‰å–å¾—ã™ã‚‹
+     * @returns {Promise<Array>} ãƒã‚±ãƒƒãƒˆãƒ‡ãƒ¼ã‚¿ã®é…åˆ—
      */
     async function fetchCookingTickets() {
         try {
             const response = await fetch(`${API_BASE_URL}/tickets?status=COOKING`);
             if (!response.ok) {
-                throw new Error(`APIƒGƒ‰[: ${response.status}`);
+                throw new Error(`APIã‚¨ãƒ©ãƒ¼: ${response.status}`);
             }
             return await response.json();
         } catch (error) {
-            console.error('ƒ`ƒPƒbƒg‚Ìæ“¾‚É¸”s‚µ‚Ü‚µ‚½:', error);
-            // ÀÛ‚É‚Í‰æ–Êã‚ÉƒGƒ‰[ƒƒbƒZ[ƒW‚ğ•\¦‚·‚é•û‚ªeØ
-            return []; // ƒGƒ‰[‚Í‹ó”z—ñ‚ğ•Ô‚·
+            console.error('ãƒã‚±ãƒƒãƒˆã®å–å¾—ã«å¤±æ•—ã—ã¾ã—ãŸ:', error);
+            // å®Ÿéš›ã«ã¯ç”»é¢ä¸Šã«ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è¡¨ç¤ºã™ã‚‹æ–¹ãŒè¦ªåˆ‡
+            return []; // ã‚¨ãƒ©ãƒ¼æ™‚ã¯ç©ºé…åˆ—ã‚’è¿”ã™
         }
     }
 
     /**
-     * ƒ`ƒPƒbƒg‚ÌƒXƒe[ƒ^ƒX‚ğXV‚·‚é
-     * @param {string} ticketId XV‚·‚éƒ`ƒPƒbƒg‚ÌID
-     * @param {string} newStatus V‚µ‚¢ƒXƒe[ƒ^ƒX ('READY'‚È‚Ç)
-     * @returns {Promise<Object|null>} XVŒã‚Ìƒ`ƒPƒbƒgƒf[ƒ^A¸”s‚Ínull
+     * ãƒã‚±ãƒƒãƒˆã®ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ã‚’æ›´æ–°ã™ã‚‹
+     * @param {string} ticketId æ›´æ–°ã™ã‚‹ãƒã‚±ãƒƒãƒˆã®ID
+     * @param {string} newStatus æ–°ã—ã„ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹ ('READY'ãªã©)
+     * @returns {Promise<Object|null>} æ›´æ–°å¾Œã®ãƒã‚±ãƒƒãƒˆãƒ‡ãƒ¼ã‚¿ã€å¤±æ•—æ™‚ã¯null
      */
     async function patchTicketStatus(ticketId, newStatus) {
         try {
@@ -41,22 +41,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ status: newStatus })
             });
             if (!response.ok) {
-                throw new Error(`APIƒGƒ‰[: ${response.status}`);
+                throw new Error(`APIã‚¨ãƒ©ãƒ¼: ${response.status}`);
             }
             return await response.json();
         } catch (error) {
-            console.error('ƒ`ƒPƒbƒg‚ÌXV‚É¸”s‚µ‚Ü‚µ‚½:', error);
-            alert('ƒ`ƒPƒbƒg‚ÌXV‚É¸”s‚µ‚Ü‚µ‚½B'); // [cite: 241]
+            console.error('ãƒã‚±ãƒƒãƒˆã®æ›´æ–°ã«å¤±æ•—ã—ã¾ã—ãŸ:', error);
+            alert('ãƒã‚±ãƒƒãƒˆã®æ›´æ–°ã«å¤±æ•—ã—ã¾ã—ãŸã€‚'); // [cite: 241]
             return null;
         }
     }
 
-    // --- UI•`‰æŠÖ” ---
+    // --- UIæç”»é–¢æ•° ---
 
     /**
-     * —\–ñ‚ÆŒ»İ‚Ì·‚ğŒvZ‚µ‚Ä•¶š—ñ‚ğ•Ô‚·
-     * @param {string} reserveAt - —\–ñ (ISO 8601Œ`®)
-     * @returns {string} •\¦—p‚ÌŠÔ•¶š—ñ
+     * äºˆç´„æ™‚åˆ»ã¨ç¾åœ¨æ™‚åˆ»ã®å·®ã‚’è¨ˆç®—ã—ã¦æ–‡å­—åˆ—ã‚’è¿”ã™
+     * @param {string} reserveAt - äºˆç´„æ™‚åˆ» (ISO 8601å½¢å¼)
+     * @returns {string} è¡¨ç¤ºç”¨ã®æ™‚é–“æ–‡å­—åˆ—
      */
     function getTimeInfoText(reserveAt) {
         const now = new Date();
@@ -64,23 +64,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const diffMinutes = Math.round((reservedTime - now) / (1000 * 60));
 
         if (diffMinutes > 0) {
-            return `—\–ñ: ${reservedTime.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} ‚Ü‚Å‚ ‚Æ ${diffMinutes} •ª`;
+            return `äºˆç´„æ™‚åˆ»: ${reservedTime.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} ã¾ã§ã‚ã¨ ${diffMinutes} åˆ†`;
         } else {
-            return `Œo‰ß: ${-diffMinutes} •ª`; // [cite: 218]
+            return `çµŒé: ${-diffMinutes} åˆ†`; // [cite: 218]
         }
     }
 
     /**
-     * ƒ`ƒPƒbƒgƒf[ƒ^‚©‚çHTML—v‘f‚ğì¬‚·‚é
-     * @param {Object} ticket - ƒ`ƒPƒbƒgƒf[ƒ^
-     * @returns {HTMLElement} ƒ`ƒPƒbƒgƒJ[ƒh‚ÌDOM—v‘f
+     * ãƒã‚±ãƒƒãƒˆãƒ‡ãƒ¼ã‚¿ã‹ã‚‰HTMLè¦ç´ ã‚’ä½œæˆã™ã‚‹
+     * @param {Object} ticket - ãƒã‚±ãƒƒãƒˆãƒ‡ãƒ¼ã‚¿
+     * @returns {HTMLElement} ãƒã‚±ãƒƒãƒˆã‚«ãƒ¼ãƒ‰ã®DOMè¦ç´ 
      */
     function createTicketCard(ticket) {
         const card = document.createElement('div');
         card.className = 'ticket-card';
         card.dataset.ticketId = ticket.ticket_id;
 
-        // —\–ñ‚É‰‚¶‚ÄƒNƒ‰ƒX‚ğ’Ç‰Á 
+        // äºˆç´„æ™‚åˆ»ã«å¿œã˜ã¦ã‚¯ãƒ©ã‚¹ã‚’è¿½åŠ  
         const now = new Date();
         const reservedTime = new Date(ticket.reserve_at);
         const diffMinutes = (reservedTime - now) / (1000 * 60);
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.classList.add('is-urgent');
         }
 
-        // ’•¶“à—e‚ÌƒŠƒXƒg‚ğì¬
+        // æ³¨æ–‡å†…å®¹ã®ãƒªã‚¹ãƒˆã‚’ä½œæˆ
         const itemsList = ticket.items.map(item => `<li>${item.product_name} x ${item.quantity}</li>`).join('');
 
         card.innerHTML = `
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <ul class="order-items">${itemsList}</ul>
                 <div class="time-info">${getTimeInfoText(ticket.reserve_at)}</div>
             </div>
-            <button class="action-button complete-btn">’²—Š®—¹</button>
+            <button class="action-button complete-btn">èª¿ç†å®Œäº†</button>
             <div class="loading-spinner"></div>
         `;
 
@@ -110,23 +110,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * ƒ`ƒPƒbƒgˆê——‚ğ‰æ–Ê‚É•`‰æ‚·‚é
-     * @param {Array<Object>} tickets - ƒ`ƒPƒbƒgƒf[ƒ^‚Ì”z—ñ
+     * ãƒã‚±ãƒƒãƒˆä¸€è¦§ã‚’ç”»é¢ã«æç”»ã™ã‚‹
+     * @param {Array<Object>} tickets - ãƒã‚±ãƒƒãƒˆãƒ‡ãƒ¼ã‚¿ã®é…åˆ—
      */
     function renderTickets(tickets) {
-        // ƒRƒ“ƒeƒi‚ğƒNƒŠƒA
+        // ã‚³ãƒ³ãƒ†ãƒŠã‚’ã‚¯ãƒªã‚¢
         upcomingContainer.innerHTML = '';
         overdueContainer.innerHTML = '';
         
         const now = new Date();
         
-        // —\–ñ‚ª–¢—ˆ‚Ì‚à‚Ì‚Æ‰ß‹‚Ì‚à‚Ì‚ÅU‚è•ª‚¯‚é [cite: 219]
+        // äºˆç´„æ™‚åˆ»ãŒæœªæ¥ã®ã‚‚ã®ã¨éå»ã®ã‚‚ã®ã§æŒ¯ã‚Šåˆ†ã‘ã‚‹ [cite: 219]
         const upcomingOrders = tickets.filter(t => new Date(t.reserve_at) >= now);
         const overdueOrders = tickets.filter(t => new Date(t.reserve_at) < now);
 
-        // —\–ñ‚ª‹ß‚¢‡‚Éƒ\[ƒg [cite: 222]
+        // äºˆç´„æ™‚åˆ»ãŒè¿‘ã„é †ã«ã‚½ãƒ¼ãƒˆ [cite: 222]
         upcomingOrders.sort((a, b) => new Date(a.reserve_at) - new Date(b.reserve_at));
-        // —\–ñ‚ªŒÃ‚¢‡‚Éƒ\[ƒg [cite: 222]
+        // äºˆç´„æ™‚åˆ»ãŒå¤ã„é †ã«ã‚½ãƒ¼ãƒˆ [cite: 222]
         overdueOrders.sort((a, b) => new Date(a.reserve_at) - new Date(b.reserve_at));
 
         upcomingOrders.forEach(ticket => upcomingContainer.appendChild(createTicketCard(ticket)));
@@ -134,43 +134,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰ ---
+    // --- ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ© ---
     
-    // ŠeƒJ[ƒh‚É•R‚Ã‚­ƒ^ƒCƒ}[ID‚ğŠÇ—‚·‚éƒIƒuƒWƒFƒNƒg
+    // å„ã‚«ãƒ¼ãƒ‰ã«ç´ã¥ãã‚¿ã‚¤ãƒãƒ¼IDã‚’ç®¡ç†ã™ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
     let cancellationTimers = {};
 
     /**
-     * u’²—Š®—¹vƒ{ƒ^ƒ“ƒNƒŠƒbƒN‚Ìˆ—
-     * @param {string} ticketId - ƒ`ƒPƒbƒgID
-     * @param {HTMLElement} cardElement - ‘Î‰‚·‚éƒJ[ƒh—v‘f
+     * ã€Œèª¿ç†å®Œäº†ã€ãƒœã‚¿ãƒ³ã‚¯ãƒªãƒƒã‚¯æ™‚ã®å‡¦ç†
+     * @param {string} ticketId - ãƒã‚±ãƒƒãƒˆID
+     * @param {HTMLElement} cardElement - å¯¾å¿œã™ã‚‹ã‚«ãƒ¼ãƒ‰è¦ç´ 
      */
     function handleCompleteCookingClick(ticketId, cardElement) {
-        // ‚·‚Å‚Éæ‚èÁ‚µ‘Ò‚¿ó‘Ô‚È‚ç‰½‚à‚µ‚È‚¢
+        // ã™ã§ã«å–ã‚Šæ¶ˆã—å¾…ã¡çŠ¶æ…‹ãªã‚‰ä½•ã‚‚ã—ãªã„
         if (cardElement.classList.contains('waiting-cancellation')) return;
         
         cardElement.classList.add('waiting-cancellation'); // [cite: 225]
         const button = cardElement.querySelector('.action-button');
-        button.textContent = 'æ‚èÁ‚µ'; // [cite: 226]
+        button.textContent = 'å–ã‚Šæ¶ˆã—'; // [cite: 226]
         button.classList.add('cancel'); // [cite: 227]
 
-        // 5•bŒã‚ÉAPI‚ğ’@‚­ƒ^ƒCƒ}[‚ğƒZƒbƒg 
+        // 5ç§’å¾Œã«APIã‚’å©ãã‚¿ã‚¤ãƒãƒ¼ã‚’ã‚»ãƒƒãƒˆ 
         const timerId = setTimeout(async () => {
-            // ƒ^ƒCƒ}[‚ª”­‰Î‚µ‚½‚çAƒ[ƒfƒBƒ“ƒO•\¦‚ÉØ‚è‘Ö‚¦ [cite: 236]
+            // ã‚¿ã‚¤ãƒãƒ¼ãŒç™ºç«ã—ãŸã‚‰ã€ãƒ­ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°è¡¨ç¤ºã«åˆ‡ã‚Šæ›¿ãˆ [cite: 236]
             cardElement.classList.add('loading');
-            button.style.display = 'none'; // ƒ{ƒ^ƒ“‚ğ‰B‚·
+            button.style.display = 'none'; // ãƒœã‚¿ãƒ³ã‚’éš ã™
 
             const result = await patchTicketStatus(ticketId, 'READY');
             
-            cardElement.classList.remove('loading'); // ƒ[ƒfƒBƒ“ƒO‰ğœ [cite: 240]
+            cardElement.classList.remove('loading'); // ãƒ­ãƒ¼ãƒ‡ã‚£ãƒ³ã‚°è§£é™¤ [cite: 240]
 
             if (result) {
-                // API’ÊM¬Œ÷AƒJ[ƒh‚ğ‰æ–Ê‚©‚çíœ [cite: 235]
+                // APIé€šä¿¡æˆåŠŸæ™‚ã€ã‚«ãƒ¼ãƒ‰ã‚’ç”»é¢ã‹ã‚‰å‰Šé™¤ [cite: 235]
                 cardElement.remove();
             } else {
-                // API’ÊM¸”sAƒJ[ƒh‚ğŒ³‚Ìó‘Ô‚É–ß‚· [cite: 240]
-                button.style.display = 'block'; // ƒ{ƒ^ƒ“‚ğÄ•\¦
+                // APIé€šä¿¡å¤±æ•—æ™‚ã€ã‚«ãƒ¼ãƒ‰ã‚’å…ƒã®çŠ¶æ…‹ã«æˆ»ã™ [cite: 240]
+                button.style.display = 'block'; // ãƒœã‚¿ãƒ³ã‚’å†è¡¨ç¤º
                 cardElement.classList.remove('waiting-cancellation');
-                button.textContent = '’²—Š®—¹';
+                button.textContent = 'èª¿ç†å®Œäº†';
                 button.classList.remove('cancel');
             }
             delete cancellationTimers[ticketId];
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * uæ‚èÁ‚µvƒ{ƒ^ƒ“ƒNƒŠƒbƒN‚Ìˆ—iƒCƒxƒ“ƒgˆÏ÷‚ğ—˜—pj
+     * ã€Œå–ã‚Šæ¶ˆã—ã€ãƒœã‚¿ãƒ³ã‚¯ãƒªãƒƒã‚¯æ™‚ã®å‡¦ç†ï¼ˆã‚¤ãƒ™ãƒ³ãƒˆå§”è­²ã‚’åˆ©ç”¨ï¼‰
      */
     document.body.addEventListener('click', (event) => {
         const button = event.target;
@@ -192,24 +192,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const ticketId = card.dataset.ticketId;
         
         if (cancellationTimers[ticketId]) {
-            clearTimeout(cancellationTimers[ticketId]); // ƒ^ƒCƒ}[‚ğƒLƒƒƒ“ƒZƒ‹ [cite: 230]
+            clearTimeout(cancellationTimers[ticketId]); // ã‚¿ã‚¤ãƒãƒ¼ã‚’ã‚­ãƒ£ãƒ³ã‚»ãƒ« [cite: 230]
             delete cancellationTimers[ticketId];
 
-            // ƒJ[ƒh‚Æƒ{ƒ^ƒ“‚ğŒ³‚Ìó‘Ô‚É–ß‚· [cite: 231]
+            // ã‚«ãƒ¼ãƒ‰ã¨ãƒœã‚¿ãƒ³ã‚’å…ƒã®çŠ¶æ…‹ã«æˆ»ã™ [cite: 231]
             card.classList.remove('waiting-cancellation');
-            button.textContent = '’²—Š®—¹';
+            button.textContent = 'èª¿ç†å®Œäº†';
             button.classList.remove('cancel');
         }
     });
 
 
-    // --- ‰Šú‰»ˆ— ---
+    // --- åˆæœŸåŒ–å‡¦ç† ---
     
     async function initialize() {
         const tickets = await fetchCookingTickets();
         renderTickets(tickets);
 
-        // ’èŠú“I‚Éƒf[ƒ^‚ğXV
+        // å®šæœŸçš„ã«ãƒ‡ãƒ¼ã‚¿ã‚’æ›´æ–°
         setInterval(async () => {
             const latestTickets = await fetchCookingTickets();
             renderTickets(latestTickets);
