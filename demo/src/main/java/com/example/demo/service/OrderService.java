@@ -41,6 +41,7 @@ public class OrderService {
     	Order order=new Order();
     	order.setOrderId(request.getOrderId());
     	order.setOrderDate(request.getOrderDate());
+    	order.setReservedTime(request.getReservedTime());
     	order.setServingStatus(request.getServingStatus());
     	order.setUserId(request.getUserId());
     	
@@ -65,6 +66,7 @@ public class OrderService {
     	Order order=new Order();
     	order.setOrderId(table.getOrderId());
     	order.setOrderDate(table.getOrderDate());
+    	order.setReservedTime(table.getReservedTime());
     	order.setServingStatus(table.getServingStatus());
     	order.setUserId(table.getUserId());
     	

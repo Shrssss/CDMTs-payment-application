@@ -7,10 +7,12 @@ import java.util.List;
 import lombok.Data;
 @Data
 public class OrderRequest {
-	/** 注文番号（外部キー） */
+	/** 注文番号（主キー） */
 	private Long orderId;
 	/** 注文日時 */
 	private LocalDateTime orderDate;
+	/** 予約時間 */
+	private String reservedTime;
 	/** 受け渡しの有無 */
 	private Boolean servingStatus;
 	/** ユーザID */

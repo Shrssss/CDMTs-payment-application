@@ -18,16 +18,12 @@ public interface OrderMapper {
 	/** すべての商品を取得 */
 	public List<Item> selectAllItems();
 	
-	
-	
 	/** 注文を登録 */
 	public int insertOrder(Order order);
 	/** 注文商品を登録 */
 	public int insertOrderItem(OrderItem item);
 	/** 商品を登録（事前登録） */
 	public int insertItem(Item item);
-	
-	
 	
 	/** 在庫情報を更新 */
 	public int updateItemAvailabilityByItemId(long itemId);
