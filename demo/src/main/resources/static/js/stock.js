@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-
-  /**
-   * 現在json-serverの不具合でitemIdと書くところをidと書いている、-before参照
-   */
-
+    /**
+     * sample.jsonのデータ形式に合わせて修正済み
+     * APIエンドポイント: /ItemTable
+     * 商品ID: itemId
+     */
 
     // -------------------------------------------------------------
     // ▼▼▼ あなたの環境に合わせてAPIのURLを修正してください ▼▼▼
     // -------------------------------------------------------------
-    const baseURL = 'http://localhost:8080'; // 例: Spring Bootのデフォルトポート
+    const baseURL = process.env.API_BASE_URL;
     // -------------------------------------------------------------
 
     const errorMessageElement = document.getElementById('error-message');
@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const syncInitialState = async () => {
         try {
-            const response = await fetch(`${baseURL}/items`);
+            // ★ 変更点: APIエンドポイントを /items から /ItemTable に変更
+            const response = await fetch(`${baseURL}/ItemTable`);
             if (!response.ok) {
                 throw new Error(`APIからのデータ取得に失敗 (HTTP: ${response.status})`);
             }
@@ -27,8 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 取得したデータをもとに、各スイッチのON/OFFを切り替える
             allToggles.forEach(toggle => {
-                const id = toggle.dataset.id;
-                const targetItem = items.find(item => item.id.toString() === id);
+                // HTML側の data-id 属性からIDを取得
+                const itemIdFromDOM = toggle.dataset.id;
+                // ★ 変更点: item.id を item.itemId に変更して商品を検索
+                const targetItem = items.find(item => item.itemId.toString() === itemIdFromDOM);
                 if (targetItem) {
                     toggle.checked = targetItem.available;
                 }
@@ -46,15 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const handleAvailabilityChange = async (event) => {
         const toggle = event.target;
-        const id = toggle.dataset.id;
+        // ★ 変更点: 変数名を id から itemId に変更（可読性のため）
+        const itemId = toggle.dataset.id;
         const newAvailability = toggle.checked;
 
         try {
-            const response = await fetch(`${baseURL}/items/${id}`, {
+            // ★ 変更点: APIエンドポイントを /items/{id} から /ItemTable/{itemId} に変更
+            const response = await fetch(`${baseURL}/ItemTable/${itemId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                // 'available' というキー名は sample.json と同じなので変更なし
                 body: JSON.stringify({ available: newAvailability }),
             });
 
@@ -62,7 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`APIでの更新に失敗 (HTTP: ${response.status})`);
             }
             
-            console.log(`ID:${id} の状態を ${newAvailability} に更新しました。`);
+            // ★ 変更点: ログメッセージを itemId に合わせる
+            console.log(`ItemID:${itemId} の状態を ${newAvailability} に更新しました。`);
             showError(''); // 成功したらエラーメッセージをクリア
 
         } catch (error) {
@@ -90,5 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
         toggle.addEventListener('change', handleAvailabilityChange);
     });
 
+    // 10秒ごとに在庫状況をサーバーと同期する
     setInterval(syncInitialState, 10000); 
 });
