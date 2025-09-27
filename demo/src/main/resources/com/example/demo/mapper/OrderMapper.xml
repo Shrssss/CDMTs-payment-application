@@ -11,7 +11,7 @@
 		<result column="ORDER_DATE" property="orderDate"/>
 		<result column="RESERVED_TIME" property="reservedTime"/>
 		<result column="SERVING_STATUS" property="servingStatus"/>
-		<result column="USERID" property="userId"/>
+		<!-- <result column="USERID" property="userId"/> -->
 	</resultMap>
 	<!-- ORDER_ITEMマップ -->
 	<resultMap id="orderItemMap" type="com.example.demo.model.OrderItem">
@@ -31,7 +31,7 @@
 	
 	
 	<select id="selectOrdersByOrderId" resultMap="orderMap" parameterType="java.lang.Long">
-		SELECT ORDERID, USERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS
+		SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS<!-- , USERID -->
 		FROM ORDER_TABLE
 		WHERE ORDERID = #{orderId}
 	</select>
@@ -61,7 +61,7 @@
 	
 	
 	<insert id="insertOrder" parameterType="com.example.demo.model.Order" useGeneratedKeys="true" keyProperty="orderId">
-		INSERT INTO ORDER_TABLE (ORDER_DATE, RESERVED_TIME, SERVING_STATUS, USERID)
+		INSERT INTO ORDER_TABLE (ORDER_DATE, RESERVED_TIME, SERVING_STATUS<!-- , USERID -->)
 		VALUES (#{orderDate}, #{servingStatus}, #{reservedTime}, #{userId})
 	</insert>
 	

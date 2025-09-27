@@ -13,6 +13,6 @@ public class OrderTable { // <-DB用
 	private LocalDateTime reservedTime;
 	/** 受け渡しの状態(0,1,2) */
 	private Integer servingStatus;
-	/** ユーザID */
-	private Integer userId;
+//	/** ユーザID */
+//	private Integer userId;
 }
