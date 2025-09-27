@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 設定項目 ---
     // ★ 変更点: json-serverのベースURLを設定
-    const API_BASE_URL = 'http://localhost:3000';
+    const API_BASE_URL = 'http://localhost:8080';
     // データ取得のポーリング間隔 (ミリ秒単位。例: 5000 = 5秒)
     const POLLING_INTERVAL = 5000; 
     

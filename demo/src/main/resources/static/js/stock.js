@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
     // ▼▼▼ あなたの環境に合わせてAPIのURLを修正してください ▼▼▼
     // -------------------------------------------------------------
-    const baseURL = 'http://localhost:3000'; // 例: Spring Bootのデフォルトポート
+    const baseURL = 'http://localhost:8080'; // 例: Spring Bootのデフォルトポート
     // -------------------------------------------------------------
 
     const errorMessageElement = document.getElementById('error-message');

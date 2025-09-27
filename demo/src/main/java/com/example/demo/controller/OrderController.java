@@ -21,8 +21,19 @@ public class OrderController {
     	return service.createOrder(request);
     }
     
-     @GetMapping("/!!holder") //order.jsonを送信
-     public Order getOrder(@PathVariable long orderId) {
-    	 return service.getOrder(orderId);
-     }
+    @GetMapping("/order?status=COOKING") //order.jsonを送信
+    public Order getOrder(@PathVariable int orderId) {
+    	return service.getOrder(orderId);
+    }
+    
+    // @PostMapping("/order/{orderId}") //servingStatusを更新
+    
+    // @GetMapping("/order/{orderId}/status") //order.jsonを送信
+    
+    // @GetMapping("/order?status=READY") //order.jsonを送信
+    
+    // @GetMapping("/items") //Itemを取得
+    
+    // @PostMapping("/items/{itemId}") //ItemAvailをupdate
+    
 }

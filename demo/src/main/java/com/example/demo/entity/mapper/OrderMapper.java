@@ -9,11 +9,11 @@ import java.util.List;
 public interface OrderMapper {
 	
 	/** オーダーIDでオーダーの情報を取得 */
-	public OrderTable selectOrdersByOrderId(long orderId);
+	public OrderTable selectOrdersByOrderId(int orderId);
 	/** オーダーIDで注文商品の明細を取得 */
-	public List<OrderItemTable> selectOrderItemsByOrderId(long orderId);
+	public List<OrderItemTable> selectOrderItemsByOrderId(int orderId);
 	/** アイテムIDで商品を取得 */
-	public Item selectItemByItemId(long itemId);
+	public Item selectItemByItemId(int itemId);
 	/** すべてのオーダーを取得 */
 	public List<OrderTable> selectAllOrders();
 	/** すべての商品を取得 */
@@ -27,7 +27,7 @@ public interface OrderMapper {
 	public int insertItem(Item item);
 	
 	/** 在庫情報を更新 */
-	public int updateItemAvailabilityByItemId(long itemId);
+	public int updateItemAvailabilityByItemId(int itemId);
 	/** 受け渡し状態の変更 */
-	public int updateServingStatusByOrderId(long orderId);
+	public int updateServingStatusByOrderId(int orderId);
 }

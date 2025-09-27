@@ -21,13 +21,13 @@ public class OrderService {
     public OrderService(OrderMapper mapper) {
         this.mapper = mapper;
     }
-    public OrderTable selectOrdersByOrderId(long orderId){
+    public OrderTable selectOrdersByOrderId(int orderId){
     	return mapper.selectOrdersByOrderId(orderId);
     }
-    public List<OrderItemTable> selectOrderItemsByOrderId(long orderId){
+    public List<OrderItemTable> selectOrderItemsByOrderId(int orderId){
     	return mapper.selectOrderItemsByOrderId(orderId);
     }
-	public Item selectItemByItemId(long itemId){
+	public Item selectItemByItemId(int itemId){
 		return mapper.selectItemByItemId(itemId);
 	}
     public List<OrderTable> selectAllOrders(){
@@ -36,10 +36,10 @@ public class OrderService {
     public List<Item> selectAllItems(){
     	return mapper.selectAllItems();
     }
-    public int updateItemAvailabilityByItemId(long itemId) {
+    public int updateItemAvailabilityByItemId(int itemId) {
     	return mapper.updateItemAvailabilityByItemId(itemId);
     }
-    public int updateServingStatusByOrderId(long orderId) {
+    public int updateServingStatusByOrderId(int orderId) {
     	return mapper.updateServingStatusByOrderId(orderId);
     }
     
@@ -69,7 +69,7 @@ public class OrderService {
     }
     
     /** DBからの注文取得と受け渡し*/
-    public Order getOrder(long orderId) {
+    public Order getOrder(int orderId) {
     	OrderTable table=mapper.selectOrdersByOrderId(orderId);
     	
     	Order order=new Order();

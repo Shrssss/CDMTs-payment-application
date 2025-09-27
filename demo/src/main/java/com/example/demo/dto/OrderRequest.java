@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class OrderRequest {
 	/** 注文番号（主キー） */
-	private Long orderId;
+	private Integer orderId;
 	/** 注文日時 */
 	private LocalDateTime orderDate;
 	/** 予約時間 */
@@ -16,14 +16,14 @@ public class OrderRequest {
 	/** 受け渡しの状態(0,1,2) */
 	private Integer servingStatus;
 	/** ユーザID */
-	private Long userId;
+	private Integer userId;
 	/** 注文商品 */
 	private List<OrderItemRequest>items=new ArrayList<>();
 	
 	@Data
 	public static class OrderItemRequest {
 	    /** 商品番号（外部キー） */
-	    private Long itemId;
+	    private Integer itemId;
 		/** 商品名 */
 		private String itemName;
 		/** 単価 */

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 @EqualsAndHashCode(callSuper=true)
 public class Order extends CommonData{
 	/** 注文番号 */
-	private Long orderId;
+	private Integer orderId;
 	/** 注文日時 */
 	private LocalDateTime orderDate;
 	/** 予約時間(12:30等) */
@@ -17,7 +17,7 @@ public class Order extends CommonData{
 	/** 受け渡しの状態(0,1,2) */
 	private Integer servingStatus;
 	/** ユーザID */
-	private Long userId;
+	private Integer userId;
 	/** 注文商品 */
 	private List<OrderItem>items=new ArrayList<>();
 	

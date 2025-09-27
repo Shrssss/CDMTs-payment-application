@@ -4,11 +4,11 @@ import lombok.Data;
 @Data
 public class OrderItemTable {
 	/** 商品明細番号 */
-	private Long orderItemId;
+	private Integer orderItemId;
 	/** 注文番号（外部キー） */
-	private Long orderId;
+	private Integer orderId;
     /** 商品番号（外部キー） */
-    private Long itemId;
+    private Integer itemId;
 	/** 注文量 */
 	private Integer quantity;
 }

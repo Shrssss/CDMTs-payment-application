@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- 設定 ---
-    const API_BASE_URL = 'http://localhost:3000';
+    const API_BASE_URL = 'http://localhost:8080';
     const POLLING_INTERVAL = 10000; // 10秒ごとにデータを自動更新
 
     // --- DOM要素の取得 ---

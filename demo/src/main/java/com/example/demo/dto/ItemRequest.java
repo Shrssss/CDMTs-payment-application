@@ -4,7 +4,7 @@ import lombok.Data;
 @Data
 public class ItemRequest {
 	/** 商品番号 */
-	private Long itemId; //主キー
+	private Integer itemId; //主キー
 	/** 商品名 */
 	private String itemName;
 	/** 単価 */
