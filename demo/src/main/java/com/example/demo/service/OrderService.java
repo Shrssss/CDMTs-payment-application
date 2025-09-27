@@ -34,6 +34,9 @@ public class OrderService {
     public int updateItemAvailabilityByItemId(long itemId) {
     	return mapper.updateItemAvailabilityByItemId(itemId);
     }
+    public int updateServingStatusByOrderId(long orderId) {
+    	return mapper.updateServingStatusByOrderId(orderId);
+    }
     
     
     /** 注文の取得とDB保存*/

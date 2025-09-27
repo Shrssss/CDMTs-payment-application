@@ -14,8 +14,8 @@ public class Order extends CommonData{
 	private LocalDateTime orderDate;
 	/** 予約時間 */
 	private String reservedTime;
-	/** 受け渡しの有無 */
-	private Boolean servingStatus;
+	/** 受け渡しの状態(0,1,2) */
+	private Integer servingStatus;
 	/** ユーザID */
 	private Long userId;
 	/** 注文商品 */

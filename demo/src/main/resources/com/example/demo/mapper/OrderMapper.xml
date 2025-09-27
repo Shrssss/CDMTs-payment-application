@@ -77,4 +77,10 @@
     	WHERE ITEMID=#{itemId}
 	</update>
 	
+	<update id="updateServingStatusByOrderId" parameterType="com.example.demo.model.Order">
+    	UPDATE ORDER_TABLE
+    	SET SERVING_STATUS=#{servingStatus}
+    	WHERE ORDERID = #{orderId}
+	</update>
+	
 </mapper>

@@ -27,4 +27,6 @@ public interface OrderMapper {
 	
 	/** 在庫情報を更新 */
 	public int updateItemAvailabilityByItemId(long itemId);
+	/** 受け渡し状態の変更 */
+	public int updateServingStatusByOrderId(long orderId);
 }
