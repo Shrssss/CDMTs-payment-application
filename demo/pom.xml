@@ -76,6 +76,11 @@
         	<groupId>org.springframework.boot</groupId>
         	<artifactId>spring-boot-starter-jdbc</artifactId>
    		</dependency>
+   		<dependency>
+    		<groupId>com.squareup</groupId>
+   			<artifactId>square</artifactId>
+   			<version>45.0.0.20250924</version>
+		</dependency>
 	</dependencies>
 
 	<build>
