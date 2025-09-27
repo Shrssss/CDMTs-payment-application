@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import com.example.demo.service.OrderService;
 import com.example.demo.dto.OrderRequest;
 import com.example.demo.model.Order;
+import com.example.demo.entity.OrderTable;
 
 @RestController
 @RequestMapping("/api")
@@ -16,7 +17,7 @@ public class OrderController {
 	private final OrderService service;
     
     @PostMapping("/!!holder") //order.jsonをDB登録
-    public Order createOrder(@RequestBody OrderRequest request) {
+    public OrderTable createOrder(@RequestBody OrderRequest request) {
     	return service.createOrder(request);
     }
     

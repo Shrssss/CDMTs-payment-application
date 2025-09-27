@@ -2,8 +2,7 @@ package com.example.demo.entity.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import com.example.demo.entity.OrderTable;
-import com.example.demo.model.Order;
-import com.example.demo.model.OrderItem;
+import com.example.demo.entity.OrderItemTable;
 import com.example.demo.model.Item;
 import java.util.List;
 @Mapper
@@ -12,16 +11,18 @@ public interface OrderMapper {
 	/** オーダーIDでオーダーの情報を取得 */
 	public OrderTable selectOrdersByOrderId(long orderId);
 	/** オーダーIDで注文商品の明細を取得 */
-	public List<OrderItem> selectOrderItemsByOrderId(long orderId);
+	public List<OrderItemTable> selectOrderItemsByOrderId(long orderId);
+	/** アイテムIDで商品を取得 */
+	public Item selectItemByItemId(long itemId);
 	/** すべてのオーダーを取得 */
 	public List<OrderTable> selectAllOrders();
 	/** すべての商品を取得 */
 	public List<Item> selectAllItems();
 	
 	/** 注文を登録 */
-	public int insertOrder(Order order);
+	public int insertOrder(OrderTable order);
 	/** 注文商品を登録 */
-	public int insertOrderItem(OrderItem item);
+	public int insertOrderItem(OrderItemTable item);
 	/** 商品を登録（事前登録） */
 	public int insertItem(Item item);
 	

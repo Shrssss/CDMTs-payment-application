@@ -10,7 +10,7 @@ public class OrderTable { // <-DB用
 	/** 注文日時 */
 	private LocalDateTime orderDate;
 	/** 予約時間 */
-	private String reservedTime;
+	private LocalDateTime reservedTime;
 	/** 受け渡しの状態(0,1,2) */
 	private Integer servingStatus;
 	/** ユーザID */

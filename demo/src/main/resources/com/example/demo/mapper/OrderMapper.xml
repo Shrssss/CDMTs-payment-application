@@ -42,6 +42,12 @@
 		WHERE ORDERID= #{orderId}
 	</select>
 	
+	<select id="selectItemByItemId" resultMap="itemMap" parameterType="java.lang.Long">
+		SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
+		FROM ITEM_TABLE
+		WHERE ITEMID= #{itemId}
+	</select>
+	
 	<select id="selectAllOrders" resultMap="orderMap">
 		SELECT ORDERID, USERID, ORDER_DATE, SERVING_STATUS
 		FROM ORDER_TABLE

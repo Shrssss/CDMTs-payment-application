@@ -1,12 +1,14 @@
 package com.example.demo.service;
 
 import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dto.OrderRequest;
 import com.example.demo.entity.OrderTable;
+import com.example.demo.entity.OrderItemTable;
 import com.example.demo.entity.mapper.OrderMapper;
 import com.example.demo.model.OrderItem;
 import com.example.demo.model.Item;
@@ -22,9 +24,12 @@ public class OrderService {
     public OrderTable selectOrdersByOrderId(long orderId){
     	return mapper.selectOrdersByOrderId(orderId);
     }
-    public List<OrderItem> selectOrderItemsByOrderId(long orderId){
+    public List<OrderItemTable> selectOrderItemsByOrderId(long orderId){
     	return mapper.selectOrderItemsByOrderId(orderId);
     }
+	public Item selectItemByItemId(long itemId){
+		return mapper.selectItemByItemId(itemId);
+	}
     public List<OrderTable> selectAllOrders(){
     	return mapper.selectAllOrders();
     }
@@ -40,8 +45,9 @@ public class OrderService {
     
     
     /** 注文の取得とDB保存*/
-    public Order createOrder(OrderRequest request) {
-    	Order order=new Order();
+    public OrderTable createOrder(OrderRequest request) {
+    	OrderTable order=new OrderTable();
+    	
     	order.setOrderId(request.getOrderId());
     	order.setOrderDate(request.getOrderDate());
     	order.setReservedTime(request.getReservedTime());
@@ -51,7 +57,7 @@ public class OrderService {
     	mapper.insertOrder(order);
     	
     	for(OrderRequest.OrderItemRequest orderItemRequest:request.getItems()) {
-    		OrderItem orderitem=new OrderItem();
+    		OrderItemTable orderitem=new OrderItemTable();
     		orderitem.setOrderId(order.getOrderId());
     		orderitem.setItemId(orderItemRequest.getItemId());
     		orderitem.setQuantity(orderItemRequest.getQuantity());
@@ -67,12 +73,31 @@ public class OrderService {
     	OrderTable table=mapper.selectOrdersByOrderId(orderId);
     	
     	Order order=new Order();
+    	 List<OrderItemTable> items = mapper.selectOrderItemsByOrderId(orderId);
+    	 
     	order.setOrderId(table.getOrderId());
     	order.setOrderDate(table.getOrderDate());
     	order.setReservedTime(table.getReservedTime());
     	order.setServingStatus(table.getServingStatus());
     	order.setUserId(table.getUserId());
     	
+    	List<OrderItem> itemDtos=new ArrayList<>();
+    	for(OrderItemTable item:items) {
+    		OrderItem dto=new OrderItem();
+    		dto.setItemId(item.getItemId());
+    		dto.setQuantity(item.getQuantity());
+    		
+    		Item itemDto=mapper.selectItemByItemId(item.getItemId());
+    		
+    		dto.setItemName(itemDto.getItemName());
+    		dto.setPrice(itemDto.getPrice());
+    		dto.setAvailable(itemDto.getAvailable());
+    		
+    		itemDtos.add(dto);
+    	}
+    	
+    	order.setItems(itemDtos);
+
     	return order;
     }
 }

@@ -12,7 +12,7 @@ public class OrderRequest {
 	/** 注文日時 */
 	private LocalDateTime orderDate;
 	/** 予約時間 */
-	private String reservedTime;
+	private LocalDateTime reservedTime;
 	/** 受け渡しの状態(0,1,2) */
 	private Integer servingStatus;
 	/** ユーザID */
@@ -24,6 +24,12 @@ public class OrderRequest {
 	public static class OrderItemRequest {
 	    /** 商品番号（外部キー） */
 	    private Long itemId;
+		/** 商品名 */
+		private String itemName;
+		/** 単価 */
+		private Integer price;
+		/** 在庫の有無*/
+		private Boolean available;
 		/** 注文量 */
 		private Integer quantity;
 	}

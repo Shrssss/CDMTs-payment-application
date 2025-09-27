@@ -2,7 +2,7 @@ package com.example.demo.model;
 
 import lombok.Data;
 @Data
-public class Item { //事前登録型　登録の詳細はitemMemo.text参照
+public class Item { //事前登録型　登録の詳細はitemMemo参照
 	/** 商品番号 */
 	private Long itemId; //主キー
 	/** 商品名 */

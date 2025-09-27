@@ -10,6 +10,12 @@ public class OrderItem {
 	private Long orderId;
     /** 商品番号（外部キー） */
     private Long itemId;
+	/** 商品名 */
+	private String itemName;
+	/** 単価 */
+	private Integer price;
+	/** 在庫の有無*/
+	private Boolean available;
 	/** 注文量 */
 	private Integer quantity;
 	
