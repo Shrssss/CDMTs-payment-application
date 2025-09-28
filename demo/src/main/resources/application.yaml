@@ -1,11 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/OrderTable
-    username: root
-    password: Niae_5221
-    #url: jdbc:mysql://${DB_HOST:host}:${DB_PORT:port}/${DB_NAME:dbname}
-    #username: ${DB_USER:user}
-    #password: ${DB_PASSWORD:password}
+    url: jdbc:mysql://${DB_HOST:host}:${DB_PORT:port}/${DB_NAME:dbname}
+    username: ${DB_USER:user}
+    password: ${DB_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -19,4 +16,4 @@ spring:
     
   square:
     environment: sandbox #production #<-本番
-    access-token: ${SQUARE_ACCESS_TOKEN}
+    access-token: ${SQUARE_TOKEN}

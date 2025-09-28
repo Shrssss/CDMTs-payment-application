@@ -16,8 +16,8 @@ public class Order extends CommonData{
 	private LocalDateTime reservedTime;
 	/** 受け渡しの状態(0,1,2) */
 	private Integer servingStatus;
-//	/** ユーザID */
-//	private Integer userId;
+//	/** 決済番号(SquareApi依存) */
+//	private String paymentId;
 	/** 注文商品 */
 	private List<OrderItem>items=new ArrayList<>();
 	
