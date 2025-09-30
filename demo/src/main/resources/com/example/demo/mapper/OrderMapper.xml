@@ -39,13 +39,13 @@
 	<select id="selectOrderItemsByOrderId" resultMap="orderItemMap" parameterType="java.lang.Long">
 		SELECT ORDER_ITEM_ID, ORDERID, ITEMID, QUANTITY
 		FROM ORDER_ITEM_TABLE
-		WHERE ORDERID= #{orderId}
+		WHERE ORDERID = #{orderId}
 	</select>
 	
 	<select id="selectItemByItemId" resultMap="itemMap" parameterType="java.lang.Long">
 		SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
 		FROM ITEM_TABLE
-		WHERE ITEMID= #{itemId}
+		WHERE ITEMID = #{itemId}
 	</select>
 	
 	<select id="selectAllOrders" resultMap="orderMap">
@@ -56,6 +56,12 @@
 	<select id="selectAllItems" resultMap="itemMap">
 		SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
 		FROM ITEM_TABLE
+	</select>
+	
+	<select id="selectServingStatusByOrderId" resultMap="orderMap">
+		SELECT ORDER_STATUS
+		FROM ORDER_TABLE
+		WHERE ORDERID = #{orderId}
 	</select>
 	
 	
@@ -85,7 +91,7 @@
 	
 	<update id="updateServingStatusByOrderId" parameterType="com.example.demo.model.Order">
     	UPDATE ORDER_TABLE
-    	SET SERVING_STATUS=#{servingStatus}
+    	SET SERVING_STATUS = #{servingStatus}
     	WHERE ORDERID = #{orderId}
 	</update>
 	

@@ -18,6 +18,8 @@ public interface OrderMapper {
 	public List<OrderTable> selectAllOrders();
 	/** すべての商品を取得 */
 	public List<Item> selectAllItems();
+	/** オーダーIDで受け渡しを取得 */
+	public Integer selectServingStatusByOrderId(int orderId);
 	
 	/** 注文を登録 */
 	public int insertOrder(OrderTable order);
@@ -27,7 +29,7 @@ public interface OrderMapper {
 	public int insertItem(Item item);
 	
 	/** 在庫情報を更新 */
-	public int updateItemAvailabilityByItemId(int itemId);
+	public int updateItemAvailabilityByItemId(int itemId,boolean available);
 	/** 受け渡し状態の変更 */
-	public int updateServingStatusByOrderId(int orderId);
+	public int updateServingStatusByOrderId(int orderId,int servingStatus);
 }

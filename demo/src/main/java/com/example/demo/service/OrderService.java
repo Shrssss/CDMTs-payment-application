@@ -21,30 +21,54 @@ public class OrderService {
     public OrderService(OrderMapper mapper) {
         this.mapper = mapper;
     }
+    
     public OrderTable selectOrdersByOrderId(int orderId){
     	return mapper.selectOrdersByOrderId(orderId);
     }
+    
     public List<OrderItemTable> selectOrderItemsByOrderId(int orderId){
     	return mapper.selectOrderItemsByOrderId(orderId);
     }
+    
 	public Item selectItemByItemId(int itemId){
 		return mapper.selectItemByItemId(itemId);
 	}
+	
     public List<OrderTable> selectAllOrders(){
     	return mapper.selectAllOrders();
     }
+    
     public List<Item> selectAllItems(){
     	return mapper.selectAllItems();
     }
-    public int updateItemAvailabilityByItemId(int itemId) {
-    	return mapper.updateItemAvailabilityByItemId(itemId);
+    
+    public String selectServingStatusByOrderId(int orderId) {
+    	Integer status=mapper.selectServingStatusByOrderId(orderId);
+    	String outline;
+    	if(status==0) {
+    		outline="調理中";
+    	}else if(status==1) {
+    		outline="受け渡し中";
+    	}else if(status==2) {
+    		outline="受け渡し済み";
+    	}else {
+    		outline="orderIdが存在しません: "+orderId;
+    	}
+    	
+    	return outline;
+    	
     }
-    public int updateServingStatusByOrderId(int orderId) {
-    	return mapper.updateServingStatusByOrderId(orderId);
+    
+    public int updateItemAvailabilityByItemId(int itemId,boolean available) {
+    	return mapper.updateItemAvailabilityByItemId(itemId,available);
+    }
+    
+    public int updateServingStatusByOrderId(int orderId,int servingStatus) {
+    	return mapper.updateServingStatusByOrderId(orderId,servingStatus);
     }
     
     
-    /** 注文の取得とDB保存*/
+    /** 注文の取得とDB保存　*/
     public OrderTable createOrder(OrderRequest request) {
     	OrderTable order=new OrderTable();
     	
@@ -68,12 +92,12 @@ public class OrderService {
     	return order;
     }
     
-    /** DBからの注文取得と受け渡し*/
+    /** DBからの注文取得と受け渡し　*/
     public Order getOrder(int orderId) {
-    	OrderTable table=mapper.selectOrdersByOrderId(orderId);
+    	OrderTable table=selectOrdersByOrderId(orderId);
     	
     	Order order=new Order();
-    	 List<OrderItemTable> items = mapper.selectOrderItemsByOrderId(orderId);
+    	 List<OrderItemTable> items=selectOrderItemsByOrderId(orderId);
     	 
     	order.setOrderId(table.getOrderId());
     	order.setOrderDate(table.getOrderDate());
@@ -87,7 +111,7 @@ public class OrderService {
     		dto.setItemId(item.getItemId());
     		dto.setQuantity(item.getQuantity());
     		
-    		Item itemDto=mapper.selectItemByItemId(item.getItemId());
+    		Item itemDto=selectItemByItemId(item.getItemId());
     		
     		dto.setItemName(itemDto.getItemName());
     		dto.setPrice(itemDto.getPrice());
@@ -100,4 +124,34 @@ public class OrderService {
 
     	return order;
     }
+    
+    /** Itemの在庫情報を更新し、Itemを返す　*/
+    public Item toggleAvailablity(int itemId,boolean available) {
+    	
+    	Integer updated=updateItemAvailabilityByItemId(itemId,available);
+    	
+    	if(updated==0) {
+    		 throw new IllegalArgumentException("指定されたitemIdが存在しません: "+itemId);
+    	}
+    	Item item=selectItemByItemId(itemId);
+    	
+    	return item;
+    }
+    
+    /** orderの受け渡し情報を更新し、orderを返す　*/
+    public OrderTable changeServingStatus(int orderId,boolean tf) {
+    	
+    	Integer status=mapper.selectServingStatusByOrderId(orderId);
+    	
+    	Integer updated=(tf)?updateServingStatusByOrderId(orderId,status+1)
+    				:updateServingStatusByOrderId(orderId,status-1);
+    	
+    	if(updated==0) {
+   		 throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
+    	}
+    	
+    	return selectOrdersByOrderId(orderId);
+    	
+    }
+    
 }
