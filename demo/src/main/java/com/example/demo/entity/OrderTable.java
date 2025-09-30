@@ -13,6 +13,6 @@ public class OrderTable { // <-DB用
 	private LocalDateTime reservedTime;
 	/** 受け渡しの状態(0,1,2) */
 	private Integer servingStatus;
-//	/** 決済番号(SquareApi依存) */
-//	private String paymentId;
+	/** 決済番号(SquareApi依存) */
+	private String paymentId;
 }

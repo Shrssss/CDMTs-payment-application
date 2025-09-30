@@ -52,7 +52,7 @@ public class OrderService {
     	order.setOrderDate(request.getOrderDate());
     	order.setReservedTime(request.getReservedTime());
     	order.setServingStatus(request.getServingStatus());
-//    	order.setUserId(request.getUserId());
+    	order.setPaymentId(request.getPaymentId());
     	
     	mapper.insertOrder(order);
     	
@@ -79,7 +79,7 @@ public class OrderService {
     	order.setOrderDate(table.getOrderDate());
     	order.setReservedTime(table.getReservedTime());
     	order.setServingStatus(table.getServingStatus());
-//    	order.setUserId(table.getUserId());
+    	order.setPaymentId(table.getPaymentId());
     	
     	List<OrderItem> itemDtos=new ArrayList<>();
     	for(OrderItemTable item:items) {

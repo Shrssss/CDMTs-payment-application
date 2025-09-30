@@ -16,12 +16,12 @@ public class OrderController {
 	
 	private final OrderService service;
     
-    @PostMapping("/!!holder") //order.jsonをDB登録
+    @PostMapping("/order/set") //order.jsonをDB登録
     public OrderTable createOrder(@RequestBody OrderRequest request) {
     	return service.createOrder(request);
     }
     
-    @GetMapping("/order?status=COOKING") //order.jsonを送信
+    @GetMapping("/order/get") //order.jsonを送信
     public Order getOrder(@PathVariable int orderId) {
     	return service.getOrder(orderId);
     }
