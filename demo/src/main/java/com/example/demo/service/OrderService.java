@@ -143,8 +143,25 @@ public class OrderService {
     	
     	Integer status=mapper.selectServingStatusByOrderId(orderId);
     	
-    	Integer updated=(tf)?updateServingStatusByOrderId(orderId,status+1)
+    	Integer updated;
+    	
+    	if(status==0) {
+    		if(tf) {
+    			updated=updateServingStatusByOrderId(orderId,status+1);
+    		}else {
+    			throw new IllegalArgumentException("この注文はすでに調理中です: "+orderId);
+    		}
+    	}else if(status==1) {
+    		updated=(tf)?updateServingStatusByOrderId(orderId,status+1)
     				:updateServingStatusByOrderId(orderId,status-1);
+    	}else if(status==2) {
+    		if(tf) {
+    			throw new IllegalArgumentException("この注文はすでに受け渡し済みです: "+orderId);
+    		}else {
+    			updated=updateServingStatusByOrderId(orderId,status-1);
+    		}
+    	}else throw new IllegalArgumentException("ServingStatusが不正です");
+    	
     	
     	if(updated==0) {
    		 throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
