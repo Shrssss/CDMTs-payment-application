@@ -52,7 +52,7 @@ public class OrderService {
     	}else if(status==2) {
     		outline="受け渡し済み";
     	}else {
-    		outline="orderIdが存在しません: "+orderId;
+    		outline="orderIdが存在しない、またはservingStatusが不正です。orderId:"+orderId;
     	}
     	
     	return outline;
@@ -160,7 +160,7 @@ public class OrderService {
     		}else {
     			updated=updateServingStatusByOrderId(orderId,status-1);
     		}
-    	}else throw new IllegalArgumentException("ServingStatusが不正です");
+    	}else throw new IllegalArgumentException("servingStatusが不正です");
     	
     	
     	if(updated==0) {
