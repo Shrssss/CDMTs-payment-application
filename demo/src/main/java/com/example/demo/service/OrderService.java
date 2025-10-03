@@ -42,21 +42,8 @@ public class OrderService {
     	return mapper.selectAllItems();
     }
     
-    public String selectServingStatusByOrderId(int orderId) {
-    	Integer status=mapper.selectServingStatusByOrderId(orderId);
-    	String outline;
-    	if(status==0) {
-    		outline="調理中";
-    	}else if(status==1) {
-    		outline="受け渡し中";
-    	}else if(status==2) {
-    		outline="受け渡し済み";
-    	}else {
-    		outline="orderIdが存在しない、またはservingStatusが不正です。orderId:"+orderId;
-    	}
-    	
-    	return outline;
-    	
+    public int selectServingStatusByOrderId(int orderId) {
+    	return mapper.selectServingStatusByOrderId(orderId);
     }
     
     public int updateItemAvailabilityByItemId(int itemId,boolean available) {

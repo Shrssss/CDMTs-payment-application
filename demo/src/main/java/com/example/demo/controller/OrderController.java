@@ -33,7 +33,7 @@ public class OrderController {
     }
     
     @GetMapping("/order/get/status/{orderId}") //servingStatusをフロントに送信
-    public String selectServingStatusByOrderId(@PathVariable int orderId) {
+    public int selectServingStatusByOrderId(@PathVariable int orderId) {
     	return service.selectServingStatusByOrderId(orderId);
     }
     
