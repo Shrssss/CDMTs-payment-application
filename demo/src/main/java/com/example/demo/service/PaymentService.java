@@ -12,25 +12,38 @@ import com.squareup.square.types.GetPaymentResponse;
 import com.squareup.square.types.GetPaymentsRequest;
 import com.squareup.square.types.CreatePaymentRequest;
 import com.squareup.square.core.SquareApiException;
+
 import com.example.demo.dto.PaymentRequest;
+import com.example.demo.model.Order;
 @Service
 public class PaymentService {
 	private final SquareClient squareClient;
+	private final OrderService orderService;
 	
-	public PaymentService(SquareClient squareClient) {
+	public PaymentService(SquareClient squareClient,OrderService orderService) {
 		this.squareClient=squareClient;
+		this.orderService=orderService;
 	}
 	
 	/** 決済リクエストを作成し、PaymentRequest型の詳細を返す */
-	public PaymentRequest createPayment(String sourceId,long amount,String currency) {
+	public PaymentRequest createPayment(String sourceId,int orderId) {
 		try {
+
+			Order selectedOrder=orderService.getOrder(orderId);
+			
+			if(selectedOrder==null) {
+				throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
+			}
+			
+			long amount=selectedOrder.getTotalAmount();
+			
 			var request=CreatePaymentRequest.builder()
 							.sourceId(sourceId)
 							.idempotencyKey(UUID.randomUUID().toString())
 							.amountMoney(
 								Money.builder()
 									.amount(amount)
-									.currency(Currency.valueOf(currency)).build()
+									.currency(Currency.valueOf("JPY")).build()
 							).build();
 			
 			var response=squareClient.payments().create(request);
@@ -62,6 +75,8 @@ public class PaymentService {
 		    result.setAmount(money.getAmount().orElseThrow(()->new RuntimeException("Amount is null")));
 		    result.setCurrency(money.getCurrency().toString());
 			
+		    orderService.updatePaymentIdByOrderId(orderId,paymentId.toString());
+		    
 			return result;
 			
 		}catch(SquareApiException e) {

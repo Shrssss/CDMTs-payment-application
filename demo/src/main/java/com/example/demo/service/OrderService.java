@@ -19,7 +19,7 @@ public class OrderService {
 	private final OrderMapper mapper;
 	
     public OrderService(OrderMapper mapper) {
-        this.mapper = mapper;
+        this.mapper=mapper;
     }
     
     public OrderTable selectOrdersByOrderId(int orderId){
@@ -56,6 +56,10 @@ public class OrderService {
     public int updatePaymentStatusByOrderId(int orderId,boolean paymentStatus) {
     	return mapper.updatePaymentStatusByOrderId(orderId,paymentStatus);
     }
+    public int updatePaymentIdByOrderId(int orderId,String paymentId) {
+    	return mapper.updatePaymentIdByOrderId(orderId,paymentId);
+    	
+    }
     
     
     /** 注文の取得とDB保存　*/
@@ -66,7 +70,7 @@ public class OrderService {
     	order.setOrderDate(request.getOrderDate());
     	order.setReservedTime(request.getReservedTime());
     	order.setServingStatus(request.getServingStatus());
-    	order.setPaymentId(request.getPaymentId());
+    	order.setPaymentId(request.getPaymentId()); //nullAble
     	order.setPaymentStatus(request.getPaymentStatus());
     	
     	mapper.insertOrder(order);
@@ -161,6 +165,7 @@ public class OrderService {
     	return selectOrdersByOrderId(orderId);
     	
     }
+    
     
     /** orderの決済情報を更新し、orderを返す　*/
     public OrderTable changePaymentStatus(int orderId,boolean paymentStatus) {

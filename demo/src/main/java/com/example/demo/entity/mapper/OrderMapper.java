@@ -32,6 +32,8 @@ public interface OrderMapper {
 	public int updateItemAvailabilityByItemId(int itemId,boolean available);
 	/** 受け渡し状態の変更 */
 	public int updateServingStatusByOrderId(int orderId,int servingStatus);
+	/** paymentIdの挿入 */
+	public int updatePaymentIdByOrderId(int orderId,String paymentId);
 	/** 決済状況の更新 */
 	public int updatePaymentStatusByOrderId(int orderId,boolean paymentStatus);
 }
