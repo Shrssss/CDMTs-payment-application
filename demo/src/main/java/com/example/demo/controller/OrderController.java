@@ -27,11 +27,16 @@ public class OrderController {
     	return service.getOrder(orderId);
     }
     
-    @PostMapping("/order/set/status/{orderId}/{tf}") //orderId,tfをもとにservingStatusを更新 （処理内容 (tf)? statusを次の状態へ : statusを前の状態へ）
+    @PostMapping("/order/set/servingStatus/{orderId}/{tf}") //orderId,tfをもとにservingStatusを更新 （処理内容 (tf)? statusを次の状態へ : statusを前の状態へ）
     public OrderTable changeServingStatus(int orderId,boolean tf) {
     	return service.changeServingStatus(orderId,tf);
     }
     
+	@PostMapping("/order/set/paymentStatus/{orderId}/{paymentStatus}")
+	public OrderTable changePaymentStatus(@PathVariable int orderId,boolean paymentStatus) {
+		return service.changePaymentStatus(orderId,paymentStatus);
+	}
+     
     @GetMapping("/order/get/status/{orderId}") //servingStatusをフロントに送信
     public int selectServingStatusByOrderId(@PathVariable int orderId) {
     	return service.selectServingStatusByOrderId(orderId);
@@ -46,5 +51,5 @@ public class OrderController {
 	public Item toggleAvailablity(@PathVariable int itemId,@PathVariable boolean available) {
 		return service.toggleAvailablity(itemId,available);
 	}
-     
+	
 }
