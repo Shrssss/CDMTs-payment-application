@@ -12,6 +12,7 @@
 		<result column="RESERVED_TIME" property="reservedTime"/>
 		<result column="SERVING_STATUS" property="servingStatus"/>
 		<result column="PAYMENTID" property="paymentId"/>
+		<result column="PAYMENT_STATUS" property="paymentStatus"/>
 	</resultMap>
 	<!-- ORDER_ITEMマップ -->
 	<resultMap id="orderItemMap" type="com.example.demo.model.OrderItem">
@@ -31,7 +32,7 @@
 	
 	
 	<select id="selectOrdersByOrderId" resultMap="orderMap" parameterType="java.lang.Long">
-		SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID
+		SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS
 		FROM ORDER_TABLE
 		WHERE ORDERID = #{orderId}
 	</select>
@@ -49,7 +50,7 @@
 	</select>
 	
 	<select id="selectAllOrders" resultMap="orderMap">
-		SELECT ORDERID, USERID, ORDER_DATE, SERVING_STATUS
+		SELECT ORDERID, USERID, ORDER_DATE, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS
 		FROM ORDER_TABLE
 	</select>
 	
@@ -67,8 +68,8 @@
 	
 	
 	<insert id="insertOrder" parameterType="com.example.demo.model.Order" useGeneratedKeys="true" keyProperty="orderId">
-		INSERT INTO ORDER_TABLE (ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID)
-		VALUES (#{orderDate}, #{servingStatus}, #{reservedTime}, #{paymentId})
+		INSERT INTO ORDER_TABLE (ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS)
+		VALUES (#{orderDate}, #{servingStatus}, #{reservedTime}, #{paymentId}, #{paymentStatus})
 	</insert>
 	
 	<insert id="insertOrderItem" parameterType="com.example.demo.model.OrderItem" useGeneratedKeys="true" keyProperty="orderItemId">
@@ -93,6 +94,12 @@
     	UPDATE ORDER_TABLE
     	SET SERVING_STATUS = #{servingStatus}
     	WHERE ORDERID = #{orderId}
+	</update>
+	
+	<update id="updatePaymentStatusByOrderId" parameterType="com.example.demo.model.Order">
+		UPDATE ORDER_TABLE
+		SET PAYMENT_STATUS = #{paymentStatus}
+		WHERE ORDERID = #{orderId}
 	</update>
 	
 </mapper>

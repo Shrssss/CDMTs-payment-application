@@ -12,12 +12,14 @@ public class Order extends CommonData{
 	private Integer orderId;
 	/** 注文日時 */
 	private LocalDateTime orderDate;
-	/** 予約時間(12:30等) */
+	/** 予約時間 */
 	private LocalDateTime reservedTime;
 	/** 受け渡しの状態(0,1,2) */
 	private Integer servingStatus;
 	/** 決済番号(SquareApi依存) */
 	private String paymentId;
+	/** 決済状況 */
+	private Boolean paymentStatus;
 	/** 注文商品 */
 	private List<OrderItem>items=new ArrayList<>();
 	

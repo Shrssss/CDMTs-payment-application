@@ -15,4 +15,6 @@ public class OrderTable { // <-DB用
 	private Integer servingStatus;
 	/** 決済番号(SquareApi依存) */
 	private String paymentId;
+	/** 決済状況 */
+	private Boolean paymentStatus;
 }

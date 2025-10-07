@@ -53,6 +53,9 @@ public class OrderService {
     public int updateServingStatusByOrderId(int orderId,int servingStatus) {
     	return mapper.updateServingStatusByOrderId(orderId,servingStatus);
     }
+    public int updatePaymentStatusByOrderId(int orderId,boolean paymentStatus) {
+    	return mapper.updatePaymentStatusByOrderId(orderId,paymentStatus);
+    }
     
     
     /** 注文の取得とDB保存　*/
@@ -64,6 +67,7 @@ public class OrderService {
     	order.setReservedTime(request.getReservedTime());
     	order.setServingStatus(request.getServingStatus());
     	order.setPaymentId(request.getPaymentId());
+    	order.setPaymentStatus(request.getPaymentStatus());
     	
     	mapper.insertOrder(order);
     	
@@ -91,6 +95,7 @@ public class OrderService {
     	order.setReservedTime(table.getReservedTime());
     	order.setServingStatus(table.getServingStatus());
     	order.setPaymentId(table.getPaymentId());
+    	order.setPaymentStatus(table.getPaymentStatus());
     	
     	List<OrderItem> itemDtos=new ArrayList<>();
     	for(OrderItemTable item:items) {
@@ -115,22 +120,21 @@ public class OrderService {
     /** Itemの在庫情報を更新し、Itemを返す　*/
     public Item toggleAvailablity(int itemId,boolean available) {
     	
-    	Integer updated=updateItemAvailabilityByItemId(itemId,available);
+    	int updated=updateItemAvailabilityByItemId(itemId,available);
     	
     	if(updated==0) {
     		 throw new IllegalArgumentException("指定されたitemIdが存在しません: "+itemId);
     	}
-    	Item item=selectItemByItemId(itemId);
     	
-    	return item;
+    	return selectItemByItemId(itemId);
     }
     
     /** orderの受け渡し情報を更新し、orderを返す　*/
     public OrderTable changeServingStatus(int orderId,boolean tf) {
     	
-    	Integer status=mapper.selectServingStatusByOrderId(orderId);
+    	int status=mapper.selectServingStatusByOrderId(orderId);
     	
-    	Integer updated;
+    	int updated;
     	
     	if(status==0) {
     		if(tf) {
@@ -156,6 +160,22 @@ public class OrderService {
     	
     	return selectOrdersByOrderId(orderId);
     	
+    }
+    
+    /** orderの決済情報を更新し、orderを返す　*/
+    public OrderTable changePaymentStatus(int orderId,boolean paymentStatus) {
+    	if(paymentStatus) {
+    		int updated=updatePaymentStatusByOrderId(orderId,paymentStatus);
+    		
+    		if(updated==0) {
+    			throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
+    		}
+        	
+        	return selectOrdersByOrderId(orderId);
+        	
+    	}else {
+    		throw new IllegalArgumentException("決済情報は不可逆です。入力:"+paymentStatus);
+    	}
     }
     
 }

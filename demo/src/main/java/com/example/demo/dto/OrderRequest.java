@@ -17,6 +17,8 @@ public class OrderRequest {
 	private Integer servingStatus;
 	/** 決済番号(SquareApi依存) */
 	private String paymentId;
+	/** 決済状況 */
+	private Boolean paymentStatus;
 	/** 注文商品 */
 	private List<OrderItemRequest>items=new ArrayList<>();
 	
