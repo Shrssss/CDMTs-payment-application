@@ -39,6 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // ★ 変更点: データ構造に合わせて 'ticket_number' から 'orderId' に修正
             ticketElement.textContent = order.orderId; 
             boardContainer.appendChild(ticketElement);
+
+            // チケット数に応じてクラスを追加する
+            boardContainer.classList.remove('many-tickets', 'very-many-tickets');
+            const ticketCount = orders.length; // 描画したチケットの数を取得
+            if (ticketCount >= 15) {
+              boardContainer.classList.add('very-many-tickets');
+            } else if (ticketCount >= 10) {
+              boardContainer.classList.add('many-tickets');
+          }
         });
     };
 

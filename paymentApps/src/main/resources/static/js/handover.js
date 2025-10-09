@@ -140,7 +140,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     button.classList.remove('cancel');
                 }
                 delete cancellationTimers[orderId];
-            }, 5000);
+            // ★ 変更点: タイマーを1分に変更
+            }, 60000);
     
             cancellationTimers[orderId] = timerId;
         }

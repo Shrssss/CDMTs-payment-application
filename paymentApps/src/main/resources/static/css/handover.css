@@ -1,10 +1,14 @@
-/* Šî–{“I‚ÈƒŒƒCƒAƒEƒg */
+html {
+  touch-action: manipulation;
+}
+
+/* åŸºæœ¬çš„ãªãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆ */
 body { font-family: sans-serif; margin: 0; background-color: #f4f4f4; }
 header { background-color: #333; color: white; padding: 1rem; text-align: center; }
 main { padding: 1rem; }
 .order-section h2 { border-bottom: 2px solid #ddd; padding-bottom: 0.5rem; }
 
-/* ƒ`ƒPƒbƒgƒJ[ƒh‚ÌƒXƒ^ƒCƒ‹ [cite: 213] */
+/* ãƒã‚±ãƒƒãƒˆã‚«ãƒ¼ãƒ‰ã®ã‚¹ã‚¿ã‚¤ãƒ« [cite: 213] */
 .ticket-card {
     background-color: white;
     border: 1px solid #ccc;
@@ -19,17 +23,17 @@ main { padding: 1rem; }
     transition: background-color 0.3s, opacity 0.3s;
 }
 
-/* —\–ñ‚É‰‚¶‚½F•ª‚¯  */
+/* äºˆç´„æ™‚åˆ»ã«å¿œã˜ãŸè‰²åˆ†ã‘  */
 .ticket-card.is-urgent { background-color: #fffbe6; border-left: 5px solid #f59e0b; }
 .ticket-card.is-overdue { background-color: #feefef; border-left: 5px solid #ef4444; }
 
-/* ƒJ[ƒh“à‚Ì—v‘f */
+/* ã‚«ãƒ¼ãƒ‰å†…ã®è¦ç´  */
 .ticket-number { font-size: 2rem; font-weight: bold; min-width: 60px; text-align: center; }
 .order-details { flex: 1; }
-.order-items { list-style: none; padding: 0; margin: 0 0 0.5rem 0; }
+.order-items { list-style: none; padding: 0; margin: 0 0 0.5rem 0; font-size: 1.5rem; }
 .time-info { font-weight: bold; }
 .action-button {
-    padding: 0.8rem 1.2rem;
+    padding: 1rem 1.5rem;
     font-size: 1rem;
     border: none;
     border-radius: 5px;
@@ -40,7 +44,7 @@ main { padding: 1rem; }
 }
 .action-button:hover { background-color: #1d4ed8; }
 
-/* ó‘Ô•Ï‰»‚ÌƒXƒ^ƒCƒ‹ */
+/* çŠ¶æ…‹å¤‰åŒ–ã®ã‚¹ã‚¿ã‚¤ãƒ« */
 .ticket-card.waiting-cancellation { opacity: 0.5; } /* [cite: 225] */
 .action-button.cancel { background-color: #dc2626; } /* [cite: 227] */
 .action-button.cancel:hover { background-color: #b91c1c; }
@@ -51,7 +55,7 @@ main { padding: 1rem; }
     width: 24px;
     height: 24px;
     animation: spin 1s linear infinite;
-    display: none; /* ’Êí‚Í”ñ•\¦ */
+    display: none; /* é€šå¸¸ã¯éè¡¨ç¤º */
 }
 .ticket-card.loading .loading-spinner { display: block; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }

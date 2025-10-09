@@ -68,8 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`APIでの更新に失敗 (HTTP: ${response.status})`);
             }
             
-            // ★ 変更点: ログメッセージを itemId に合わせる
-            console.log(`ItemID:${itemId} の状態を ${newAvailability} に更新しました。`);
+            // ★ 変更点: ログメッセージを itemId に合わせて修正 ログメッセージ消した
             showError(''); // 成功したらエラーメッセージをクリア
 
         } catch (error) {

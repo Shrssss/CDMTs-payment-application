@@ -6,15 +6,27 @@ body {
     margin: 0;
     padding: 20px;
     text-align: center;
+    height: 100vh;
+    box-sizing: border-box;
+    max-height: 100vh;
+    min-height: 100vh;
+    /* 画面からはみ出さないようにする */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    flex-shrink: 0; /* ヘッダーのサイズを固定 */
 }
 
 header h1 {
-    font-size: 3rem;
+    font-size: 2.5rem; /* ヘッダーサイズを小さくして余白を確保 */
     color: #0056b3;
     border-bottom: 4px solid #0056b3;
     display: inline-block;
     padding-bottom: 10px;
-    margin-bottom: 30px;
+    margin: 0 0 20px 0; /* マージンを調整 */
 }
 
 /* チケット番号を表示するコンテナのスタイル */
@@ -22,24 +34,74 @@ header h1 {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    align-items: center;
+    gap: 15px; /* ギャップを小さくして余白を節約 */
+    flex: 1; /* 残りの縦スペースを全て使用 */
+    overflow: hidden; /* はみ出し防止 */
+    padding: 10px 0;
+    /* グリッドレイアウトで均等配置 */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: 15px;
+    align-content: center;
 }
 
-/* 個々のチケット番号のスタイル (iPadでも見やすいように大きく表示) */
+/* 個々のチケット番号のスタイル (動的サイズ調整) */
 .ticket-number {
     background-color: #ffffff;
     color: #d9534f;
-    font-size: 6rem; /* 番号の文字サイズを非常に大きくする */
+    font-size: clamp(3rem, 8vw, 6rem); /* 画面サイズに応じて文字サイズを調整 */
     font-weight: bold;
-    padding: 30px 40px;
+    padding: clamp(15px, 3vw, 30px) clamp(20px, 4vw, 40px); /* レスポンシブパディング */
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    min-width: 300px; /* 番号が少なくても一定の幅を保つ */
+    min-width: 150px; /* 最小幅を小さくする */
+    max-width: 300px; /* 最大幅を制限 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 高さを制限してコンテナ内に収める */
+    height: clamp(80px, 12vh, 150px);
+    box-sizing: border-box;
 }
 
 /* ステータスメッセージのスタイル */
 #status-message {
-    font-size: 2.5rem;
+    font-size: clamp(1.5rem, 4vw, 2.5rem); /* レスポンシブフォントサイズ */
     color: #666;
-    margin-top: 50px;
+    margin: 20px 0 0 0;
+    flex-shrink: 0; /* サイズ固定 */
+    padding: 10px;
+}
+
+/* チケットが多い場合の対応 */
+@media screen and (min-width: 768px) {
+    #ticket-board-container {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        max-height: calc(100vh - 200px); /* ヘッダーとステータス分を除く */
+    }
+}
+
+/* チケットが非常に多い場合の緊急対応 */
+.ticket-number.compact {
+    font-size: clamp(2rem, 6vw, 4rem);
+    padding: clamp(10px, 2vw, 20px);
+    height: clamp(60px, 8vh, 100px);
+    min-width: 120px;
+}
+
+/* 10個以上のチケットがある場合の自動調整 */
+#ticket-board-container.many-tickets .ticket-number {
+    font-size: clamp(1.8rem, 5vw, 3.5rem);
+    padding: clamp(8px, 1.5vw, 15px);
+    height: clamp(50px, 7vh, 80px);
+    min-width: 100px;
+}
+
+/* 15個以上の場合の更なる調整 */
+#ticket-board-container.very-many-tickets .ticket-number {
+    font-size: clamp(1.5rem, 4vw, 2.8rem);
+    padding: clamp(5px, 1vw, 10px);
+    height: clamp(40px, 5vh, 60px);
+    min-width: 80px;
 }
