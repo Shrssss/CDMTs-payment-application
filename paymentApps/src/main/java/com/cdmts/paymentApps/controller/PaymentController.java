@@ -1,5 +1,6 @@
 package com.cdmts.paymentApps.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 //import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +24,10 @@ public class PaymentController {
 	public PaymentRequest createPayment(@PathVariable int orderId,@PathVariable String sourceId) {
 		return service.createPayment(orderId,sourceId);
 	}
-	
+	/** ApplicationIdを渡す */
+	@GetMapping("/payment/get/ApplicationId")
+	public String getApplicationId() {
+		return "";
+	}
 	
 }
