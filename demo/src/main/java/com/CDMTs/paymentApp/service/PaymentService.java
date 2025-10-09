@@ -1,9 +1,11 @@
-package com.example.demo.service;
+package com.CDMTs.paymentApp.service;
 
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.CDMTs.paymentApp.dto.PaymentRequest;
+import com.CDMTs.paymentApp.model.Order;
 import com.squareup.square.SquareClient;
 import com.squareup.square.types.Money;
 import com.squareup.square.types.Currency;
@@ -12,9 +14,6 @@ import com.squareup.square.types.GetPaymentResponse;
 import com.squareup.square.types.GetPaymentsRequest;
 import com.squareup.square.types.CreatePaymentRequest;
 import com.squareup.square.core.SquareApiException;
-
-import com.example.demo.dto.PaymentRequest;
-import com.example.demo.model.Order;
 @Service
 public class PaymentService {
 	private final SquareClient squareClient;

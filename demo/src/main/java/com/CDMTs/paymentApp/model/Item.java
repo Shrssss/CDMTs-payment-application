@@ -1,8 +1,8 @@
-package com.example.demo.dto;
+package com.CDMTs.paymentApp.model;
 
 import lombok.Data;
 @Data
-public class ItemRequest {
+public class Item { //事前登録型　登録の詳細はitemMemo参照
 	/** 商品番号 */
 	private Integer itemId; //主キー
 	/** 商品名 */

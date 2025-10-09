@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.CDMTs.paymentApp.service;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demo.dto.OrderRequest;
-import com.example.demo.entity.OrderTable;
-import com.example.demo.entity.OrderItemTable;
-import com.example.demo.entity.mapper.OrderMapper;
-import com.example.demo.model.OrderItem;
-import com.example.demo.model.Item;
-import com.example.demo.model.Order;
+import com.CDMTs.paymentApp.dto.OrderRequest;
+import com.CDMTs.paymentApp.entity.OrderItemTable;
+import com.CDMTs.paymentApp.entity.OrderTable;
+import com.CDMTs.paymentApp.entity.mapper.OrderMapper;
+import com.CDMTs.paymentApp.model.Item;
+import com.CDMTs.paymentApp.model.Order;
+import com.CDMTs.paymentApp.model.OrderItem;
 @Transactional
 @Service
 public class OrderService {
@@ -66,7 +66,7 @@ public class OrderService {
     public OrderTable createOrder(OrderRequest request) {
     	OrderTable order=new OrderTable();
     	
-    	order.setOrderId(request.getOrderId());
+    	//order.setOrderId(request.getOrderId());
     	order.setOrderDate(request.getOrderDate());
     	order.setReservedTime(request.getReservedTime());
     	order.setServingStatus(request.getServingStatus());

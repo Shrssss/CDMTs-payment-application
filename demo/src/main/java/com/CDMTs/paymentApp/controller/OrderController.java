@@ -1,14 +1,14 @@
-package com.example.demo.controller;
+package com.CDMTs.paymentApp.controller;
 
 import org.springframework.web.bind.annotation.*;
 
-import lombok.RequiredArgsConstructor;
+import com.CDMTs.paymentApp.dto.OrderRequest;
+import com.CDMTs.paymentApp.entity.OrderTable;
+import com.CDMTs.paymentApp.model.Item;
+import com.CDMTs.paymentApp.model.Order;
+import com.CDMTs.paymentApp.service.OrderService;
 
-import com.example.demo.service.OrderService;
-import com.example.demo.dto.OrderRequest;
-import com.example.demo.model.Order;
-import com.example.demo.model.Item;
-import com.example.demo.entity.OrderTable;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api")

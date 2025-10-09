@@ -1,4 +1,4 @@
-package com.example.demo.controller;
+package com.CDMTs.paymentApp.controller;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.service.PaymentService;
-import com.example.demo.dto.PaymentRequest;
+import com.CDMTs.paymentApp.dto.PaymentRequest;
+import com.CDMTs.paymentApp.service.PaymentService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.CDMTs.paymentApp.entity;
 
 import java.time.LocalDateTime;
 

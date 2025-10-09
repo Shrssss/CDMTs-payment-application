@@ -1,4 +1,4 @@
-package com.example.demo.model;
+package com.CDMTs.paymentApp.model;
 
 import lombok.*;
 

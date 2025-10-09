@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="com.example.demo.entity.mapper.OrderMapper">
+<mapper namespace="com.CDMTs.paymentApp.entity.mapper.OrderMapper">
 
 
 
 	<!-- ORDERマップ -->
-	<resultMap id="orderMap" type="com.example.demo.model.Order">
+	<resultMap id="orderMap" type="com.CDMTs.paymentApp.model.Order">
 		<id column="ORDERID" property="orderId"/>
 		<result column="ORDER_DATE" property="orderDate"/>
 		<result column="RESERVED_TIME" property="reservedTime"/>
@@ -15,14 +15,14 @@
 		<result column="PAYMENT_STATUS" property="paymentStatus"/>
 	</resultMap>
 	<!-- ORDER_ITEMマップ -->
-	<resultMap id="orderItemMap" type="com.example.demo.model.OrderItem">
+	<resultMap id="orderItemMap" type="com.CDMTs.paymentApp.model.OrderItem">
 		<id column="ORDER_ITEM_ID" property="orderItemId"/>
 		<result column="ORDERID" property="orderId"/>
 		<result column="ITEMID" property="itemId"/>
 		<result column="QUANTITY" property="quantity"/>
 	</resultMap>
 	<!-- ITEMマップ -->
-	<resultMap id="itemMap" type="com.example.demo.model.Item">
+	<resultMap id="itemMap" type="com.CDMTs.paymentApp.model.Item">
 		<id column="ITEMID" property="itemId"/>
 		<result column="ITEM_NAME" property="itemName"/>
 		<result column="PRICE" property="price"/>
@@ -67,36 +67,36 @@
 	
 	
 	
-	<insert id="insertOrder" parameterType="com.example.demo.model.Order" useGeneratedKeys="true" keyProperty="orderId">
+	<insert id="insertOrder" parameterType="com.CDMTs.paymentApp.model.Order" useGeneratedKeys="true" keyProperty="orderId">
 		INSERT INTO ORDER_TABLE (ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS)
 		VALUES (#{orderDate}, #{servingStatus}, #{reservedTime}, #{paymentId}, #{paymentStatus})
 	</insert>
 	
-	<insert id="insertOrderItem" parameterType="com.example.demo.model.OrderItem" useGeneratedKeys="true" keyProperty="orderItemId">
+	<insert id="insertOrderItem" parameterType="com.CDMTs.paymentApp.model.OrderItem" useGeneratedKeys="true" keyProperty="orderItemId">
 		INSERT INTO ORDER_ITEM_TABLE (ITEMID , ORDERID, QUANTITY)
 		VALUES (#{itemId}, #{orderId}, #{quantity})
 	</insert>
 	
-	<insert id="insertItem" parameterType="com.example.demo.model.Item">
+	<insert id="insertItem" parameterType="com.CDMTs.paymentApp.model.Item">
 		INSERT INTO ITEM_TABLE (ITEMID ,ITEM_NAME, PRICE, AVAILABLE)
 		VALUES (#{itemId}, #{itemName}, #{price}, #{available})
 	</insert>
 	
 	
 	
-	<update id="updateItemAvailablityByItemId" parameterType="com.example.demo.model.Item">
+	<update id="updateItemAvailablityByItemId" parameterType="com.CDMTs.paymentApp.model.Item">
     	UPDATE ITEM_TABLE
     	SET AVAILABLE=#{available}
     	WHERE ITEMID=#{itemId}
 	</update>
 	
-	<update id="updateServingStatusByOrderId" parameterType="com.example.demo.model.Order">
+	<update id="updateServingStatusByOrderId" parameterType="com.CDMTs.paymentApp.model.Order">
     	UPDATE ORDER_TABLE
     	SET SERVING_STATUS = #{servingStatus}
     	WHERE ORDERID = #{orderId}
 	</update>
 	
-	<update id="updatePaymentStatusByOrderId" parameterType="com.example.demo.model.Order">
+	<update id="updatePaymentStatusByOrderId" parameterType="com.CDMTs.paymentApp.model.Order">
 		UPDATE ORDER_TABLE
 		SET PAYMENT_STATUS = #{paymentStatus}
 		WHERE ORDERID = #{orderId}

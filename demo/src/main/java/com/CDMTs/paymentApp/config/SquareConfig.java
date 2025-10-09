@@ -1,4 +1,4 @@
-package com.example.demo.config;
+package com.CDMTs.paymentApp.config;
 
 import org.springframework.context.annotation.*;
 

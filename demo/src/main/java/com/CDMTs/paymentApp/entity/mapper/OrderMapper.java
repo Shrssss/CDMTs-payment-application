@@ -1,9 +1,11 @@
-package com.example.demo.entity.mapper;
+package com.CDMTs.paymentApp.entity.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
-import com.example.demo.entity.OrderTable;
-import com.example.demo.entity.OrderItemTable;
-import com.example.demo.model.Item;
+
+import com.CDMTs.paymentApp.entity.OrderItemTable;
+import com.CDMTs.paymentApp.entity.OrderTable;
+import com.CDMTs.paymentApp.model.Item;
+
 import java.util.List;
 @Mapper
 public interface OrderMapper {
