@@ -43,7 +43,7 @@ public class PaymentService {
 								Money.builder()
 									.amount(amount)
 									.currency(Currency.valueOf("JPY")).build()
-							).build();
+							).locationId("").build();
 			
 			var response=squareClient.payments().create(request);
 			
