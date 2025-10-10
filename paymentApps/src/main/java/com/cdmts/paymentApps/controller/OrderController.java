@@ -28,12 +28,12 @@ public class OrderController {
     }
     
     @PostMapping("/order/set/servingStatus/{orderId}/{tf}") //orderId,tfをもとにservingStatusを更新 （処理内容 (tf)? statusを次の状態へ : statusを前の状態へ）
-    public OrderTable changeServingStatus(int orderId,boolean tf) {
+    public OrderTable changeServingStatus(@PathVariable int orderId,@PathVariable boolean tf) {
     	return service.changeServingStatus(orderId,tf);
     }
     
 	@PostMapping("/order/set/paymentStatus/{orderId}/{paymentStatus}")
-	public OrderTable changePaymentStatus(@PathVariable int orderId,boolean paymentStatus) {
+	public OrderTable changePaymentStatus(@PathVariable int orderId,@PathVariable boolean paymentStatus) {
 		return service.changePaymentStatus(orderId,paymentStatus);
 	}
      
