@@ -24,7 +24,7 @@ public class PaymentService {
 		this.orderService=orderService;
 	}
 	
-	/** 決済リクエストを作成し、PaymentRequest型の詳細を返す */
+	/** 決済リクエストを作成し、PaymentRequest型の詳細を返す */ //square関連はすべてOptionalなのでnull処理しなくていいとか言わないでください
 	public PaymentRequest createPayment(int orderId,String sourceId) {
 		try {
 

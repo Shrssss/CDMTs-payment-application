@@ -60,7 +60,7 @@
 	</select>
 	
 	<select id="selectServingStatusByOrderId" resultMap="orderMap">
-		SELECT ORDER_STATUS
+		SELECT SERVING_STATUS
 		FROM ORDER_TABLE
 		WHERE ORDERID = #{orderId}
 	</select>
@@ -69,7 +69,7 @@
 	
 	<insert id="insertOrder" parameterType="com.cdmts.paymentApps.model.Order" useGeneratedKeys="true" keyProperty="orderId">
 		INSERT INTO ORDER_TABLE (ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS)
-		VALUES (#{orderDate}, #{servingStatus}, #{reservedTime}, #{paymentId}, #{paymentStatus})
+		VALUES (#{orderDate}, #{reservedTime}, #{servingStatus}, #{paymentId}, #{paymentStatus})
 	</insert>
 	
 	<insert id="insertOrderItem" parameterType="com.cdmts.paymentApps.model.OrderItem" useGeneratedKeys="true" keyProperty="orderItemId">
@@ -84,19 +84,19 @@
 	
 	
 	
-	<update id="updateItemAvailablityByItemId" parameterType="com.CDMTs.paymentApp.model.Item">
+	<update id="updateItemAvailablityByItemId" parameterType="com.cdmts.paymentApps.model.Item">
     	UPDATE ITEM_TABLE
     	SET AVAILABLE=#{available}
     	WHERE ITEMID=#{itemId}
 	</update>
 	
-	<update id="updateServingStatusByOrderId" parameterType="com.CDMTs.paymentApp.model.Order">
+	<update id="updateServingStatusByOrderId" parameterType="com.cdmts.paymentApps.model.Order">
     	UPDATE ORDER_TABLE
     	SET SERVING_STATUS = #{servingStatus}
     	WHERE ORDERID = #{orderId}
 	</update>
 	
-	<update id="updatePaymentStatusByOrderId" parameterType="com.CDMTs.paymentApp.model.Order">
+	<update id="updatePaymentStatusByOrderId" parameterType="com.cdmts.paymentApps.model.Order">
 		UPDATE ORDER_TABLE
 		SET PAYMENT_STATUS = #{paymentStatus}
 		WHERE ORDERID = #{orderId}
