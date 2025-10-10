@@ -10,6 +10,8 @@ import com.cdmts.paymentApps.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -22,7 +24,7 @@ public class OrderController {
     	return service.createOrder(request);
     }
     
-    @GetMapping("/order/get/{orderId}") //order.jsonをフロントに送信
+    @GetMapping("/order/get/byorderId/{orderId}") //order.jsonをフロントに送信
     public Order getOrder(@PathVariable int orderId) {
     	return service.getOrder(orderId);
     }
@@ -42,7 +44,7 @@ public class OrderController {
     	return service.selectServingStatusByOrderId(orderId);
     }
     
-    @GetMapping("/items/get/{itemId}") //Item.jsonをフロントに送信
+    @GetMapping("/items/get/byitemId/{itemId}") //Item.jsonをフロントに送信
     public Item selectItemByItemId(@PathVariable int itemId) {
     	return service.selectItemByItemId(itemId);
     }
@@ -50,6 +52,11 @@ public class OrderController {
 	@PostMapping("/items/set/available/{itemId}/{available}") //itemId,availableをもとにItemAvailを更新
 	public Item toggleAvailablity(@PathVariable int itemId,@PathVariable boolean available) {
 		return service.toggleAvailablity(itemId,available);
+	}
+	
+	@GetMapping("order/get/bystatus/{servingStatus}") //servingStatusをもとにorderをフロントに送信
+	public List<OrderTable> selectOrdersByServingStatus(@PathVariable int servingStatus){
+		return service.selectOrdersByServingStatus(servingStatus);
 	}
 	
 }

@@ -46,6 +46,10 @@ public class OrderService {
     	return mapper.selectServingStatusByOrderId(orderId);
     }
     
+    public List<OrderTable> selectOrdersByServingStatus(int servingStatus) {
+    	return mapper.selectOrdersByServingStatus(servingStatus);
+    }
+    
     public int updateItemAvailabilityByItemId(int itemId,boolean available) {
     	return mapper.updateItemAvailabilityByItemId(itemId,available);
     }

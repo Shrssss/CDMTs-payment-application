@@ -65,6 +65,13 @@
 		WHERE ORDERID = #{orderId}
 	</select>
 	
+	<select id="selectOrdersBySevingStatus" resultMap="orderMap">
+		SELECT ORDERID, USERID, ORDER_DATE, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS
+		FROM ORDER_TABLE
+		WHERE SERVING_STATUS = #{servingStatus}
+	</select>
+	
+	
 	
 	
 	<insert id="insertOrder" parameterType="com.cdmts.paymentApps.model.Order" useGeneratedKeys="true" keyProperty="orderId">

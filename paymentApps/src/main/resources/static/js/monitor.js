@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchAndUpdateBoard = async () => {
         try {
             // ★ 変更点: servingStatus=1の注文を取得するようにAPIエンドポイントを変更
-            const response = await fetch(`${API_BASE_URL}/OrderTable?servingStatus=1`);
+            const response = await fetch(`${API_BASE_URL}/OrderTable?servingStatus=1`); //多分 (BaseURL)/
 
             if (!response.ok) {
                 throw new Error(`サーバーからの応答が不正です: ${response.status}`);

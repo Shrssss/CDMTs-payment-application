@@ -22,6 +22,8 @@ public interface OrderMapper {
 	public List<Item> selectAllItems();
 	/** オーダーIDで受け渡しを取得 */
 	public Integer selectServingStatusByOrderId(int orderId);
+	/** servingStatusでorderを取得 */
+	public List<OrderTable> selectOrdersByServingStatus(int servingStatus);
 	
 	/** 注文を登録 */
 	public int insertOrder(OrderTable order);
