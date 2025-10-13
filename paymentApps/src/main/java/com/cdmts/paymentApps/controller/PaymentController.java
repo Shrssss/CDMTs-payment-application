@@ -27,7 +27,7 @@ public class PaymentController {
 	/** ApplicationIdを渡す */
 	@GetMapping("/payment/get/ApplicationId")
 	public String getApplicationId() {
-		return "sq0idp-VLfeIy3EnmoACHjocINrRA";
+		return "LKJK1TXBNV3GX"; //<- sandbox //sq0idp-VLfeIy3EnmoACHjocINrRA
 	}
 	
 }
