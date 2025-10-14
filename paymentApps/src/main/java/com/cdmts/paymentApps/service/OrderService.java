@@ -173,13 +173,18 @@ public class OrderService {
     
     /** orderの決済情報を更新し、orderを返す　*/
     public OrderTable changePaymentStatus(int orderId,boolean paymentStatus) {
-    	int updated=updatePaymentStatusByOrderId(orderId,paymentStatus);
+    	if(paymentStatus) {
+    		int updated=updatePaymentStatusByOrderId(orderId,paymentStatus);
     		
-    	if(updated==0) {
-    		throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
-    	}
+    		if(updated==0) {
+    			throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
+    		}
         	
-        return selectOrdersByOrderId(orderId);
+        	return selectOrdersByOrderId(orderId);
+        	
+    	}else {
+    		throw new IllegalArgumentException("決済情報は不可逆です。入力:"+paymentStatus);
+    	}
     }
     
 }
