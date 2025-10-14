@@ -132,13 +132,20 @@ public class OrderService {
     	
     	if(itemId%10==0) {
     		
-    		int updated=updateItemAvailabilityByItemId(itemId,available);
-        	
-        	if(updated==0) {
-        		 throw new IllegalArgumentException("指定されたitemIdが存在しません: "+itemId);
-        	}
-        	
-        	items.add(selectItemByItemId(itemId));
+    		int[] itemIds= {itemId,itemId+31,itemId+32,itemId+33,itemId+34};
+    		int updated=0;
+    				
+    		for(int i=0;i<5;i++) {
+    			
+    			updated+=updateItemAvailabilityByItemId(itemIds[i],available);
+    			
+    			if(updated==0) {
+           		 throw new IllegalArgumentException("指定されたitemIdが存在しません: "+itemIds[i]);
+    			}
+            	
+            	items.add(selectItemByItemId(itemId));
+    			
+    		}
 
     	}else {
     		
@@ -150,7 +157,8 @@ public class OrderService {
     			
     			if(updated==0) {
            		 throw new IllegalArgumentException("指定されたitemIdが存在しません: "+itemIds[i]);
-           	}
+    			}
+    			
     			items.add(selectItemByItemId(itemIds[i]));
     			
     		}
