@@ -17,3 +17,7 @@ spring:
   square:
     environment: sandbox #production #<-本番
     access-token: ${SQUARE_TOKEN}
+
+  server:
+    port: 8080
+    address: 0.0.0.0
