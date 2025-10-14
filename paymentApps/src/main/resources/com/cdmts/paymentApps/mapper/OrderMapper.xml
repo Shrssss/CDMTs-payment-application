@@ -74,12 +74,12 @@
 	
 	
 	
-	<insert id="insertOrder" parameterType="com.cdmts.paymentApps.model.Order" useGeneratedKeys="true" keyProperty="orderId">
+	<insert id="insertOrder" parameterType="com.cdmts.paymentApps.entity.OrderTable" useGeneratedKeys="true" keyProperty="orderId">
 		INSERT INTO ORDER_TABLE (ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS)
 		VALUES (#{orderDate}, #{reservedTime}, #{servingStatus}, #{paymentId}, #{paymentStatus})
 	</insert>
 	
-	<insert id="insertOrderItem" parameterType="com.cdmts.paymentApps.model.OrderItem" useGeneratedKeys="true" keyProperty="orderItemId">
+	<insert id="insertOrderItem" parameterType="com.cdmts.paymentApps.entity.OrderItemTable" useGeneratedKeys="true" keyProperty="orderItemId">
 		INSERT INTO ORDER_ITEM_TABLE (ITEMID , ORDERID, QUANTITY)
 		VALUES (#{itemId}, #{orderId}, #{quantity})
 	</insert>
