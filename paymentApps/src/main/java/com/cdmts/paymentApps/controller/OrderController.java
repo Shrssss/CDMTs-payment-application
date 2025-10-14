@@ -50,7 +50,7 @@ public class OrderController {
     }
 
 	@PostMapping("/items/set/available/{itemId}/{available}") //itemId,availableをもとにItemAvailを更新
-	public Item toggleAvailablity(@PathVariable int itemId,@PathVariable boolean available) {
+	public List<Item> toggleAvailablity(@PathVariable int itemId,@PathVariable boolean available) {
 		return service.toggleAvailablity(itemId,available);
 	}
 	

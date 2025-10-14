@@ -126,15 +126,38 @@ public class OrderService {
     }
     
     /** Itemの在庫情報を更新し、Itemを返す　*/
-    public Item toggleAvailablity(int itemId,boolean available) {
+    public List<Item> toggleAvailablity(int itemId,boolean available) {
     	
-    	int updated=updateItemAvailabilityByItemId(itemId,available);
+    	List<Item> items=new ArrayList<>();
     	
-    	if(updated==0) {
-    		 throw new IllegalArgumentException("指定されたitemIdが存在しません: "+itemId);
+    	if(itemId%10==0) {
+    		
+    		int updated=updateItemAvailabilityByItemId(itemId,available);
+        	
+        	if(updated==0) {
+        		 throw new IllegalArgumentException("指定されたitemIdが存在しません: "+itemId);
+        	}
+        	
+        	items.add(selectItemByItemId(itemId));
+
+    	}else {
+    		
+    		int[] itemIds= {itemId,40+itemId%10,50+itemId%10};
+    		int updated=0;
+    		
+    		for(int i=0;i<3;i++) {
+    			updated+=updateItemAvailabilityByItemId(itemIds[i],available);
+    			
+    			if(updated==0) {
+           		 throw new IllegalArgumentException("指定されたitemIdが存在しません: "+itemIds[i]);
+           	}
+    			items.add(selectItemByItemId(itemIds[i]));
+    			
+    		}
     	}
     	
-    	return selectItemByItemId(itemId);
+    	return items;
+    	
     }
     
     /** orderの受け渡し情報を更新し、orderを返す　*/
