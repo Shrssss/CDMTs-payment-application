@@ -109,6 +109,8 @@ public class OrderService {
     	List<OrderItem> itemDtos=new ArrayList<>();
     	for(OrderItemTable item:items) {
     		OrderItem dto=new OrderItem();
+    		dto.setOrderItemId(item.getOrderItemId());
+    		dto.setOrderId(item.getOrderId());
     		dto.setItemId(item.getItemId());
     		dto.setQuantity(item.getQuantity());
     		
