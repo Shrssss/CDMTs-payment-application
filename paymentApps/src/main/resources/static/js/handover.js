@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchReadyOrders() {
         try {
             // ★ 変更点: URLをOrderTableに変更し、servingStatus=1でフィルタリング
-            const response = await fetch(`${API_BASE_URL}/OrderTable?servingStatus=1`);
+            //const response = await fetch(`${API_BASE_URL}/OrderTable?servingStatus=1`);
+			const response = await fetch(`${API_BASE_URL}/order/get/bystatus/1`);
             if (!response.ok) {
                 throw new Error(`APIエラー: ${response.status}`);
             }
@@ -33,25 +34,41 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param {number} newStatus 新しいステータス (2: DONEなど)
      * @returns {Promise<Object|null>} 更新後の注文データ、失敗時はnull
      */
-    async function patchOrderStatus(orderId, newStatus) {
-        try {
-            // ★ 変更点: URLをOrderTable/{orderId}の形式に変更
-            const response = await fetch(`${API_BASE_URL}/OrderTable/${orderId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                // ★ 変更点: statusをservingStatusに変更
-                body: JSON.stringify({ servingStatus: newStatus }),
-            });
-            if (!response.ok) {
-                throw new Error(`APIエラー: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('注文の更新に失敗しました:', error);
-            alert('サーバーとの通信に失敗しました。時間をおいて再度お試しください。');
-            return null;
-        }
-    }
+//    async function patchOrderStatus(orderId, newStatus) {
+//        try {
+//            // ★ 変更点: URLをOrderTable/{orderId}の形式に変更
+//            const response = await fetch(`${API_BASE_URL}/OrderTable/${orderId}`, {
+//                method: 'PATCH',
+//                headers: { 'Content-Type': 'application/json' },
+//                // ★ 変更点: statusをservingStatusに変更
+//                body: JSON.stringify({ servingStatus: newStatus }),
+//            });
+//            if (!response.ok) {
+//                throw new Error(`APIエラー: ${response.status}`);
+//            }
+//            return await response.json();
+//        } catch (error) {
+//            console.error('注文の更新に失敗しました:', error);
+//            alert('サーバーとの通信に失敗しました。時間をおいて再度お試しください。');
+//            return null;
+//        }
+//    }
+	
+	async function patchOrderStatus(orderId, tf) {
+	    try {
+	        const response = await fetch(`${API_BASE_URL}/order/set/servingStatus/${orderId}/${tf}`, {
+	            method: 'POST',
+	        });
+	        if (!response.ok) {
+	            throw new Error(`APIエラー: ${response.status}`);
+	        }
+	        return await response.json();
+	    } catch (error) {
+	        console.error('注文の更新に失敗しました:', error);
+	        alert('サーバーとの通信に失敗しました。時間をおいて再度お試しください。');
+	        return null;
+	    }
+	}
 
     // --- UI描画関数 ---
 
