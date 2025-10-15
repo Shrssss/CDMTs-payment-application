@@ -73,9 +73,9 @@ public class OrderService {
     	//order.setOrderId(request.getOrderId());
     	order.setOrderDate(request.getOrderDate());
     	order.setReservedTime(request.getReservedTime());
-    	order.setServingStatus(request.getServingStatus());
-    	order.setPaymentId(request.getPaymentId()); //nullAble
-    	order.setPaymentStatus(request.getPaymentStatus());
+    	order.setServingStatus(0);
+    	//order.setPaymentId(request.getPaymentId()); //nullAble
+    	order.setPaymentStatus(false);
     	
     	mapper.insertOrder(order);
     	
