@@ -47,6 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+	//テスト用
+async function testFetchOrder() {
+    const orderId = 4; // 取得したい注文ID
+    const order = await fetchOrder(orderId);
+    console.log(order);
+}
+
+testFetchOrder();
+
     /**
      * 注文のステータスを更新する
      * @param {string|number} orderId 更新する注文のID
