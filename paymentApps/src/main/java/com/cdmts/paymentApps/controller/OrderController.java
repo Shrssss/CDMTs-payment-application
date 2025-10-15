@@ -48,6 +48,11 @@ public class OrderController {
     public Item selectItemByItemId(@PathVariable int itemId) {
     	return service.selectItemByItemId(itemId);
     }
+    
+    @GetMapping("/item/get/allItems")
+    public List<Item> selectAllItems(){
+    	return service.selectAllItems();
+    }
 
 	@PostMapping("/items/set/available/{itemId}/{available}") //itemId,availableをもとにItemAvailを更新
 	public List<Item> toggleAvailablity(@PathVariable int itemId,@PathVariable boolean available) {
