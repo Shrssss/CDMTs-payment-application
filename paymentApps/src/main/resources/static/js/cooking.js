@@ -47,9 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
-testFetchOrder();
-
     /**
      * 注文のステータスを更新する
      * @param {string|number} orderId 更新する注文のID
