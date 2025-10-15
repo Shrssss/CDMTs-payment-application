@@ -30,6 +30,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+	/**
+     * orderIdで単一注文を取得する
+     * @param {number|string} orderId
+     * @returns {Promise<Object|null>} 注文データ（order.items含む）、失敗時はnull
+     */
+    async function fetchOrder(orderId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/order/get/byorderId/${orderId}`);
+            if (!response.ok) throw new Error(`APIエラー: ${response.status}`);
+            const order = await response.json();
+            return order; // order.items が含まれている
+        } catch (error) {
+            console.error('注文の取得に失敗しました:', error);
+            return null;
+        }
+    }
+
     /**
      * 注文のステータスを更新する
      * @param {string|number} orderId 更新する注文のID
