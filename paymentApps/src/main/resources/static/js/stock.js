@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
     // ▼▼▼ あなたの環境に合わせてAPIのURLを修正してください ▼▼▼
     // -------------------------------------------------------------
-    const baseURL = "https://dev-cdmts-pay.codemates.net/api";
+    const baseURL = "http://dev-cdmts-pay.codemates.net:8080/api";
     // -------------------------------------------------------------
 
     const errorMessageElement = document.getElementById('error-message');
