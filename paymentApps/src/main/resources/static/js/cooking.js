@@ -54,6 +54,26 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(order);
 }
 testFetchOrder();
+
+//試作
+	async function fetchCookingOrdersWithItems() {
+    const orderTables = await fetchCookingOrders(); // itemsなしOrderTableのリスト
+    // 全orderIdの詳細（items入りOrder）を取得
+    const ordersWithItems = await Promise.all(
+        orderTables.map(orderTable => fetchOrder(orderTable.orderId))
+    );
+    return ordersWithItems.filter(order => order !== null);
+}
+
+async function initialize() {
+    const orders = await fetchCookingOrdersWithItems();
+    renderOrders(orders);
+
+    setInterval(async () => {
+        const latestOrders = await fetchCookingOrdersWithItems();
+        renderOrders(latestOrders);
+    }, POLLING_INTERVAL);
+}
 	
     /**
      * 注文のステータスを更新する
