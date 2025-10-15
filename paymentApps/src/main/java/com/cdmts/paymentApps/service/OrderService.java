@@ -113,6 +113,7 @@ public class OrderService {
     		dto.setOrderId(item.getOrderId());
     		dto.setItemId(item.getItemId());
     		dto.setQuantity(item.getQuantity());
+    		dto.setItem(selectItemByItemId(item.getItemId()));
     		
     		Item itemDto=selectItemByItemId(item.getItemId());
     		
