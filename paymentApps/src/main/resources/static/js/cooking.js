@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.style.display = 'none';
 
                 // ★ 変更点: patchTicketStatusをpatchOrderStatusに変更、ステータスを'READY'から1に変更
-                const result = await patchOrderStatus(orderId, 1);
+                const result = await patchOrderStatus(orderId, true);
 
                 card.classList.remove('loading');
 
