@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncInitialState = async () => {
         try {
             // ★ 変更点: APIエンドポイントを /items から /ItemTable に変更
-            const response = await fetch(`${baseURL}/ItemTable`);
+            const response = await fetch(`${baseURL}/item/get/allItems`);
             if (!response.ok) {
                 throw new Error(`APIからのデータ取得に失敗 (HTTP: ${response.status})`);
             }
