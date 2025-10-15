@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- 設定 ---
-    const API_BASE_URL = process.env.API_BASE_URL;
+    const API_BASE_URL = "https://dev-cdmts-pay.codemates.net/api";
     const POLLING_INTERVAL = 10000; // 10秒ごとにデータを自動更新
 
     // --- DOM要素の取得 ---
