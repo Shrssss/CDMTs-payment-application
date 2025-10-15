@@ -84,7 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
         card.dataset.orderId = order.orderId;
 
         // ★ 変更点: product_nameをitemNameに変更
-        const itemsList = order.items.map(item => `<li>${item.itemName} x ${item.quantity}</li>`).join('');
+        //const itemsList = order.items.map(item => `<li>${item.itemName} x ${item.quantity}</li>`).join('');
+		const itemsList = (order.items || []).map(item => `<li>${item.itemName} x ${item.quantity}</li>`).join('');
 
         card.innerHTML = `
             <div class="ticket-number">${order.orderId}</div>
