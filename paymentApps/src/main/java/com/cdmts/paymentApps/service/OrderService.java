@@ -47,8 +47,55 @@ public class OrderService {
     	return mapper.selectServingStatusByOrderId(orderId);
     }
     
-    public List<OrderTable> selectOrdersByServingStatus(int servingStatus) {
-    	return mapper.selectOrdersByServingStatus(servingStatus);
+    public List<Order> selectOrdersByServingStatus(int servingStatus) {
+    	
+    	List<OrderTable> orderTable=mapper.selectOrdersByServingStatus(servingStatus);
+    	
+    	List<Order> orders=new ArrayList<>();
+    	
+    	for(OrderTable orderDto:orderTable) {
+    		
+    		Order order=new Order();
+    		
+    		order.setOrderId(orderDto.getOrderId());
+    		order.setOrderDate(orderDto.getOrderDate());
+    		order.setReservedTime(orderDto.getReservedTime());
+    		order.setServingStatus(orderDto.getServingStatus());
+    		order.setPaymentId(orderDto.getPaymentId());
+    		order.setPaymentStatus(orderDto.getPaymentStatus());
+    		
+    		List<OrderItemTable> orderItemTable=selectOrderItemsByOrderId(orderDto.getOrderId());
+    		
+    		List<OrderItem> orderItems=new ArrayList<>();
+    		
+    		for(OrderItemTable orderItemDto:orderItemTable) {
+    			
+    			OrderItem orderItem=new OrderItem();
+    			
+    			Item itemDto=selectItemByItemId(orderItemDto.getItemId());
+        		
+    			orderItem.setOrderItemId(orderItemDto.getOrderItemId());
+    			orderItem.setOrderId(orderItemDto.getOrderId());
+    			orderItem.setItemId(orderItemDto.getItemId());
+    			orderItem.setQuantity(orderItemDto.getQuantity());
+    			
+    			orderItem.setItemName(itemDto.getItemName());
+    			orderItem.setPrice(itemDto.getPrice());
+    			orderItem.setAvailable(itemDto.getAvailable());
+    			
+    			orderItem.setItem(itemDto);
+    			
+    			orderItems.add(orderItem);
+    			
+    		}
+    		
+			order.setItems(orderItems);
+    		
+    		orders.add(order);
+    	}
+    	
+    	
+    	return orders;
     }
     
     public int updateItemAvailabilityByItemId(int itemId,boolean available) {

@@ -61,7 +61,7 @@ public class OrderController {
 	}
 	
 	@GetMapping("order/get/bystatus/{servingStatus}") //servingStatusをもとにorderをフロントに送信
-	public List<OrderTable> selectOrdersByServingStatus(@PathVariable int servingStatus){
+	public List<Order> selectOrdersByServingStatus(@PathVariable int servingStatus){
 		return service.selectOrdersByServingStatus(servingStatus);
 	}
 	
