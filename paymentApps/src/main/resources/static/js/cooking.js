@@ -121,15 +121,15 @@ document.addEventListener('DOMContentLoaded', () => {
 		const itemsList = (order.items || []).map(item => `<li>${item.itemName} x ${item.quantity}</li>`).join('');
 
 
-        card.innerHTML = `
-            <div class="ticket-number">${order.orderId}</div>
-            <div class="order-details">
-                <ul class="order-items">${itemsList}</ul>
-                <div class="time-info">${getTimeInfoText(order.reservedTime)}</div>
-            </div>
-            <button class="action-button complete-btn">調理完了</button>
-            <div class="loading-spinner"></div>
-        `;
+card.innerHTML = `
+    <div class="ticket-number">${order.orderId}</div>
+    <div class="order-details">
+        <div class="time-info">${getTimeInfoText(order.reservedTime)}</div>
+        <ul class="order-items">${itemsList}</ul>
+    </div>
+    <button class="action-button complete-btn">調理完了</button>
+    <div class="loading-spinner"></div>
+`;
         return card;
     }
 
