@@ -3,6 +3,7 @@ package com.cdmts.paymentApps.service;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +23,15 @@ public class OrderService {
         this.mapper=mapper;
     }
     
-    public OrderTable selectOrdersByOrderId(int orderId){
+    public OrderTable selectOrdersByOrderId(@Param("orderId") int orderId){
     	return mapper.selectOrdersByOrderId(orderId);
     }
     
-    public List<OrderItemTable> selectOrderItemsByOrderId(int orderId){
+    public List<OrderItemTable> selectOrderItemsByOrderId(@Param("orderId") int orderId){
     	return mapper.selectOrderItemsByOrderId(orderId);
     }
     
-	public Item selectItemByItemId(int itemId){
+	public Item selectItemByItemId(@Param("itemId") int itemId){
 		return mapper.selectItemByItemId(itemId);
 	}
 	
@@ -42,7 +43,7 @@ public class OrderService {
     	return mapper.selectAllItems();
     }
     
-    public int selectServingStatusByOrderId(int orderId) {
+    public int selectServingStatusByOrderId(@Param("orderId") int orderId) {
     	return mapper.selectServingStatusByOrderId(orderId);
     }
     
