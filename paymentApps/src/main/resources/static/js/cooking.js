@@ -47,12 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-	//テスト用
-async function testFetchOrder() {
-    const orderId = 4; // 取得したい注文ID
-    const order = await fetchOrder(orderId);
-    console.log(order);
-}
 
 testFetchOrder();
 
