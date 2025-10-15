@@ -47,37 +47,61 @@ document.addEventListener('DOMContentLoaded', () => {
      * スイッチが操作されたときに、APIを呼び出して状態を更新する
      * @param {Event} event 
      */
-    const handleAvailabilityChange = async (event) => {
-        const toggle = event.target;
-        // ★ 変更点: 変数名を id から itemId に変更（可読性のため）
-        const itemId = toggle.dataset.id;
-        const newAvailability = toggle.checked;
+//    const handleAvailabilityChange = async (event) => {
+//        const toggle = event.target;
+//        // ★ 変更点: 変数名を id から itemId に変更（可読性のため）
+//        const itemId = toggle.dataset.id;
+//        const newAvailability = toggle.checked;
+//
+//        try {
+//            // ★ 変更点: APIエンドポイントを /items/{id} から /ItemTable/{itemId} に変更
+//            const response = await fetch(`${baseURL}/ItemTable/${itemId}`, {
+//                method: 'PATCH',
+//                headers: {
+//                    'Content-Type': 'application/json',
+//                },
+//                // 'available' というキー名は sample.json と同じなので変更なし
+//                body: JSON.stringify({ available: newAvailability }),
+//            });
+//
+//            if (!response.ok) {
+//                throw new Error(`APIでの更新に失敗 (HTTP: ${response.status})`);
+//            }
+//            
+//            // ★ 変更点: ログメッセージを itemId に合わせて修正 ログメッセージ消した
+//            showError(''); // 成功したらエラーメッセージをクリア
+//
+//        } catch (error) {
+//            console.error('更新エラー:', error);
+//            showError('サーバーとの通信に失敗し、状態を更新できませんでした。');
+//            // 更新に失敗したので、スイッチの状態を元に戻す
+//            toggle.checked = !newAvailability;
+//        }
+//    };
+	
+	const handleAvailabilityChange = async (event) => {
+	    const toggle = event.target;
+	    const itemId = toggle.dataset.id;
+	    const newAvailability = toggle.checked;
 
-        try {
-            // ★ 変更点: APIエンドポイントを /items/{id} から /ItemTable/{itemId} に変更
-            const response = await fetch(`${baseURL}/ItemTable/${itemId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                // 'available' というキー名は sample.json と同じなので変更なし
-                body: JSON.stringify({ available: newAvailability }),
-            });
+	    try {
+	        const response = await fetch(`${baseURL}/items/set/available/${itemId}/${newAvailability}`, {
+	            method: 'POST',
+	        });
 
-            if (!response.ok) {
-                throw new Error(`APIでの更新に失敗 (HTTP: ${response.status})`);
-            }
-            
-            // ★ 変更点: ログメッセージを itemId に合わせて修正 ログメッセージ消した
-            showError(''); // 成功したらエラーメッセージをクリア
+	        if (!response.ok) {
+	            throw new Error(`APIでの更新に失敗 (HTTP: ${response.status})`);
+	        }
 
-        } catch (error) {
-            console.error('更新エラー:', error);
-            showError('サーバーとの通信に失敗し、状態を更新できませんでした。');
-            // 更新に失敗したので、スイッチの状態を元に戻す
-            toggle.checked = !newAvailability;
-        }
-    };
+	        showError(''); // 成功したらエラーメッセージをクリア
+
+	    } catch (error) {
+	        console.error('更新エラー:', error);
+	        showError('サーバーとの通信に失敗し、状態を更新できませんでした。');
+	        toggle.checked = !newAvailability; // 失敗時に元に戻す
+	    }
+	};
+
     
     /**
      * エラーメッセージを表示する

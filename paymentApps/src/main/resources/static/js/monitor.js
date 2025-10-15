@@ -54,24 +54,44 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * バックエンドAPIから最新の注文情報を取得し、画面を更新する関数
      */
-    const fetchAndUpdateBoard = async () => {
-        try {
-            // ★ 変更点: servingStatus=1の注文を取得するようにAPIエンドポイントを変更
-            const response = await fetch(`${API_BASE_URL}/OrderTable?servingStatus=1`); //多分 (BaseURL)/
+//    const fetchAndUpdateBoard = async () => {
+//        try {
+//            // ★ 変更点: servingStatus=1の注文を取得するようにAPIエンドポイントを変更
+//            const response = await fetch(`${API_BASE_URL}/OrderTable?servingStatus=1`); //多分 (BaseURL)/
+//
+//            if (!response.ok) {
+//                throw new Error(`サーバーからの応答が不正です: ${response.status}`);
+//            }
+//
+//            const orders = await response.json();
+//            renderOrders(orders);
+//
+//        } catch (error) {
+//            console.error('データの取得に失敗しました:', error);
+//            boardContainer.innerHTML = '';
+//            statusMessage.textContent = '更新エラーが発生しました。接続を確認してください。';
+//        }
+//    };
+	
+	const fetchAndUpdateBoard = async () => {
+	    try {
+	        // ★ 修正: 正しいAPIパスに変更
+	        const response = await fetch(`${API_BASE_URL}/order/get/bystatus/1`);
 
-            if (!response.ok) {
-                throw new Error(`サーバーからの応答が不正です: ${response.status}`);
-            }
+	        if (!response.ok) {
+	            throw new Error(`サーバーからの応答が不正です: ${response.status}`);
+	        }
 
-            const orders = await response.json();
-            renderOrders(orders);
+	        const orders = await response.json();
+	        renderOrders(orders);
 
-        } catch (error) {
-            console.error('データの取得に失敗しました:', error);
-            boardContainer.innerHTML = '';
-            statusMessage.textContent = '更新エラーが発生しました。接続を確認してください。';
-        }
-    };
+	    } catch (error) {
+	        console.error('データの取得に失敗しました:', error);
+	        boardContainer.innerHTML = '';
+	        statusMessage.textContent = '更新エラーが発生しました。接続を確認してください。';
+	    }
+	};
+
 
     // --- 実行処理 ---
     fetchAndUpdateBoard(); 
