@@ -200,7 +200,7 @@ public class OrderService {
 
     	}else {
     		
-    		int[] itemIds= {itemId,40+itemId%10,50+itemId%10};
+    		Int[], itemIds={itemId,90+itemId%10};
     		int updated=0;
     		
     		for(int i=0;i<3;i++) {
