@@ -44,7 +44,7 @@ public class PaymentService {
 								Money.builder()
 									.amount(amount)
 									.currency(Currency.valueOf("JPY")).build()
-							).locationId("LKJK1TXBNV3GX").build(); //<- sandbox //LYP1FB67EDXBN
+							).locationId("LYP1FB67EDXBN").build(); //<- sandbox //LYP1FB67EDXBN
 			
 			var response=squareClient.payments().create(request);
 			
@@ -90,8 +90,8 @@ public class PaymentService {
 	public Map<String,String> getSquareClient(){
 		Map<String,String> client=new HashMap<>();
 		
-		client.put("applicationId","sandbox-sq0idb-TSpPtbWlulBoJyV0q3lPgQ");
-		client.put("locationId","LKJK1TXBNV3GX");
+		client.put("applicationId","sq0idp-VLfeIy3EnmoACHjocINrRA");
+		client.put("locationId","LYP1FB67EDXBN");
 		client.put("environment","PRODUCTION");
 		
 		return client;
