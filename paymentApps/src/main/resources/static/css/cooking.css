@@ -24,8 +24,8 @@ main { padding: 1rem; }
 }
 
 /* 予約時刻に応じた色分け  */
-.ticket-card.is-urgent { background-color: #fffbe6; border-left: 5px solid #f59e0b; }
-.ticket-card.is-overdue { background-color: #feefef; border-left: 5px solid #ef4444; }
+.ticket-card.is-urgent { background-color: #f6e384; border-left: 5px solid #f59e0b; }
+.ticket-card.is-overdue { background-color: #f7bebe; border-left: 5px solid #ef4444; }
 
 /* カード内の要素 */
 .ticket-number { font-size: 2rem; font-weight: bold; min-width: 60px; text-align: center; }
