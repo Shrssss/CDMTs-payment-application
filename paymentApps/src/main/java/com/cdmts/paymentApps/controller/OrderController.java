@@ -30,7 +30,7 @@ public class OrderController {
     	return service.getOrder(orderId);
     }
     
-    @PostMapping("/order/set/servingStatus/{orderId}/{tf}") //orderId,tfをもとにservingStatusを更新 （処理内容 (tf)? statusを次の状態へ : statusを前の状態へ）
+    @PostMapping("/order/set/servingStatus/{orderId}/{servingStatus}") //orderId,tfをもとにservingStatusを更新 （処理内容 (tf)? statusを次の状態へ : statusを前の状態へ）
     public OrderTable changeServingStatus(@PathVariable int orderId,@PathVariable int servingStatus) {
     	return service.changeServingStatus(orderId,servingStatus);
     }
