@@ -109,5 +109,12 @@
         SET PAYMENT_STATUS = #{paymentStatus}
         WHERE ORDERID = #{orderId}
     </update>
+    
+    <update id="updatePaymentIdByOrderId" parameterType="com.cdmts.paymentApps.entity.OrderTable">
+    	UPDATE ORDER_TABLE
+   		SET PAYMENTID = #{paymentId}
+   		WHERE ORDERID = #{orderId}
+    </update>
+    
 
 </mapper>
