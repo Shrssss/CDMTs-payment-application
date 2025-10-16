@@ -221,27 +221,32 @@ public class OrderService {
     }
     
     /** orderの受け渡し情報を更新し、orderを返す　*/
-    public OrderTable changeServingStatus(int orderId,boolean tf) {
+    public OrderTable changeServingStatus(int orderId,int servingStatus) {
     	
     	int status=mapper.selectServingStatusByOrderId(orderId);
     	
     	int updated;
     	
     	if(status==0) {
-    		if(tf) {
-    			updated=updateServingStatusByOrderId(orderId,status+1);
+    		
+    		if(servingStatus!=1) {
+    			updated=updateServingStatusByOrderId(orderId,servingStatus);
     		}else {
-    			throw new IllegalArgumentException("この注文はすでに調理中です: "+orderId);
+    			throw new IllegalArgumentException("入力値が不正です: "+servingStatus);
     		}
+    		
     	}else if(status==1) {
-    		updated=(tf)?updateServingStatusByOrderId(orderId,status+1)
-    				:updateServingStatusByOrderId(orderId,status-1);
-    	}else if(status==2) {
-    		if(tf) {
-    			throw new IllegalArgumentException("この注文はすでに受け渡し済みです: "+orderId);
+    		
+    		if(servingStatus!=2) {
+    			updated=updateServingStatusByOrderId(orderId,servingStatus);
     		}else {
-    			updated=updateServingStatusByOrderId(orderId,status-1);
+    			throw new IllegalArgumentException("入力値が不正です: "+servingStatus);
     		}
+    		
+    	}else if(status==2) {
+    		
+    		throw new IllegalArgumentException("入力値が不正です: "+servingStatus);
+    		
     	}else throw new IllegalArgumentException("servingStatusが不正です");
     	
     	
