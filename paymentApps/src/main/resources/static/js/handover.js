@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function patchOrderStatus(orderId, newStatus) {
         try {
             // ★ 変更点: URLをOrderTable/{orderId}の形式に変更
-            const response = await fetch(`${API_BASE_URL}/OrderTable/${orderId}`, {
-                method: 'PATCH',
+            const response = await fetch(`${API_BASE_URL}/order/set/servingStatus/${orderId}/${newStatus}`, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 // ★ 変更点: statusをservingStatusに変更
                 body: JSON.stringify({ servingStatus: newStatus }),
