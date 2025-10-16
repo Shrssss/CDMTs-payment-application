@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/test_db?useSSL=false&serverTimezone=Asia/Tokyo&allowPublicKeyRetrieval=false
+    url: jdbc:mysql://127.0.0.1:3306/release_db?useSSL=false&serverTimezone=Asia/Tokyo&allowPublicKeyRetrieval=false
     # url jdbc:mysql://localhost:3306/${DB_NAME:dbname}
     username: test_user
     password: ${DB_PASSWORD:password}

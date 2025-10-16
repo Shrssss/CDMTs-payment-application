@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://dev-cdmts-pay.codemates.net")
+@CrossOrigin(origins = "http://cdmts-pay.codemates.net")
 @RequiredArgsConstructor
 public class OrderController {
 	

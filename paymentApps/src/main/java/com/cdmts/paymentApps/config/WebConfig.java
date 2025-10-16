@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
 		@Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-            .allowedOrigins("https://dev-cdmts-pay.codemates.net") // ← HTTPSを明示
+            .allowedOrigins("https://cdmts-pay.codemates.net")
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .allowCredentials(true);
 	}

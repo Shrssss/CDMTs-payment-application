@@ -3,11 +3,9 @@ package com.cdmts.paymentApps.controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-//import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-//import com.squareup.square.SquareClient;
 
 import com.cdmts.paymentApps.dto.PaymentRequest;
 import com.cdmts.paymentApps.service.PaymentService;
@@ -22,18 +20,12 @@ import java.util.Map;
 public class PaymentController {
 
 	private final PaymentService service;
-//	private final SquareClient squareClient;
 	
 	/** sourceIdで決済リクエストを作成する */
 	@PostMapping("/payment/create/{orderId}/{sourceId}")
 	public PaymentRequest createPayment(@PathVariable int orderId,@PathVariable String sourceId) {
 		return service.createPayment(orderId,sourceId);
 	}
-//	/** ApplicationIdを渡す */
-//	@GetMapping("/payment/get/ApplicationId")
-//	public String getApplicationId() {
-//		return "LKJK1TXBNV3GX"; //<- sandbox //sq0idp-VLfeIy3EnmoACHjocINrRA
-//	}
 	
 	@GetMapping("/square/config")
 	public Map<String,String> getSquareClient() {

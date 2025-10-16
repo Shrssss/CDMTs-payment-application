@@ -10,7 +10,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- 設定項目 ---
-    const API_BASE_URL = "https://dev-cdmts-pay.codemates.net/api";
+    const API_BASE_URL = "https://cdmts-pay.codemates.net/api";
     const POLLING_INTERVAL = 5000; // データ取得の間隔 (5秒)
     
     // --- DOM要素の取得 ---

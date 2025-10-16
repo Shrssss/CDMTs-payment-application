@@ -11,7 +11,7 @@ public class SquareConfig {
     /** クライアントを作成 */
 	SquareClient squareClient() {
 		SquareClient client=SquareClient.builder()
-				.environment(Environment.SANDBOX) //Environment.PRODUCTION //<-本番
+				.environment(Environment.PRODUCTION) //Environment.PRODUCTION //<-本番
 				.token(System.getenv("SQUARE_TOKEN")).build();
 		return client;
 	}

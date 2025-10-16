@@ -15,7 +15,6 @@ import com.squareup.square.types.Payment;
 import com.squareup.square.types.GetPaymentResponse;
 import com.squareup.square.types.GetPaymentsRequest;
 import com.squareup.square.types.CreatePaymentRequest;
-//import com.squareup.square.core.Environment;
 import com.squareup.square.core.SquareApiException;
 @Service
 public class PaymentService {
