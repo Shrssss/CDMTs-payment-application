@@ -142,7 +142,7 @@ async function initialize() {
         const reservedTime = new Date(order.reservedTime);
         const diffMinutes = (reservedTime - now) / (1000 * 60);
         if (diffMinutes < 0) card.classList.add('is-overdue');
-        else if (diffMinutes <= 5) card.classList.add('is-urgent');
+        else if (diffMinutes <= 10) card.classList.add('is-urgent');
 
         // ★ 変更点: product_nameをitemNameに変更
         //const itemsList = order.items.map(item => `<li>${item.itemName} x ${item.quantity}</li>`).join('');
