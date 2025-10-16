@@ -30,7 +30,6 @@ public class PaymentService {
 	/** 決済リクエストを作成し、PaymentRequest型の詳細を返す */ //square関連はすべてOptionalなのでnull処理しなくていいとか言わないでください
 	public PaymentRequest createPayment(int orderId,String sourceId) {
 		try {
-
 			Order selectedOrder=orderService.getOrder(orderId);
 			
 			if(selectedOrder==null) {
@@ -77,7 +76,10 @@ public class PaymentService {
 		    result.setAmount(money.getAmount().orElseThrow(()->new RuntimeException("Amount is null")));
 		    result.setCurrency(money.getCurrency().toString());
 			
+		    boolean tf=(result.getStatus()=="COMPLETED")?true:false;
+		    
 		    orderService.updatePaymentIdByOrderId(orderId,paymentId.toString());
+		    orderService.updatePaymentStatusByOrderId(orderId,tf);
 		    
 			return result;
 			
