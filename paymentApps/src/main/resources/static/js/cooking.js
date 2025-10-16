@@ -214,7 +214,7 @@ card.innerHTML = `
                 button.style.display = 'none';
 
                 // ★ 変更点: patchTicketStatusをpatchOrderStatusに変更、ステータスを'READY'から1に変更
-                const result = await patchOrderStatus(orderId, true);
+                const result = await patchOrderStatus(orderId, 1);
 
                 card.classList.remove('loading');
 
