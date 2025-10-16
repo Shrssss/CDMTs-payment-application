@@ -229,7 +229,7 @@ public class OrderService {
     	
     	if(status==0) {
     		
-    		if(servingStatus!=1) {
+    		if(servingStatus==1) {
     			updated=updateServingStatusByOrderId(orderId,servingStatus);
     		}else {
     			throw new IllegalArgumentException("入力値が不正です: "+servingStatus);
@@ -237,7 +237,7 @@ public class OrderService {
     		
     	}else if(status==1) {
     		
-    		if(servingStatus!=2) {
+    		if(servingStatus==0||servingStatus==2) {
     			updated=updateServingStatusByOrderId(orderId,servingStatus);
     		}else {
     			throw new IllegalArgumentException("入力値が不正です: "+servingStatus);
@@ -245,7 +245,11 @@ public class OrderService {
     		
     	}else if(status==2) {
     		
-    		throw new IllegalArgumentException("入力値が不正です: "+servingStatus);
+    		if(servingStatus==1) {
+    			updated=updateServingStatusByOrderId(orderId,servingStatus);
+    		}else {
+    			throw new IllegalArgumentException("入力値が不正です: "+servingStatus);
+    		}
     		
     	}else throw new IllegalArgumentException("servingStatusが不正です");
     	
