@@ -15,7 +15,7 @@ import com.squareup.square.types.Payment;
 import com.squareup.square.types.GetPaymentResponse;
 import com.squareup.square.types.GetPaymentsRequest;
 import com.squareup.square.types.CreatePaymentRequest;
-import com.squareup.square.core.Environment;
+//import com.squareup.square.core.Environment;
 import com.squareup.square.core.SquareApiException;
 @Service
 public class PaymentService {
@@ -89,8 +89,8 @@ public class PaymentService {
 	public Map<String,String> getSquareClient(){
 		Map<String,String> client=new HashMap<>();
 		
-		client.put("applicationId","LKJK1TXBNV3GX");
-		client.put("locationId","sandbox-sq0idb-TSpPtbWlulBoJyV0q3lPgQ");
+		client.put("applicationId","sandbox-sq0idb-TSpPtbWlulBoJyV0q3lPgQ");
+		client.put("locationId","LKJK1TXBNV3GX");
 		client.put("environment","SANDBOX");
 		
 		return client;
