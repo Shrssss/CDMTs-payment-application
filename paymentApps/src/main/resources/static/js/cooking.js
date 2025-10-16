@@ -84,7 +84,7 @@ async function initialize() {
     async function patchOrderStatus(orderId, newStatus) {
         try {
             // ★ 変更点: URLをOrderTable/{orderId}の形式に変更
-            const response = await fetch(`${API_BASE_URL}/OrderTable/${orderId}`, {
+            const response = await fetch(`${API_BASE_URL}/order/set/servingStatus/${orderId}/${newStatus}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
