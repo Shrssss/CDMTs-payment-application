@@ -13,5 +13,12 @@ public class WebConfig implements WebMvcConfigurer {
 		
 		registry.addViewController("/")
 		.setViewName("forward:/index.html");
+
+		@Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+            .allowedOrigins("https://dev-cdmts-pay.codemates.net"/) // ← HTTPSを明示
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowCredentials(true);
 	}
 }
