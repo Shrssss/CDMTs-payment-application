@@ -14,28 +14,30 @@ import com.cdmts.paymentApps.service.PaymentService;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class PaymentController {
 
 	private final PaymentService service;
-	private final SquareClient squareClient;
+//	private final SquareClient squareClient;
 	
 	/** sourceIdで決済リクエストを作成する */
 	@PostMapping("/payment/create/{orderId}/{sourceId}")
 	public PaymentRequest createPayment(@PathVariable int orderId,@PathVariable String sourceId) {
 		return service.createPayment(orderId,sourceId);
 	}
-	/** ApplicationIdを渡す */
-	@GetMapping("/payment/get/ApplicationId")
-	public String getApplicationId() {
-		return "LKJK1TXBNV3GX"; //<- sandbox //sq0idp-VLfeIy3EnmoACHjocINrRA
-	}
+//	/** ApplicationIdを渡す */
+//	@GetMapping("/payment/get/ApplicationId")
+//	public String getApplicationId() {
+//		return "LKJK1TXBNV3GX"; //<- sandbox //sq0idp-VLfeIy3EnmoACHjocINrRA
+//	}
 	
 	@GetMapping("/square/config")
-	public SquareClient getSquareClient() {
-		return squareClient;
+	public Map<String,String> getSquareClient() {
+		return service.getSquareClient();
 	}
 	
 }

@@ -1,6 +1,8 @@
 package com.cdmts.paymentApps.service;
 
 import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import com.squareup.square.types.Payment;
 import com.squareup.square.types.GetPaymentResponse;
 import com.squareup.square.types.GetPaymentsRequest;
 import com.squareup.square.types.CreatePaymentRequest;
+import com.squareup.square.core.Environment;
 import com.squareup.square.core.SquareApiException;
 @Service
 public class PaymentService {
@@ -82,5 +85,16 @@ public class PaymentService {
 			throw new RuntimeException("Square API Exception: "+e.getMessage(),e);
 		}
 	}
+	
+	public Map<String,String> getSquareClient(){
+		Map<String,String> client=new HashMap<>();
+		
+		client.put("applicationId","LKJK1TXBNV3GX");
+		client.put("locationId","sandbox-sq0idb-TSpPtbWlulBoJyV0q3lPgQ");
+		client.put("environment","SANDBOX");
+		
+		return client;
+	}
+	
 	
 }
