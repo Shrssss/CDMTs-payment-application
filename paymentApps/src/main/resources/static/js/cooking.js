@@ -162,6 +162,7 @@ card.innerHTML = `
     }
 
     function renderOrders(orders) {
+		const waitingIds = Object.keys(cancellationTimers); // 追加
         upcomingContainer.innerHTML = '';
         overdueContainer.innerHTML = '';
         const now = new Date();
@@ -172,8 +173,20 @@ card.innerHTML = `
         upcomingOrders.sort((a, b) => new Date(a.reservedTime) - new Date(b.reservedTime));
         overdueOrders.sort((a, b) => new Date(a.reservedTime) - new Date(b.reservedTime));
 
-        upcomingOrders.forEach(order => upcomingContainer.appendChild(createOrderCard(order)));
-        overdueOrders.forEach(order => overdueContainer.appendChild(createOrderCard(order)));
+		function renderCard(order) {
+        	const card = createOrderCard(order);
+        	// 追加：「取り消し中」状態なら再現する
+        	if (waitingIds.includes(order.orderId.toString())) {
+            	const button = card.querySelector('.action-button');
+            	card.classList.add('waiting-cancellation');
+            	button.textContent = '取り消し';
+            	button.classList.add('cancel');
+        	}
+        	return card;
+    	}
+		
+        upcomingOrders.forEach(order => upcomingContainer.appendChild(renderCard(order)));
+        overdueOrders.forEach(order => overdueContainer.appendChild(renderCard(order)));
     }
 
     // --- イベントハンドラ ---
