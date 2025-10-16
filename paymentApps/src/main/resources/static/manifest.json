@@ -1,16 +1,15 @@
 {
-  "name": "CDMTs Payment Application",
-  "short_name": "CDMTsPay",
-  "start_url": "/index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "description": "CDMTsの支払い・注文管理アプリケーション",
-  "icons": [
-    {
-      "src": "/static/media/logo.88124291a864a309ab6e.jpg",
-      "sizes": "192x192",
-      "type": "image/jpeg"
-    }
-  ]
+    "short_name": "角煮オーダー",
+    "name": "CODEMATES 多摩祭モバイルオーダー",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#3367D6",
+    "icons": [
+        {
+            "src": "/favicon.ico",
+            "sizes": "64x64 32x32 24x24 16x16",
+            "type": "image/x-icon"
+        }
+    ]
 }
