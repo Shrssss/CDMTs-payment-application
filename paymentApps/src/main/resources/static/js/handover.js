@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.style.display = 'none';
     
                 // ★ 変更点: ステータスを 'DONE' から 2 に変更し、関数をpatchOrderStatusに変更
-                const result = await patchOrderStatus(orderId, true);
+                const result = await patchOrderStatus(orderId, 1);
                 
                 card.classList.remove('loading');
     
