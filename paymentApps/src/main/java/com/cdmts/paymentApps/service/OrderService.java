@@ -201,9 +201,10 @@ public class OrderService {
     	}else {
     		
     		int[] itemIds={itemId,90+itemId%10};
+    		
     		int updated=0;
     		
-    		for(int i=0;i<3;i++) {
+    		for(int i=0;i<2;i++) {
     			updated+=updateItemAvailabilityByItemId(itemIds[i],available);
     			
     			if(updated==0) {
