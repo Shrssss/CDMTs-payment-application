@@ -46,7 +46,7 @@ public class PaymentService {
 								Money.builder()
 									.amount(amount)
 									.currency(Currency.valueOf("JPY")).build()
-							).locationId("sandbox-sq0idb-TSpPtbWlulBoJyV0q3lPgQ").build(); //<- sandbox //LYP1FB67EDXBN
+							).locationId("LKJK1TXBNV3GX").build(); //<- sandbox //LYP1FB67EDXBN
 			
 			var response=squareClient.payments().create(request);
 			
