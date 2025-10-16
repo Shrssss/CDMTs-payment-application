@@ -84,12 +84,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderOrders(orders) {
+		const waitingIds = Object.keys(cancellationTimers);　//追加
+		
         readyOrdersContainer.innerHTML = '';
 
         // ★ 変更点: ticket_numberをorderIdでソート
         orders.sort((a, b) => a.orderId - b.orderId);
 
-        orders.forEach(order => readyOrdersContainer.appendChild(createOrderCard(order)));
+		function renderCard(order) {
+        	const card = createOrderCard(order);
+        	// 追加：「取り消し中」状態なら再現する
+        	if (waitingIds.includes(order.orderId.toString())) {
+            	const button = card.querySelector('.action-button');
+            	card.classList.add('waiting-cancellation');
+            	button.textContent = '取り消し';
+            	button.classList.add('cancel');
+        	}
+        	return card;
+    	}
+		
+        orders.forEach(order => readyOrdersContainer.appendChild(renderCard(order)));
     }
 
     // --- イベントハンドラ ---
