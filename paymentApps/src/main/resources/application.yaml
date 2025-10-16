@@ -18,7 +18,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     
   square:
-    environment: sandbox #production #<-本番
+    environment: production #production #<-本番
     access-token: ${SQUARE_TOKEN}
 
   server:
