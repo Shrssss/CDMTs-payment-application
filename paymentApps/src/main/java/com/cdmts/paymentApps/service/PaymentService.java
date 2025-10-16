@@ -92,7 +92,7 @@ public class PaymentService {
 		
 		client.put("applicationId","sandbox-sq0idb-TSpPtbWlulBoJyV0q3lPgQ");
 		client.put("locationId","LKJK1TXBNV3GX");
-		client.put("environment","SANDBOX");
+		client.put("environment","PRODUCTION");
 		
 		return client;
 	}
