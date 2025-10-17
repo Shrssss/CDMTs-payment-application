@@ -39,5 +39,5 @@ public interface OrderMapper {
 	/** paymentIdの挿入 */
 	public int updatePaymentIdByOrderId(int orderId,String paymentId);
 	/** 決済状況の更新 */
-	public int updatePaymentStatusByOrderId(int orderId,boolean paymentStatus);
+	public int updatePaymentStatusByOrderId(int orderId,String paymentStatus);
 }
