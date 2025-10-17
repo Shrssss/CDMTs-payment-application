@@ -36,7 +36,7 @@ public class OrderController {
     }
     
 	@PostMapping("/order/set/paymentStatus/{orderId}/{paymentStatus}")
-	public OrderTable changePaymentStatus(@PathVariable int orderId,@PathVariable String paymentStatus) {
+	public OrderTable changePaymentStatus(@PathVariable int orderId,@PathVariable boolean paymentStatus) {
 		return service.changePaymentStatus(orderId,paymentStatus);
 	}
      
