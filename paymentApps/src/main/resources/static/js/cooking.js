@@ -12,25 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /**
      * 調理中(servingStatus=0)の注文をサーバーから取得する
+     * paymentStatusがtrueのみ返す
      * @returns {Promise<Array>} 注文データの配列
      */
     async function fetchCookingOrders() {
         try {
-            // ★ 変更点: URLをOrderTableに変更し、servingStatus=0でフィルタリング
-           	//const response = await fetch(`${API_BASE_URL}/OrderTable?servingStatus=0`);
-			const response = await fetch(`${API_BASE_URL}/order/get/bystatus/0`);
+            const response = await fetch(`${API_BASE_URL}/order/get/bystatus/0`);
             if (!response.ok) {
                 throw new Error(`APIエラー: ${response.status}`);
             }
-            return await response.json();
+            const orders = await response.json();
+            // paymentStatusがtrueのみ残す
+            return orders.filter(order => order.paymentStatus === true);
         } catch (error) {
             console.error('注文の取得に失敗しました:', error);
-            // 画面の表示を止めないように、エラー時は空配列を返す
             return [];
         }
     }
 
-	/**
+    /**
      * orderIdで単一注文を取得する
      * @param {number|string} orderId
      * @returns {Promise<Object|null>} 注文データ（order.items含む）、失敗時はnull
@@ -47,34 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
-	async function testFetchOrder() {
-    const orderId = 1; // 取得したい注文ID
-    const order = await fetchOrder(orderId);
-    console.log(order);
-}
-testFetchOrder();
-
-//試作
-	async function fetchCookingOrdersWithItems() {
-    const orderTables = await fetchCookingOrders(); // itemsなしOrderTableのリスト
-    // 全orderIdの詳細（items入りOrder）を取得
-    const ordersWithItems = await Promise.all(
-        orderTables.map(orderTable => fetchOrder(orderTable.orderId))
-    );
-    return ordersWithItems.filter(order => order !== null);
-}
-
-async function initialize() {
-    const orders = await fetchCookingOrdersWithItems();
-    renderOrders(orders);
-
-    setInterval(async () => {
-        const latestOrders = await fetchCookingOrdersWithItems();
-        renderOrders(latestOrders);
-    }, POLLING_INTERVAL);
-}
-	
     /**
      * 注文のステータスを更新する
      * @param {string|number} orderId 更新する注文のID
@@ -83,13 +55,11 @@ async function initialize() {
      */
     async function patchOrderStatus(orderId, newStatus) {
         try {
-            // ★ 変更点: URLをOrderTable/{orderId}の形式に変更
             const response = await fetch(`${API_BASE_URL}/order/set/servingStatus/${orderId}/${newStatus}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                // ★ 変更点: statusをservingStatusに変更
                 body: JSON.stringify({
                     servingStatus: newStatus,
                 }),
@@ -120,57 +90,50 @@ async function initialize() {
     function createOrderCard(order) {
         const card = document.createElement('div');
         card.className = 'ticket-card';
-        // ★ 変更点: ticketIdをorderIdに変更
         card.dataset.orderId = order.orderId;
 
         const now = new Date();
-        // ★ 変更点: reserve_atをreservedTimeに変更
         const reservedTime = new Date(order.reservedTime);
         const diffMinutes = (reservedTime - now) / (1000 * 60);
         if (diffMinutes < 0) card.classList.add('is-overdue');
         else if (diffMinutes <= 10) card.classList.add('is-urgent');
 
-        // ★ 変更点: product_nameをitemNameに変更
-        //const itemsList = order.items.map(item => `<li>${item.itemName} x ${item.quantity}</li>`).join('');
-		const itemsList = (order.items || []).map(item => `<li>${item.itemName} x ${item.quantity}</li>`).join('');
+        const itemsList = (order.items || []).map(item => `<li>${item.itemName} x ${item.quantity}</li>`).join('');
 
-
-card.innerHTML = `
-    <div class="ticket-number">${order.orderId}</div>
-    <div class="order-details">
-        <div class="time-info">${getTimeInfoText(order.reservedTime)}</div>
-        <ul class="order-items">${itemsList}</ul>
-    </div>
-    <button class="action-button complete-btn">調理完了</button>
-    <div class="loading-spinner"></div>
-`;
+        card.innerHTML = `
+            <div class="ticket-number">${order.orderId}</div>
+            <div class="order-details">
+                <div class="time-info">${getTimeInfoText(order.reservedTime)}</div>
+                <ul class="order-items">${itemsList}</ul>
+            </div>
+            <button class="action-button complete-btn">調理完了</button>
+            <div class="loading-spinner"></div>
+        `;
         return card;
     }
 
     function renderOrders(orders) {
-		const waitingIds = Object.keys(cancellationTimers); // 追加
+        const waitingIds = Object.keys(cancellationTimers);
         upcomingContainer.innerHTML = '';
         overdueContainer.innerHTML = '';
         const now = new Date();
-        // ★ 変更点: reserve_atをreservedTimeに変更
         const upcomingOrders = orders.filter(o => new Date(o.reservedTime) >= now);
         const overdueOrders = orders.filter(o => new Date(o.reservedTime) < now);
-        // ★ 変更点: reserve_atをreservedTimeに変更
+
         upcomingOrders.sort((a, b) => new Date(a.reservedTime) - new Date(b.reservedTime));
         overdueOrders.sort((a, b) => new Date(a.reservedTime) - new Date(b.reservedTime));
 
-		function renderCard(order) {
-        	const card = createOrderCard(order);
-        	// 追加：「取り消し中」状態なら再現する
-        	if (waitingIds.includes(order.orderId.toString())) {
-            	const button = card.querySelector('.action-button');
-            	card.classList.add('waiting-cancellation');
-            	button.textContent = '取り消し';
-            	button.classList.add('cancel');
-        	}
-        	return card;
-    	}
-		
+        function renderCard(order) {
+            const card = createOrderCard(order);
+            if (waitingIds.includes(order.orderId.toString())) {
+                const button = card.querySelector('.action-button');
+                card.classList.add('waiting-cancellation');
+                button.textContent = '取り消し';
+                button.classList.add('cancel');
+            }
+            return card;
+        }
+
         upcomingOrders.forEach(order => upcomingContainer.appendChild(renderCard(order)));
         overdueOrders.forEach(order => overdueContainer.appendChild(renderCard(order)));
     }
@@ -187,7 +150,6 @@ card.innerHTML = `
         const card = button.closest('.ticket-card');
         if (!card) return;
 
-        // ★ 変更点: ticketIdをorderIdに変更
         const orderId = card.dataset.orderId;
 
         // (1) 「取り消し」ボタンがクリックされた場合
@@ -213,23 +175,19 @@ card.innerHTML = `
                 card.classList.add('loading');
                 button.style.display = 'none';
 
-                // ★ 変更点: patchTicketStatusをpatchOrderStatusに変更、ステータスを'READY'から1に変更
                 const result = await patchOrderStatus(orderId, 1);
 
                 card.classList.remove('loading');
 
                 if (result) {
-                    // API通信が成功したらカードを削除
                     card.remove();
                 } else {
-                    // 失敗した場合はボタンと表示を元に戻す
                     button.style.display = 'block';
                     card.classList.remove('waiting-cancellation');
                     button.textContent = '調理完了';
                     button.classList.remove('cancel');
                 }
                 delete cancellationTimers[orderId];
-            // ★ 変更点: タイマーを1分に変更
             }, 60000);
 
             cancellationTimers[orderId] = timerId;
