@@ -105,7 +105,7 @@ public class OrderService {
     public int updateServingStatusByOrderId(int orderId,int servingStatus) {
     	return mapper.updateServingStatusByOrderId(orderId,servingStatus);
     }
-    public int updatePaymentStatusByOrderId(int orderId,boolean paymentStatus) {
+    public int updatePaymentStatusByOrderId(int orderId,String paymentStatus) {
     	return mapper.updatePaymentStatusByOrderId(orderId,paymentStatus);
     }
     public int updatePaymentIdByOrderId(int orderId,String paymentId) {
