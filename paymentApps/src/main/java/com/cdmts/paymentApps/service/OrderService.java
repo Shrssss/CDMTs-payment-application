@@ -264,7 +264,7 @@ public class OrderService {
     
     
     /** orderの決済情報を更新し、orderを返す　*/
-    public OrderTable changePaymentStatus(int orderId,boolean paymentStatus) {
+    public OrderTable changePaymentStatus(int orderId,String paymentStatus) {
     	if(paymentStatus) {
     		int updated=updatePaymentStatusByOrderId(orderId,paymentStatus);
     		
