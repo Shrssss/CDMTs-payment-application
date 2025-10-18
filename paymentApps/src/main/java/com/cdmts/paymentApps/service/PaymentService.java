@@ -37,14 +37,18 @@ public class PaymentService {
 			
 			long amount=selectedOrder.getTotalAmount();
 			
+			String idempotencyKey=UUID.randomUUID().toString();
+			
 			var request=CreatePaymentRequest.builder()
 							.sourceId(sourceId)
-							.idempotencyKey(UUID.randomUUID().toString())
+							.idempotencyKey(idempotencyKey)
 							.amountMoney(
 								Money.builder()
 									.amount(amount)
 									.currency(Currency.valueOf("JPY")).build()
 							).locationId("LYP1FB67EDXBN").build(); //<- sandbox //LYP1FB67EDXBN
+			
+			orderService.updateIdempotencyKeyByOrderId(orderId,idempotencyKey);
 			
 			var response=squareClient.payments().create(request);
 			

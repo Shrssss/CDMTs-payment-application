@@ -40,4 +40,6 @@ public interface OrderMapper {
 	public int updatePaymentIdByOrderId(int orderId,String paymentId);
 	/** 決済状況の更新 */
 	public int updatePaymentStatusByOrderId(int orderId,boolean paymentStatus);
+	
+	public int updateIdempotencyKeyByOrderId(int orderId,String IdempotencyKey);
 }

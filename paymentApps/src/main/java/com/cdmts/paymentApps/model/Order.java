@@ -20,6 +20,8 @@ public class Order extends CommonData{
 	private String paymentId;
 	/** 決済状況 */
 	private Boolean paymentStatus;
+	
+	private String idempotencyKey;
 	/** 注文商品 */
 	private List<OrderItem>items=new ArrayList<>();
 	

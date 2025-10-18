@@ -19,6 +19,8 @@ public class OrderRequest {
 	private String paymentId;
 	/** 決済状況 */
 	private Boolean paymentStatus;
+	
+	private String idempotencyKey;
 	/** 注文商品 */
 	private List<OrderItemRequest>items=new ArrayList<>();
 	

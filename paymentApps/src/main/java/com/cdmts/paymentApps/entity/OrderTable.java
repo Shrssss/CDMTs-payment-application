@@ -17,4 +17,6 @@ public class OrderTable { // <-DB用
 	private String paymentId;
 	/** 決済状況 */
 	private Boolean paymentStatus;
+	
+	private String idempotencyKey;
 }

@@ -47,6 +47,10 @@ public class OrderService {
     	return mapper.selectServingStatusByOrderId(orderId);
     }
     
+    public int updateIdempotencyKeyByOrderId(@Param("orderId") int orderId,String idempotencyKey) {
+    	return mapper.updateIdempotencyKeyByOrderId(orderId,idempotencyKey);
+    }
+    
     public List<Order> selectOrdersByServingStatus(int servingStatus) {
     	
     	List<OrderTable> orderTable=mapper.selectOrdersByServingStatus(servingStatus);

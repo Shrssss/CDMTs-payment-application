@@ -13,6 +13,7 @@
         <result column="SERVING_STATUS" property="servingStatus"/>
         <result column="PAYMENTID" property="paymentId"/>
         <result column="PAYMENT_STATUS" property="paymentStatus"/>
+        <result column="IDEMPOTENCY_KEY" property="idempotencyKey"/>
     </resultMap>
 
     <!-- ORDER_ITEMマップ -->
@@ -34,7 +35,7 @@
 
 
     <select id="selectOrdersByOrderId" resultMap="orderMap" parameterType="int">
-        SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS
+        SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS, IDEMPOTENCY_KEY
         FROM ORDER_TABLE
         WHERE ORDERID = #{orderId}
     </select>
@@ -52,7 +53,7 @@
     </select>
 
     <select id="selectAllOrders" resultMap="orderMap">
-        SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS
+        SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS, IDEMPOTENCY_KEY
         FROM ORDER_TABLE
     </select>
 
@@ -68,7 +69,7 @@
     </select>
 
     <select id="selectOrdersByServingStatus" resultMap="orderMap" parameterType="int">
-        SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS
+        SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS, IDEMPOTENCY_KEY
         FROM ORDER_TABLE
         WHERE SERVING_STATUS = #{servingStatus}
     </select>
@@ -76,8 +77,8 @@
 
 
     <insert id="insertOrder" parameterType="com.cdmts.paymentApps.entity.OrderTable" useGeneratedKeys="true" keyProperty="orderId">
-        INSERT INTO ORDER_TABLE (ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS)
-        VALUES (#{orderDate}, #{reservedTime}, #{servingStatus}, #{paymentId}, #{paymentStatus})
+        INSERT INTO ORDER_TABLE (ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS, IDEMPOTENCY_KEY)
+        VALUES (#{orderDate}, #{reservedTime}, #{servingStatus}, #{paymentId}, #{paymentStatus}, #{idempotencyKey})
     </insert>
 
     <insert id="insertOrderItem" parameterType="com.cdmts.paymentApps.entity.OrderItemTable" useGeneratedKeys="true" keyProperty="orderItemId">
@@ -113,6 +114,12 @@
     <update id="updatePaymentIdByOrderId" parameterType="com.cdmts.paymentApps.entity.OrderTable">
     	UPDATE ORDER_TABLE
    		SET PAYMENTID = #{paymentId}
+   		WHERE ORDERID = #{orderId}
+    </update>
+    
+    <update id="updateIdempotencyKeyByOrderId" parameterType="com.cdmts.paymentApps.entity.OrderTable">
+    	UPDATE ORDER_TABLE
+   		SET PAYMENTID = #{idempotencyKey}
    		WHERE ORDERID = #{orderId}
     </update>
     
