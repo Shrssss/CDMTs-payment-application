@@ -88,9 +88,9 @@ public class PaymentService {
 		    result.setStatus(paymentDetails.getStatus().orElseThrow(()->new RuntimeException("Status is null")));
 		    result.setAmount(money.getAmount().orElseThrow(()->new RuntimeException("Amount is null")));
 		    result.setCurrency(money.getCurrency().toString());
-			
-		    boolean tf=(result.getStatus()=="COMPLETED")?true:false;
 		    
+						boolean tf=(result.getStatus().equals("COMPLETED"));
+
 		    orderService.updatePaymentIdByOrderId(orderId,paymentId.toString());
 		    orderService.updatePaymentStatusByOrderId(orderId,tf);
 		    
