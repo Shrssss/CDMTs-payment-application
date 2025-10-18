@@ -61,8 +61,6 @@ public class PaymentService {
 				
 				String newIdempotencyKey=UUID.randomUUID().toString();
 				
-				orderService.updateIdempotencyKeyByOrderId(orderId,newIdempotencyKey);
-				
 				var request=CreatePaymentRequest.builder()
 								.sourceId(sourceId)
 								.idempotencyKey(newIdempotencyKey)
@@ -94,6 +92,8 @@ public class PaymentService {
 				
 				Money money=paymentDetails.getAmountMoney()
 						.orElseThrow(()->new RuntimeException("AmountMoney is null"));
+				
+				orderService.updateIdempotencyKeyByOrderId(orderId,newIdempotencyKey);
 				
 				result.setPaymentId(paymentId);
 			    result.setStatus(paymentDetails.getStatus().orElseThrow(()->new RuntimeException("Status is null")));
