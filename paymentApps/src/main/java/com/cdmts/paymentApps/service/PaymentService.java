@@ -37,18 +37,28 @@ public class PaymentService {
 			
 			long amount=selectedOrder.getTotalAmount();
 			
-			String idempotencyKey=UUID.randomUUID().toString();
+			String existingKey=orderService.selectIdempotencyKeyByOrderId(orderId);
+			
+			if(orderService.selectPaymentStatusByOrderId(orderId)==true) {
+				throw new IllegalArgumentException("すでに決済が完了されています 注文番号:"+orderId);
+			}
+			
+			if(existingKey!=null&&!existingKey.isEmpty()) {
+				throw new IllegalArgumentException("すでに決済が作成されています 注文番号:"+orderId);
+			}
+			
+			String newIdempotencyKey=UUID.randomUUID().toString();
+			
+			orderService.updateIdempotencyKeyByOrderId(orderId,newIdempotencyKey);
 			
 			var request=CreatePaymentRequest.builder()
 							.sourceId(sourceId)
-							.idempotencyKey(idempotencyKey)
+							.idempotencyKey(newIdempotencyKey)
 							.amountMoney(
 								Money.builder()
 									.amount(amount)
 									.currency(Currency.valueOf("JPY")).build()
 							).locationId("LYP1FB67EDXBN").build(); //<- sandbox //LYP1FB67EDXBN
-			
-			orderService.updateIdempotencyKeyByOrderId(orderId,idempotencyKey);
 			
 			var response=squareClient.payments().create(request);
 			

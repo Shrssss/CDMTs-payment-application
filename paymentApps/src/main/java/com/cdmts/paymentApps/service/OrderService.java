@@ -51,6 +51,10 @@ public class OrderService {
     	return mapper.updateIdempotencyKeyByOrderId(orderId,idempotencyKey);
     }
     
+    public String selectIdempotencyKeyByOrderId(int orderId) {
+        return mapper.selectIdempotencyKeyByOrderId(orderId);
+    }
+    
     public List<Order> selectOrdersByServingStatus(int servingStatus) {
     	
     	List<OrderTable> orderTable=mapper.selectOrdersByServingStatus(servingStatus);
@@ -101,6 +105,11 @@ public class OrderService {
     	
     	return orders;
     }
+    
+    public boolean selectPaymentStatusByOrderId(int orderId) {
+    	return mapper.selectPaymentStatusByOrderId(orderId);
+    }
+    
     
     public int updateItemAvailabilityByItemId(int itemId,boolean available) {
     	return mapper.updateItemAvailabilityByItemId(itemId,available);

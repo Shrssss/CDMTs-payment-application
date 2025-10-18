@@ -25,6 +25,11 @@ public interface OrderMapper {
 	/** servingStatusでorderを取得 */
 	public List<OrderTable> selectOrdersByServingStatus(int servingStatus);
 	
+	public Boolean selectPaymentStatusByOrderId(int orderId);
+	
+	public String selectIdempotencyKeyByOrderId(int orderId);
+
+	
 	/** 注文を登録 */
 	public int insertOrder(OrderTable order);
 	/** 注文商品を登録 */
@@ -42,4 +47,5 @@ public interface OrderMapper {
 	public int updatePaymentStatusByOrderId(int orderId,boolean paymentStatus);
 	
 	public int updateIdempotencyKeyByOrderId(int orderId,String IdempotencyKey);
+	
 }

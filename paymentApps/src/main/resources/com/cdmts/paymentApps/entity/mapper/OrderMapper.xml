@@ -74,6 +74,23 @@
         WHERE SERVING_STATUS = #{servingStatus}
     </select>
 
+	<select id="selectPaymentStatusByOrderId" resultType="boolean" parameterType="int">
+        SELECT PAYMENT_STATUS
+        FROM ORDER_TABLE
+        WHERE ORDERID = #{orderId}
+    </select>
+
+
+
+	<select id="selectIdempotencyKeyByOrderId" resultType="String" parameterType="int">
+   		 SELECT IDEMPOTENCY_KEY
+   		 FROM ORDER_TABLE
+    	WHERE ORDERID = #{orderId}
+	</select>
+    
+    
+
+
 
 
     <insert id="insertOrder" parameterType="com.cdmts.paymentApps.entity.OrderTable" useGeneratedKeys="true" keyProperty="orderId">
@@ -91,14 +108,15 @@
         VALUES (#{itemId}, #{itemName}, #{price}, #{available})
     </insert>
 
+
+
+
     <update id="updateItemAvailabilityByItemId" parameterType="com.cdmts.paymentApps.model.Item">
         UPDATE ITEM_TABLE
         SET AVAILABLE = #{available}
         WHERE ITEMID = #{itemId}
     </update>
-
-
-
+    
     <update id="updateServingStatusByOrderId" parameterType="com.cdmts.paymentApps.entity.OrderTable">
         UPDATE ORDER_TABLE
         SET SERVING_STATUS = #{servingStatus}
@@ -119,7 +137,7 @@
     
     <update id="updateIdempotencyKeyByOrderId" parameterType="com.cdmts.paymentApps.entity.OrderTable">
     	UPDATE ORDER_TABLE
-   		SET PAYMENTID = #{idempotencyKey}
+   		SET IDEMPOTENCY_KEY = #{idempotencyKey}
    		WHERE ORDERID = #{orderId}
     </update>
     
