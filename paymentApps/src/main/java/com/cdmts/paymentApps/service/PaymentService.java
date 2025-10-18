@@ -31,6 +31,8 @@ public class PaymentService {
 		try {
 			Order selectedOrder=orderService.getOrder(orderId);
 			
+			boolean hasKeyError=false;
+			
 			if(selectedOrder==null) {
 				throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
 			}
@@ -40,11 +42,11 @@ public class PaymentService {
 			String existingKey=orderService.selectIdempotencyKeyByOrderId(orderId);
 			
 			if(orderService.selectPaymentStatusByOrderId(orderId)==true) {
-				throw new IllegalArgumentException("すでに決済が完了されています 注文番号:"+orderId);
+				hasKeyError=true;
 			}
 			
 			if(existingKey!=null&&!existingKey.isEmpty()) {
-				throw new IllegalArgumentException("すでに決済が作成されています 注文番号:"+orderId);
+				hasKeyError=true;
 			}
 			
 			String newIdempotencyKey=UUID.randomUUID().toString();
@@ -88,6 +90,7 @@ public class PaymentService {
 		    result.setStatus(paymentDetails.getStatus().orElseThrow(()->new RuntimeException("Status is null")));
 		    result.setAmount(money.getAmount().orElseThrow(()->new RuntimeException("Amount is null")));
 		    result.setCurrency(money.getCurrency().toString());
+		    result.setHasKeyError(hasKeyError);
 		    
 						boolean tf=(result.getStatus().equals("COMPLETED"));
 

@@ -11,4 +11,6 @@ public class PaymentRequest {
 	    private Long amount;
 	    /** 決済通貨 */
 	    private String currency;
+	    
+	    private boolean hasKeyError;
 }
