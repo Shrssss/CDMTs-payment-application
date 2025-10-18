@@ -31,6 +31,8 @@ public class PaymentService {
 		try {
 			Order selectedOrder=orderService.getOrder(orderId);
 			
+			PaymentRequest result=new PaymentRequest();
+			
 			boolean hasKeyError=false;
 			
 			if(selectedOrder==null) {
@@ -49,55 +51,65 @@ public class PaymentService {
 				hasKeyError=true;
 			}
 			
-			String newIdempotencyKey=UUID.randomUUID().toString();
-			
-			orderService.updateIdempotencyKeyByOrderId(orderId,newIdempotencyKey);
-			
-			var request=CreatePaymentRequest.builder()
-							.sourceId(sourceId)
-							.idempotencyKey(newIdempotencyKey)
-							.amountMoney(
-								Money.builder()
-									.amount(amount)
-									.currency(Currency.valueOf("JPY")).build()
-							).locationId("LYP1FB67EDXBN").build(); //<- sandbox //LYP1FB67EDXBN
-			
-			var response=squareClient.payments().create(request);
-			
-			if(response.getErrors()!=null&&!response.getErrors().isEmpty()) {
-				throw new RuntimeException("Square API Error: "+response.getErrors());
+			if(hasKeyError) {
+				
+				result.setHasKeyError(hasKeyError);
+				
+				return result;
+				
+			}else {
+				
+				String newIdempotencyKey=UUID.randomUUID().toString();
+				
+				orderService.updateIdempotencyKeyByOrderId(orderId,newIdempotencyKey);
+				
+				var request=CreatePaymentRequest.builder()
+								.sourceId(sourceId)
+								.idempotencyKey(newIdempotencyKey)
+								.amountMoney(
+									Money.builder()
+										.amount(amount)
+										.currency(Currency.valueOf("JPY")).build()
+								).locationId("LYP1FB67EDXBN").build(); //<- sandbox //LYP1FB67EDXBN
+				
+				var response=squareClient.payments().create(request);
+				
+				if(response.getErrors()!=null&&!response.getErrors().isEmpty()) {
+					throw new RuntimeException("Square API Error: "+response.getErrors());
+				}
+				
+				Payment createdPayment=response.getPayment()
+						.orElseThrow(()->new RuntimeException("Payment creation returned null"));
+				 
+				String paymentId=createdPayment.getId()
+						.orElseThrow(() -> new RuntimeException("paymentId is null"));
+						
+				GetPaymentResponse getResponse=squareClient.payments().get(
+						GetPaymentsRequest.builder()
+								.paymentId(paymentId).build()
+						);		
+					
+				Payment paymentDetails=getResponse.getPayment()
+							.orElseThrow(()->new RuntimeException("Payment not found"));
+				
+				Money money=paymentDetails.getAmountMoney()
+						.orElseThrow(()->new RuntimeException("AmountMoney is null"));
+				
+				result.setPaymentId(paymentId);
+			    result.setStatus(paymentDetails.getStatus().orElseThrow(()->new RuntimeException("Status is null")));
+			    result.setAmount(money.getAmount().orElseThrow(()->new RuntimeException("Amount is null")));
+			    result.setCurrency(money.getCurrency().toString());
+			    result.setHasKeyError(hasKeyError);
+			    
+							boolean tf=(result.getStatus().equals("COMPLETED"));
+
+			    orderService.updatePaymentIdByOrderId(orderId,paymentId.toString());
+			    orderService.updatePaymentStatusByOrderId(orderId,tf);
+			    
+				return result;
 			}
 			
-			Payment createdPayment=response.getPayment()
-					.orElseThrow(()->new RuntimeException("Payment creation returned null"));
-			 
-			String paymentId=createdPayment.getId()
-					.orElseThrow(() -> new RuntimeException("paymentId is null"));
-					
-			GetPaymentResponse getResponse=squareClient.payments().get(
-					GetPaymentsRequest.builder()
-							.paymentId(paymentId).build()
-					);		
-				
-			Payment paymentDetails=getResponse.getPayment()
-						.orElseThrow(()->new RuntimeException("Payment not found"));
-			
-			Money money=paymentDetails.getAmountMoney()
-					.orElseThrow(()->new RuntimeException("AmountMoney is null"));
-			
-			PaymentRequest result=new PaymentRequest();
-			result.setPaymentId(paymentId);
-		    result.setStatus(paymentDetails.getStatus().orElseThrow(()->new RuntimeException("Status is null")));
-		    result.setAmount(money.getAmount().orElseThrow(()->new RuntimeException("Amount is null")));
-		    result.setCurrency(money.getCurrency().toString());
-		    result.setHasKeyError(hasKeyError);
-		    
-						boolean tf=(result.getStatus().equals("COMPLETED"));
 
-		    orderService.updatePaymentIdByOrderId(orderId,paymentId.toString());
-		    orderService.updatePaymentStatusByOrderId(orderId,tf);
-		    
-			return result;
 			
 		}catch(SquareApiException e) {
 			throw new RuntimeException("Square API Exception: "+e.getMessage(),e);
