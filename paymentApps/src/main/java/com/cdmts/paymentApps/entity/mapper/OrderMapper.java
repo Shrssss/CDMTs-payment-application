@@ -1,6 +1,7 @@
 package com.cdmts.paymentApps.entity.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.cdmts.paymentApps.entity.OrderItemTable;
 import com.cdmts.paymentApps.entity.OrderTable;
@@ -46,6 +47,6 @@ public interface OrderMapper {
 	/** 決済状況の更新 */
 	public int updatePaymentStatusByOrderId(int orderId,boolean paymentStatus);
 	
-	public int updateIdempotencyKeyByOrderId(int orderId,String IdempotencyKey);
+	public int updateIdempotencyKeyByOrderId(@Param("orderId") int orderId,@Param("idempotencyKey") String idempotencyKey);
 	
 }
