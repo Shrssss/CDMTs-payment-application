@@ -4,15 +4,15 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.cdmts.paymentApps.entity.OrderItemTable;
+import com.cdmts.paymentApps.model.entity.OrderItem;
 
 @Mapper
 public interface OrderItemMapper {
 	
 	/** オーダーIDで注文商品の明細を取得 */
-	public List<OrderItemTable> selectOrderItemsByOrderId(int orderId);
+	public List<OrderItem> selectOrderItemsByOrderId(Integer orderId);
 	
 	/** 注文商品を登録 */
-	public int insertOrderItem(OrderItemTable item);
+	public int insertOrderItem(OrderItem item);
 
 }

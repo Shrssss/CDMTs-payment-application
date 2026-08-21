@@ -3,9 +3,7 @@ package com.cdmts.paymentApps.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.cdmts.paymentApps.entity.OrderItemTable;
-import com.cdmts.paymentApps.entity.OrderTable;
-import com.cdmts.paymentApps.model.entity.Item;
+import com.cdmts.paymentApps.model.entity.Order;
 
 import java.util.List;
 
@@ -13,30 +11,30 @@ import java.util.List;
 public interface OrderMapper {
 	
 	/** オーダーIDでオーダーの情報を取得 */
-	public OrderTable selectOrdersByOrderId(int orderId);
+	public Order selectOrdersByOrderId(Integer orderId);
 	/** すべてのオーダーを取得 */
-	public List<OrderTable> selectAllOrders();
+	public List<Order> selectAllOrders();
 	/** オーダーIDで受け渡しを取得 */
-	public Integer selectServingStatusByOrderId(int orderId);
+	public Integer selectServingStatusByOrderId(Integer orderId);
 	/** servingStatusでorderを取得 */
-	public List<OrderTable> selectOrdersByServingStatus(int servingStatus);
+	public List<Order> selectOrdersByServingStatus(Integer servingStatus);
 	
-	public Boolean selectPaymentStatusByOrderId(int orderId);
+	public Boolean selectPaymentStatusByOrderId(Integer orderId);
 	
-	public String selectIdempotencyKeyByOrderId(int orderId);
+	public String selectIdempotencyKeyByOrderId(Integer orderId);
 
 	
 	/** 注文を登録 */
-	public int insertOrder(OrderTable order);
+	public int insertOrder(Order order);
 	
 
 	/** 受け渡し状態の変更 */
-	public int updateServingStatusByOrderId(int orderId,int servingStatus);
+	public int updateServingStatusByOrderId(Integer orderId,Integer servingStatus);
 	/** paymentIdの挿入 */
-	public int updatePaymentIdByOrderId(int orderId,String paymentId);
+	public int updatePaymentIdByOrderId(Integer orderId,String paymentId);
 	/** 決済状況の更新 */
-	public int updatePaymentStatusByOrderId(int orderId,boolean paymentStatus);
+	public int updatePaymentStatusByOrderId(Integer orderId,Boolean paymentStatus);
 	
-	public int updateIdempotencyKeyByOrderId(@Param("orderId") int orderId,@Param("idempotencyKey") String idempotencyKey);
+	public int updateIdempotencyKeyByOrderId(@Param("orderId") Integer orderId,@Param("idempotencyKey") String idempotencyKey);
 	
 }
