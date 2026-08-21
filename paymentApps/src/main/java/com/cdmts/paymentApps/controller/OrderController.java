@@ -3,6 +3,7 @@ package com.cdmts.paymentApps.controller;
 import org.springframework.web.bind.annotation.*;
 
 import com.cdmts.paymentApps.entity.OrderTable;
+import com.cdmts.paymentApps.model.dto.OrderCreateRequest;
 import com.cdmts.paymentApps.model.dto.OrderRequest;
 import com.cdmts.paymentApps.model.entity.Item;
 import com.cdmts.paymentApps.model.entity.Order;
@@ -13,56 +14,102 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/orders")
 @CrossOrigin(origins = "https://cdmts-pay.codemates.net")
 @RequiredArgsConstructor
 public class OrderController {
 	
-	private final OrderService service;
+	private final OrderService orderService;
     
-    @PostMapping("/order/set") //フロントから受け取ったorder.jsonをDB登録
-    public OrderTable createOrder(@RequestBody OrderRequest request) {
-    	return service.createOrder(request);
-    }
-    
-    @GetMapping("/order/get/byorderId/{orderId}") //order.jsonをフロントに送信
-    public Order getOrder(@PathVariable int orderId) {
-    	return service.getOrder(orderId);
-    }
-    
-    @PostMapping("/order/set/servingStatus/{orderId}/{servingStatus}") //orderId,tfをもとにservingStatusを更新 （処理内容 (tf)? statusを次の状態へ : statusを前の状態へ）
-    public OrderTable changeServingStatus(@PathVariable int orderId,@PathVariable int servingStatus) {
-    	return service.changeServingStatus(orderId,servingStatus);
-    }
-    
-	@PostMapping("/order/set/paymentStatus/{orderId}/{paymentStatus}")
-	public OrderTable changePaymentStatus(@PathVariable int orderId,@PathVariable boolean paymentStatus) {
-		return service.changePaymentStatus(orderId,paymentStatus);
-	}
-     
-    @GetMapping("/order/get/status/{orderId}") //servingStatusをフロントに送信
-    public int selectServingStatusByOrderId(@PathVariable int orderId) {
-    	return service.selectServingStatusByOrderId(orderId);
-    }
-    
-    @GetMapping("/items/get/byitemId/{itemId}") //Item.jsonをフロントに送信
-    public Item selectItemByItemId(@PathVariable int itemId) {
-    	return service.selectItemByItemId(itemId);
-    }
-    
-    @GetMapping("/item/get/allItems")
-    public List<Item> selectAllItems(){
-    	return service.selectAllItems();
-    }
-
-	@PostMapping("/items/set/available/{itemId}/{available}") //itemId,availableをもとにItemAvailを更新
-	public List<Item> toggleAvailablity(@PathVariable int itemId,@PathVariable boolean available) {
-		return service.toggleAvailablity(itemId,available);
-	}
 	
-	@GetMapping("order/get/bystatus/{servingStatus}") //servingStatusをもとにorderをフロントに送信
-	public List<Order> selectOrdersByServingStatus(@PathVariable int servingStatus){
-		return service.selectOrdersByServingStatus(servingStatus);
+    /*
+     * 注文作成
+     * 
+     * メソッド名 	: createOrder
+     * 戻り値		: Long orderId
+     * 引数		: OrderCreateRequest
+     * 
+     * 		POST /api/orders/set
+     * 
+     */
+    @PostMapping("/set")
+    public Long createOrder(@RequestBody OrderCreateRequest orderDto) {
+    	return orderService.createOrder(orderDto);
+    }
+    
+    /*
+     * 注文取得
+     * 
+     * メソッド名 	: getOrders
+     * 戻り値		: List<OrderResponse>
+     * 引数		: List<Long> orderIds
+     * 
+     * 		Get /api/orders/get/byOrderIds
+     * 
+     */
+    @GetMapping("/get/byOrderIds")
+    public List<OrderResponse> getOrders(@RequestParam List<Long> orderIds) {
+    	return orderService.getOrder(orderId);
+    }
+    
+    /*
+     * 提供状態更新
+     * 
+     * メソッド名 	: updateServingStatus
+     * 戻り値		: Long orderId
+     * 引数		: Long orderId, Short servingStatus
+     * 
+     * 		PUT /api/orders/update/servingStatus/{orderId}/{servingStatus}
+     * 
+     */
+    @PutMapping("/update/servingStatus/{orderId}/{servingStatus}")
+    public Long updateServingStatus(@PathVariable Long orderId,@PathVariable Short servingStatus) {
+    	return orderService.changeServingStatus(orderId,servingStatus);
+    }
+    
+    /*
+     * 提供状態更新
+     * 
+     * メソッド名 	: updatePaymentStatus
+     * 戻り値		: Long orderId
+     * 引数		: Long orderId, Boolean paymentStatus
+     * 
+     * 		PUT /api/orders/update/paymentStatus/{orderId}/{paymentStatus}
+     * 
+     */
+	@PutMapping("/update/paymentStatus/{orderId}/{paymentStatus}")
+	public Long updatePaymentStatus(@PathVariable Long orderId,@PathVariable Boolean paymentStatus) {
+		return orderService.changePaymentStatus(orderId,paymentStatus);
+	}
+    
+    /*
+     * 注文からの提供状態取得
+     * 
+     * メソッド名 	: getServingStatusByOrderIds
+     * 戻り値		: Short servingStatus
+     * 引数		: List<Long> orderIds
+     * 
+     * 		GET /api/orders/get/servingStatus
+     * 
+     */
+    @GetMapping("/get/servingStatus")
+    public Short getServingStatusByOrderIds(@RequestParam List<Long> orderIds) {
+    	return orderService.selectServingStatusByOrderId(orderId);
+    }
+	
+    /*
+     * 提供状態からの注文取得
+     * 
+     * メソッド名 	: getServingStatusByOrderIds
+     * 戻り値		: Short servingStatus
+     * 引数		: List<Long> orderIds
+     * 
+     * 		GET /api/orders/get/servingStatus
+     * 
+     */
+	@GetMapping("/get/byServingStatus/{servingStatus}")
+	public List<OrderResponse> selectOrdersByServingStatus(@PathVariable Short servingStatus){
+		return orderService.selectOrdersByServingStatus(servingStatus);
 	}
 	
 }

@@ -7,13 +7,13 @@ import java.time.LocalDateTime;
 public class Order{
 	
 	/** 注文番号 */
-	private Integer orderId;
+	private Long orderId;
 	/** 注文日時 */
 	private LocalDateTime orderDate;
 	/** 予約時間 */
 	private LocalDateTime reservedTime;
 	/** 受け渡しの状態(0,1,2) */
-	private Integer servingStatus;
+	private Short servingStatus;
 	/** 決済番号(SquareApi依存) */
 	private String paymentId;
 	/** 決済状況 */

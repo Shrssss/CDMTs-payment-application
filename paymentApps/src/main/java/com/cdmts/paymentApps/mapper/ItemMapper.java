@@ -10,7 +10,7 @@ import com.cdmts.paymentApps.model.entity.Item;
 public interface ItemMapper {
 
 	/** アイテムIDで商品を取得 */
-	public Item selectItemByItemId(Integer itemId);
+	public Item selectItemByItemId(Long itemId);
 	/** すべての商品を取得 */
 	public List<Item> selectAllItems();
 	
@@ -18,6 +18,6 @@ public interface ItemMapper {
 	public int insertItem(Item item);
 	
 	/** 在庫情報を更新 */
-	public int updateItemAvailabilityByItemId(Integer itemId,Boolean available);
+	public int updateItemAvailabilityByItemId(Long itemId,Boolean available);
 	
 }

@@ -1,11 +1,7 @@
 package com.cdmts.paymentApps.model.dto;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
-import lombok.Data;
-@Data
 public class OrderRequest {
 	/** 注文番号（主キー） */
 	private Integer orderId;
@@ -21,21 +17,5 @@ public class OrderRequest {
 	private Boolean paymentStatus;
 	
 	private String idempotencyKey;
-	/** 注文商品 */
-	private List<OrderItemRequest>items=new ArrayList<>();
-	
-	@Data
-	public static class OrderItemRequest {
-	    /** 商品番号（外部キー） */
-	    private Integer itemId;
-		/** 商品名 */
-		private String itemName;
-		/** 単価 */
-		private Integer price;
-		/** 在庫の有無*/
-		private Boolean available;
-		/** 注文量 */
-		private Integer quantity;
-	}
 	
 }

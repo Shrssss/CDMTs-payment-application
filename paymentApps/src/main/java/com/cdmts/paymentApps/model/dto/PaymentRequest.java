@@ -1,7 +1,5 @@
 package com.cdmts.paymentApps.model.dto;
 
-import lombok.Data;
-@Data
 public class PaymentRequest {
 		/** 決済番号 */
 	    private String paymentId;

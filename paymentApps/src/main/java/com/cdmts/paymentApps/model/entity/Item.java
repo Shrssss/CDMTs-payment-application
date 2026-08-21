@@ -5,7 +5,7 @@ import lombok.Data;
 public class Item {
 	
 	/** 商品番号 */
-	private Integer itemId;
+	private Long itemId;
 	/** 商品名 */
 	private String itemName;
 	/** 単価 */

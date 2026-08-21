@@ -10,7 +10,7 @@ import com.cdmts.paymentApps.model.entity.OrderItem;
 public interface OrderItemMapper {
 	
 	/** オーダーIDで注文商品の明細を取得 */
-	public List<OrderItem> selectOrderItemsByOrderId(Integer orderId);
+	public List<OrderItem> selectOrderItemsByOrderId(Long orderId);
 	
 	/** 注文商品を登録 */
 	public int insertOrderItem(OrderItem item);

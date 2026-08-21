@@ -5,11 +5,11 @@ import lombok.Data;
 public class OrderItem { 
 
 	/** 商品明細番号 */
-	private Integer orderItemId;
+	private Long orderItemId;
 	/** 注文番号（外部キー） */
-	private Integer orderId;
+	private Long orderId;
     /** 商品番号（外部キー） */
-    private Integer itemId;
+    private Long itemId;
 	/** 注文量 */
 	private Integer quantity;
 	

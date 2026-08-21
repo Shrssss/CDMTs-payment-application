@@ -11,17 +11,17 @@ import java.util.List;
 public interface OrderMapper {
 	
 	/** オーダーIDでオーダーの情報を取得 */
-	public Order selectOrdersByOrderId(Integer orderId);
+	public Order selectOrdersByOrderId(Long orderId);
 	/** すべてのオーダーを取得 */
 	public List<Order> selectAllOrders();
 	/** オーダーIDで受け渡しを取得 */
-	public Integer selectServingStatusByOrderId(Integer orderId);
+	public Short selectServingStatusByOrderId(Long orderId);
 	/** servingStatusでorderを取得 */
-	public List<Order> selectOrdersByServingStatus(Integer servingStatus);
+	public List<Order> selectOrdersByServingStatus(Short servingStatus);
 	
-	public Boolean selectPaymentStatusByOrderId(Integer orderId);
+	public Boolean selectPaymentStatusByOrderId(Long orderId);
 	
-	public String selectIdempotencyKeyByOrderId(Integer orderId);
+	public String selectIdempotencyKeyByOrderId(Long orderId);
 
 	
 	/** 注文を登録 */
@@ -29,12 +29,12 @@ public interface OrderMapper {
 	
 
 	/** 受け渡し状態の変更 */
-	public int updateServingStatusByOrderId(Integer orderId,Integer servingStatus);
+	public int updateServingStatusByOrderId(Long orderId,Short servingStatus);
 	/** paymentIdの挿入 */
-	public int updatePaymentIdByOrderId(Integer orderId,String paymentId);
+	public int updatePaymentIdByOrderId(Long orderId,String paymentId);
 	/** 決済状況の更新 */
-	public int updatePaymentStatusByOrderId(Integer orderId,Boolean paymentStatus);
+	public int updatePaymentStatusByOrderId(Long orderId,Boolean paymentStatus);
 	
-	public int updateIdempotencyKeyByOrderId(@Param("orderId") Integer orderId,@Param("idempotencyKey") String idempotencyKey);
+	public int updateIdempotencyKeyByOrderId(@Param("orderId") Long orderId,@Param("idempotencyKey") String idempotencyKey);
 	
 }
