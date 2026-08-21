@@ -101,8 +101,8 @@ public class OrderController {
      * 提供状態からの注文取得
      * 
      * メソッド名 	: getServingStatusByOrderIds
-     * 戻り値		: Short servingStatus
-     * 引数		: List<Long> orderIds
+     * 戻り値		: List<OrderResponse> orderResponses
+     * 引数		: Short servingStatus
      * 
      * 		GET /api/orders/get/servingStatus
      * 
