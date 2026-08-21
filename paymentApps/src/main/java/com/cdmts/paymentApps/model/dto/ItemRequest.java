@@ -1,4 +1,4 @@
-package com.cdmts.paymentApps.dto;
+package com.cdmts.paymentApps.model.dto;
 
 import lombok.Data;
 @Data

@@ -1,3 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="mapper.ItemMapper"></mapper>
+<mapper namespace="com.cdmts.paymentApps.mapper.ItemMapper">
+
+    <!-- ITEMマップ -->
+    <resultMap id="itemMap" type="com.cdmts.paymentApps.model.entity.Item">
+        <id column="ITEMID" property="itemId"/>
+        <result column="ITEM_NAME" property="itemName"/>
+        <result column="PRICE" property="price"/>
+        <result column="AVAILABLE" property="available"/>
+    </resultMap>
+
+
+
+    <select id="selectItemByItemId" resultMap="itemMap" parameterType="int">
+        SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
+        FROM ITEM_TABLE
+        WHERE ITEMID = #{itemId}
+    </select>
+
+	<select id="selectAllItems" resultMap="itemMap">
+        SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
+        FROM ITEM_TABLE
+    </select>
+
+
+
+    <insert id="insertItem" parameterType="com.cdmts.paymentApps.model.entity.Item">
+        INSERT INTO ITEM_TABLE (ITEMID, ITEM_NAME, PRICE, AVAILABLE)
+        VALUES (#{itemId}, #{itemName}, #{price}, #{available})
+    </insert>
+    
+    
+    
+    <update id="updateItemAvailabilityByItemId" parameterType="com.cdmts.paymentApps.model.entity.Item">
+        UPDATE ITEM_TABLE
+        SET AVAILABLE = #{available}
+        WHERE ITEMID = #{itemId}
+    </update>    
+
+</mapper>

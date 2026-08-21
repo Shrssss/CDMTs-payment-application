@@ -7,13 +7,13 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cdmts.paymentApps.dto.OrderRequest;
 import com.cdmts.paymentApps.entity.OrderItemTable;
 import com.cdmts.paymentApps.entity.OrderTable;
-import com.cdmts.paymentApps.entity.mapper.OrderMapper;
-import com.cdmts.paymentApps.model.Item;
-import com.cdmts.paymentApps.model.Order;
-import com.cdmts.paymentApps.model.OrderItem;
+import com.cdmts.paymentApps.mapper.OrderMapper;
+import com.cdmts.paymentApps.model.dto.OrderRequest;
+import com.cdmts.paymentApps.model.entity.Item;
+import com.cdmts.paymentApps.model.entity.Order;
+import com.cdmts.paymentApps.model.entity.OrderItem;
 @Transactional
 @Service
 public class OrderService {

@@ -1,4 +1,4 @@
-package com.cdmts.paymentApps.dto;
+package com.cdmts.paymentApps.model.dto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package com.cdmts.paymentApps.model;
+package com.cdmts.paymentApps.model.entity;
 
 import lombok.Data;
 @Data
@@ -18,10 +18,10 @@ public class OrderItem {
 	private Boolean available;
 	/** 注文量 */
 	private Integer quantity;
-	
-	private Item item;
-	
-	public int getTotalPrice() {
-		return (item!=null?item.getPrice():0)*quantity;
-	}
+//	
+//	private Item item;
+//	
+//	public int getTotalPrice() {
+//		return (item!=null?item.getPrice():0)*quantity;
+//	}
 }

@@ -1,3 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="mapper.OrderItemMapper"></mapper>
+<mapper namespace="com.cdmts.paymentApps.mapper.OrderItemMapper">
+
+    <!-- ORDER_ITEMマップ -->
+    <resultMap id="orderItemMap" type="com.cdmts.paymentApps.model.entity.OrderItem">
+        <id column="ORDER_ITEM_ID" property="orderItemId"/>
+        <result column="ORDERID" property="orderId"/>
+        <result column="ITEMID" property="itemId"/>
+        <result column="QUANTITY" property="quantity"/>
+    </resultMap>
+    
+    
+    
+	<select id="selectOrderItemsByOrderId" resultMap="orderItemMap" parameterType="int">
+        SELECT ORDER_ITEM_ID, ORDERID, ITEMID, QUANTITY
+        FROM ORDER_ITEM_TABLE
+        WHERE ORDERID = #{orderId}
+    </select>
+    
+    
+    
+    <insert id="insertOrderItem" parameterType="com.cdmts.paymentApps.model.entity.OrderItem" useGeneratedKeys="true" keyProperty="orderItemId">
+        INSERT INTO ORDER_ITEM_TABLE (ITEMID, ORDERID, QUANTITY)
+        VALUES (#{itemId}, #{orderId}, #{quantity})
+    </insert>
+
+</mapper>

@@ -6,8 +6,8 @@ import java.util.HashMap;
 
 import org.springframework.stereotype.Service;
 
-import com.cdmts.paymentApps.dto.PaymentRequest;
-import com.cdmts.paymentApps.model.Order;
+import com.cdmts.paymentApps.model.dto.PaymentRequest;
+import com.cdmts.paymentApps.model.entity.Order;
 import com.squareup.square.SquareClient;
 import com.squareup.square.types.Money;
 import com.squareup.square.types.Currency;

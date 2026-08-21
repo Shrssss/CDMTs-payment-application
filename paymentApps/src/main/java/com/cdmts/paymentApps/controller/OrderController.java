@@ -2,10 +2,10 @@ package com.cdmts.paymentApps.controller;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.cdmts.paymentApps.dto.OrderRequest;
 import com.cdmts.paymentApps.entity.OrderTable;
-import com.cdmts.paymentApps.model.Item;
-import com.cdmts.paymentApps.model.Order;
+import com.cdmts.paymentApps.model.dto.OrderRequest;
+import com.cdmts.paymentApps.model.entity.Item;
+import com.cdmts.paymentApps.model.entity.Order;
 import com.cdmts.paymentApps.service.OrderService;
 
 import lombok.RequiredArgsConstructor;

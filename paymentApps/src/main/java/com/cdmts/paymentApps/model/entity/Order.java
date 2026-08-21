@@ -1,9 +1,12 @@
-package com.cdmts.paymentApps.model;
+package com.cdmts.paymentApps.model.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.cdmts.paymentApps.model.CommonData;
+
 import java.util.ArrayList;
 @Data
 @EqualsAndHashCode(callSuper=true)
@@ -22,11 +25,11 @@ public class Order extends CommonData{
 	private Boolean paymentStatus;
 	
 	private String idempotencyKey;
-	/** 注文商品 */
-	private List<OrderItem>items=new ArrayList<>();
-	
-	 /** 注文合計金額 */
-	public int getTotalAmount() {
-		return items.stream().mapToInt(OrderItem::getTotalPrice).sum();
-	}
+//	/** 注文商品 */
+//	private List<OrderItem>items=new ArrayList<>();
+//	
+//	 /** 注文合計金額 */
+//	public int getTotalAmount() {
+//		return items.stream().mapToInt(OrderItem::getTotalPrice).sum();
+//	}
 }
