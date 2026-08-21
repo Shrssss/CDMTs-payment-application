@@ -2,11 +2,8 @@ package com.cdmts.paymentApps.controller;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.cdmts.paymentApps.entity.OrderTable;
 import com.cdmts.paymentApps.model.dto.OrderCreateRequest;
-import com.cdmts.paymentApps.model.dto.OrderRequest;
-import com.cdmts.paymentApps.model.entity.Item;
-import com.cdmts.paymentApps.model.entity.Order;
+import com.cdmts.paymentApps.model.dto.OrderResponse;
 import com.cdmts.paymentApps.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
@@ -48,8 +45,8 @@ public class OrderController {
      * 
      */
     @GetMapping("/get/byOrderIds")
-    public List<OrderResponse> getOrders(@RequestParam List<Long> orderIds) {
-    	return orderService.getOrder(orderId);
+    public List<OrderResponse> getOrdersByIds(@RequestParam List<Long> orderIds) {
+    	return orderService.getOrdersByIds(orderIds);
     }
     
     /*
@@ -64,7 +61,7 @@ public class OrderController {
      */
     @PutMapping("/update/servingStatus/{orderId}/{servingStatus}")
     public Long updateServingStatus(@PathVariable Long orderId,@PathVariable Short servingStatus) {
-    	return orderService.changeServingStatus(orderId,servingStatus);
+    	return orderService.updateServingStatus(orderId,servingStatus);
     }
     
     /*
@@ -79,7 +76,7 @@ public class OrderController {
      */
 	@PutMapping("/update/paymentStatus/{orderId}/{paymentStatus}")
 	public Long updatePaymentStatus(@PathVariable Long orderId,@PathVariable Boolean paymentStatus) {
-		return orderService.changePaymentStatus(orderId,paymentStatus);
+		return orderService.updatePaymentStatus(orderId,paymentStatus);
 	}
     
     /*
@@ -89,12 +86,12 @@ public class OrderController {
      * 戻り値		: Short servingStatus
      * 引数		: List<Long> orderIds
      * 
-     * 		GET /api/orders/get/servingStatus
+     * 		GET /api/orders/get/servingStatus/{orderId}
      * 
      */
     @GetMapping("/get/servingStatus")
-    public Short getServingStatusByOrderIds(@RequestParam List<Long> orderIds) {
-    	return orderService.selectServingStatusByOrderId(orderId);
+    public Short getServingStatusByOrderId(@PathVariable Long orderId) {
+    	return orderService.getServingStatusByOrderId(orderId);
     }
 	
     /*
@@ -108,8 +105,8 @@ public class OrderController {
      * 
      */
 	@GetMapping("/get/byServingStatus/{servingStatus}")
-	public List<OrderResponse> selectOrdersByServingStatus(@PathVariable Short servingStatus){
-		return orderService.selectOrdersByServingStatus(servingStatus);
+	public List<OrderResponse> getOrdersByServingStatus(@PathVariable Short servingStatus){
+		return orderService.getOrdersByServingStatus(servingStatus);
 	}
 	
 }

@@ -13,6 +13,6 @@ public interface OrderItemMapper {
 	public List<OrderItem> selectOrderItemsByOrderId(Long orderId);
 	
 	/** 注文商品を登録 */
-	public int insertOrderItem(OrderItem item);
+	public int insertOrderItems(List<OrderItem> items);
 
 }

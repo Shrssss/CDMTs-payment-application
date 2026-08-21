@@ -11,7 +11,7 @@ import java.util.List;
 public interface OrderMapper {
 	
 	/** オーダーIDでオーダーの情報を取得 */
-	public Order selectOrdersByOrderId(Long orderId);
+	public List<Order> selectOrdersByOrderIds(List<Long> orderIds);
 	/** すべてのオーダーを取得 */
 	public List<Order> selectAllOrders();
 	/** オーダーIDで受け渡しを取得 */

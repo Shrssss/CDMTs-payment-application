@@ -1,7 +1,14 @@
 package com.cdmts.paymentApps.model.entity;
 
-import lombok.Data;
-@Data
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderItem { 
 
 	/** 商品明細番号 */
