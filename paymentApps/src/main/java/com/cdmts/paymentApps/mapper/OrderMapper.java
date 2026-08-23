@@ -18,10 +18,6 @@ public interface OrderMapper {
 	public Short selectServingStatusByOrderId(Long orderId);
 	/** servingStatusでorderを取得 */
 	public List<Order> selectOrdersByServingStatus(Short servingStatus);
-	
-//	public Boolean selectPaymentStatusByOrderId(Long orderId);
-//	
-//	public String selectIdempotencyKeyByOrderId(Long orderId);
 
 	
 	/** 注文を登録 */
@@ -30,11 +26,8 @@ public interface OrderMapper {
 
 	/** 受け渡し状態の変更 */
 	public int updateServingStatusByOrderId(@Param("orderId")Long orderId,@Param("servingStatus")Short servingStatus);
-//	/** paymentIdの挿入 */
-//	public int updatePaymentIdByOrderId(Long orderId,String paymentId);
 	/** 決済状況の更新 */
 	public int updatePaymentStatusByOrderId(@Param("orderId")Long orderId,@Param("paymentStatus")Boolean paymentStatus);
-//	
-//	public int updateIdempotencyKeyByOrderId(@Param("orderId") Long orderId,@Param("idempotencyKey") String idempotencyKey);
+
 	
 }

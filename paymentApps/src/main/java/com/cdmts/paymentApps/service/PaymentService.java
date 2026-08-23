@@ -1,55 +1,90 @@
 package com.cdmts.paymentApps.service;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.cdmts.paymentApps.model.dto.PaymentRequest;
+import com.cdmts.paymentApps.mapper.ItemMapper;
+import com.cdmts.paymentApps.mapper.OrderItemMapper;
+import com.cdmts.paymentApps.mapper.OrderMapper;
+import com.cdmts.paymentApps.mapper.PaymentMapper;
+import com.cdmts.paymentApps.model.dto.OrderPaymentResponse;
+import com.cdmts.paymentApps.model.dto.PaymentResponse;
+import com.cdmts.paymentApps.model.entity.Item;
 import com.cdmts.paymentApps.model.entity.Order;
+import com.cdmts.paymentApps.model.entity.OrderItem;
 import com.squareup.square.SquareClient;
 import com.squareup.square.types.Money;
 import com.squareup.square.types.Currency;
 import com.squareup.square.types.Payment;
+
+import lombok.RequiredArgsConstructor;
+
 import com.squareup.square.types.GetPaymentResponse;
 import com.squareup.square.types.GetPaymentsRequest;
 import com.squareup.square.types.CreatePaymentRequest;
 import com.squareup.square.core.SquareApiException;
+
 @Service
+@RequiredArgsConstructor
 public class PaymentService {
+	
 	private final SquareClient squareClient;
-	private final OrderService orderService;
 	
-	public PaymentService(SquareClient squareClient,OrderService orderService) {
-		this.squareClient=squareClient;
-		this.orderService=orderService;
-	}
+	private final OrderMapper orderMapper;
 	
-	/** 決済リクエストを作成し、PaymentRequest型の詳細を返す */ //square関連はすべてOptionalなのでnull処理しなくていいとか言わないでください
-	public PaymentRequest createPayment(int orderId,String sourceId) {
+	private final OrderItemMapper orderItemMapper;
+	
+	private final ItemMapper itemMapper;
+	
+	private final PaymentMapper paymentMapper;
+	
+	public PaymentResponse createPayment(Long orderId,String sourceId) {
+		
 		try {
-			Order selectedOrder=orderService.getOrder(orderId);
 			
-			PaymentRequest result=new PaymentRequest();
+			Order orderEntity=orderMapper.selectOrdersByOrderIds(List.of(orderId)).getFirst();
+			
+			List<OrderItem> orderItemEntities=orderItemMapper.selectOrderItemsByOrderId(orderId);
+			
+			if(orderItemEntities==null||orderItemEntities.isEmpty()) throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
+			
+			List<Item> itemEntities=itemMapper.selectItemsByItemIds(
+										orderItemEntities.stream()
+											.map(orderItem->orderItem.getItemId())
+											.toList()
+										);
+			
+			Map<Long,Item>itemMap=itemEntities.stream()
+									.collect(Collectors.toMap(Item::getItemId,item->item));
+			
+			OrderPaymentResponse orderPaymentDto=new OrderPaymentResponse(
+														orderId,
+														orderItemEntities.stream()
+															.map(orderItem->new OrderPaymentResponse.OrderedItem(
+																						orderItem.getItemId(),
+																						itemMap.get(orderItem.getItemId()).getPrice(),
+																						orderItem.getQuantity()
+																					)
+																)
+															.toList()
+													);
+			
+			PaymentResponse result=new PaymentResponse();
 			
 			boolean hasKeyError=false;
 			
-			if(selectedOrder==null) {
-				throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
-			}
+			long amount=orderPaymentDto.getTotalAmount();
 			
-			long amount=selectedOrder.getTotalAmount();
+			String existingKey=orderEntity.getIdempotencyKey();
 			
-			String existingKey=orderService.selectIdempotencyKeyByOrderId(orderId);
+			if(Boolean.TRUE.equals(orderEntity.getPaymentStatus())) hasKeyError=true;
 			
-			if(orderService.selectPaymentStatusByOrderId(orderId)==true) {
-				hasKeyError=true;
-			}
-			
-			if(existingKey!=null&&!existingKey.isEmpty()) {
-				hasKeyError=true;
-			}
+			if(existingKey!=null&&!existingKey.isEmpty()) hasKeyError=true;
 			
 			if(hasKeyError) {
 				
@@ -93,18 +128,20 @@ public class PaymentService {
 				Money money=paymentDetails.getAmountMoney()
 						.orElseThrow(()->new RuntimeException("AmountMoney is null"));
 				
-				orderService.updateIdempotencyKeyByOrderId(orderId,newIdempotencyKey);
+
 				
 				result.setPaymentId(paymentId);
+				
+			    /** @return Indicates whether the payment is APPROVED, PENDING, COMPLETED, CANCELED, or FAILED.*/
 			    result.setStatus(paymentDetails.getStatus().orElseThrow(()->new RuntimeException("Status is null")));
+			    
 			    result.setAmount(money.getAmount().orElseThrow(()->new RuntimeException("Amount is null")));
 			    result.setCurrency(money.getCurrency().toString());
 			    result.setHasKeyError(hasKeyError);
 			    
-							boolean tf=(result.getStatus().equals("COMPLETED"));
-
-			    orderService.updatePaymentIdByOrderId(orderId,paymentId.toString());
-			    orderService.updatePaymentStatusByOrderId(orderId,tf);
+			    boolean paymentStatus=(result.getStatus().equals("COMPLETED"));
+							
+				paymentMapper.updatePaymentIdAndStatusAndKey(orderId,paymentId.toString(),paymentStatus,newIdempotencyKey);
 			    
 				return result;
 			}

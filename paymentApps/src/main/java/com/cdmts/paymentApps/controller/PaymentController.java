@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cdmts.paymentApps.model.dto.PaymentRequest;
+import com.cdmts.paymentApps.model.dto.PaymentResponse;
 import com.cdmts.paymentApps.service.PaymentService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class PaymentController {
 	
 	/** sourceIdで決済リクエストを作成する */
 	@PostMapping("/payments/create/{orderId}/{sourceId}")
-	public PaymentRequest createPayment(@PathVariable int orderId,@PathVariable String sourceId) {
+	public PaymentResponse createPayment(@PathVariable Long orderId,@PathVariable String sourceId) {
 		return paymentService.createPayment(orderId,sourceId);
 	}
 	

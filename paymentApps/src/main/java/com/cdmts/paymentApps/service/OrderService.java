@@ -1,7 +1,6 @@
 package com.cdmts.paymentApps.service;
 
 import java.util.List;
-import java.util.ArrayList;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,9 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cdmts.paymentApps.mapper.OrderItemMapper;
 import com.cdmts.paymentApps.mapper.OrderMapper;
 import com.cdmts.paymentApps.model.dto.OrderCreateRequest;
-import com.cdmts.paymentApps.model.dto.OrderRequest;
 import com.cdmts.paymentApps.model.dto.OrderResponse;
-import com.cdmts.paymentApps.model.entity.Item;
 import com.cdmts.paymentApps.model.entity.Order;
 import com.cdmts.paymentApps.model.entity.OrderItem;
 
@@ -104,47 +101,5 @@ public class OrderService {
     			.toList();
     	
     }
-    
-    
-    
-//  public OrderTable selectOrdersByOrderId(@Param("orderId") int orderId){
-//	return mapper.selectOrdersByOrderId(orderId);
-//}
-//
-//public List<OrderItemTable> selectOrderItemsByOrderId(@Param("orderId") int orderId){
-//	return mapper.selectOrderItemsByOrderId(orderId);
-//}
-//
-//public List<OrderTable> selectAllOrders(){
-//	return mapper.selectAllOrders();
-//}
-//
-//public int updateIdempotencyKeyByOrderId(@Param("orderId") int orderId,String idempotencyKey) {
-//	return mapper.updateIdempotencyKeyByOrderId(orderId,idempotencyKey);
-//}
-//
-//public String selectIdempotencyKeyByOrderId(int orderId) {
-//    return mapper.selectIdempotencyKeyByOrderId(orderId);
-//}
-//
-//public boolean selectPaymentStatusByOrderId(int orderId) {
-//	return mapper.selectPaymentStatusByOrderId(orderId);
-//}
-//
-//public int updateItemAvailabilityByItemId(int itemId,boolean available) {
-//	return mapper.updateItemAvailabilityByItemId(itemId,available);
-//}
-//
-//public int updateServingStatusByOrderId(int orderId,int servingStatus) {
-//	return mapper.updateServingStatusByOrderId(orderId,servingStatus);
-//}
-//public int updatePaymentStatusByOrderId(int orderId,boolean paymentStatus) {
-//	return mapper.updatePaymentStatusByOrderId(orderId,paymentStatus);
-//}
-//public int updatePaymentIdByOrderId(int orderId,String paymentId) {
-//	return mapper.updatePaymentIdByOrderId(orderId,paymentId);
-//	
-//}
-    
     
 }
