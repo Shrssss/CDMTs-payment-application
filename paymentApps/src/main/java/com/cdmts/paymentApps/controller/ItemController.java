@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cdmts.paymentApps.model.entity.Item;
+import com.cdmts.paymentApps.model.dto.ItemCreateRequest;
+import com.cdmts.paymentApps.model.dto.ItemResponse;
 import com.cdmts.paymentApps.service.ItemService;
 
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,10 @@ public class ItemController {
      * 
      */
     @GetMapping("/get/byItemIds")
-    public List<Item> getItemsByItemIds(@RequestParam List<Long> itemIds) {
-    	return itemService.selectItemByItemId(itemId);
+    public List<ItemResponse> getItemsByItemIds(@RequestParam List<Long> itemIds) {
+    
+    	return itemService.getItemsByItemIds(itemIds);
+    
     }
     
     /*
@@ -50,23 +53,44 @@ public class ItemController {
      * 
      */
     @GetMapping("/get/allItems")
-    public List<Item> selectAllItems(){
+    public List<ItemResponse> selectAllItems(){
+    	
     	return itemService.selectAllItems();
+    
     }
 
     /*
      * 在庫状況更新
      * 
      * メソッド名 	: updateAvailablity
-     * 戻り値		: List<Item>
-     * 引数		: List<Long> itemId, Boolean available
+     * 戻り値		: List<Long> itemIds
+     * 引数		: List<Long> itemIds, Boolean available
      * 
      * 		PUT /api/items/update/available/{available}
      * 
      */
 	@PutMapping("/update/available/{available}")
-	public List<Item> updateAvailablity(@RequestParam List<Long> itemIds,@PathVariable Boolean available) {
-		return itemService.toggleAvailablity(itemId,available);
+	public List<Long> updateAvailablity(@RequestParam List<Long> itemIds,@PathVariable Boolean available) {
+		
+		return itemService.updateAvailablity(itemIds,available);
+		
+	}
+	
+    /*
+     * 商品登録
+     * 
+     * メソッド名 	: createItems
+     * 戻り値		: List<Long> itemIds
+     * 引数		: List<Item> items
+     * 
+     * 		POST /api/items
+     * 
+     */
+	@PostMapping
+	public List<Long> createItems(List<ItemCreateRequest>ItemDtos){
+		
+		return itemService.createItems(ItemDtos);
+		
 	}
 
 }

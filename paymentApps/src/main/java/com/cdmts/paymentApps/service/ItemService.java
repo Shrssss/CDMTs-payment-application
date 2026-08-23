@@ -1,12 +1,12 @@
 package com.cdmts.paymentApps.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 
 import com.cdmts.paymentApps.mapper.ItemMapper;
+import com.cdmts.paymentApps.model.dto.ItemCreateRequest;
+import com.cdmts.paymentApps.model.dto.ItemResponse;
 import com.cdmts.paymentApps.model.entity.Item;
 
 import lombok.RequiredArgsConstructor;
@@ -16,56 +16,61 @@ import lombok.RequiredArgsConstructor;
 public class ItemService {
 	
 	private final ItemMapper itemMapper;
+	
+	public ItemResponse toResponse(Item itemEntity) {
+		
+		return new ItemResponse(
+					itemEntity.getItemId(),
+					itemEntity.getItemName(),
+					itemEntity.getPrice(),
+					itemEntity.getAvailable()
+				);
+		
+	}
 
-	public Item selectItemByItemId(@Param("itemId") int itemId){
-		return mapper.selectItemByItemId(itemId);
+	public List<ItemResponse> getItemsByItemIds(List<Long> itemIds){
+		
+		List<Item>itemEntities=itemMapper.selectItemsByItemIds(itemIds);
+		
+		return itemEntities.stream()
+				.map(item->toResponse(item))
+				.toList();
+	
 	}
 	
-    public List<Item> selectAllItems(){
-    	return mapper.selectAllItems();
+    public List<ItemResponse> selectAllItems(){
+    	
+    	List<Item>itemEntities=itemMapper.selectAllItems();
+    	
+    	return itemEntities.stream()
+				.map(item->toResponse(item))
+				.toList();
+    	
     }
     
-    /** Itemの在庫情報を更新し、Itemを返す　*/
-    public List<Item> toggleAvailablity(int itemId,boolean available) {
+    public List<Long> updateAvailablity(List<Long> itemIds,Boolean available) {
     	
-    	List<Item> items=new ArrayList<>();
+    	int updateCount=itemMapper.updateItemAvailabilityByItemId(itemIds,available);
     	
-    	if(itemId%10==0) {
-    		
-    		int[] itemIds= {itemId,itemId+31,itemId+32,itemId+33,itemId+34};
-    		int updated=0;
-    				
-    		for(int i=0;i<5;i++) {
-    			
-    			updated+=updateItemAvailabilityByItemId(itemIds[i],available);
-    			
-    			if(updated==0) {
-           		 throw new IllegalArgumentException("指定されたitemIdが存在しません: "+itemIds[i]);
-    			}
-            	
-            	items.add(selectItemByItemId(itemId));
-    			
-    		}
-
-    	}else {
-    		
-    		int[] itemIds={itemId,90+itemId%10};
-    		
-    		int updated=0;
-    		
-    		for(int i=0;i<2;i++) {
-    			updated+=updateItemAvailabilityByItemId(itemIds[i],available);
-    			
-    			if(updated==0) {
-           		 throw new IllegalArgumentException("指定されたitemIdが存在しません: "+itemIds[i]);
-    			}
-    			
-    			items.add(selectItemByItemId(itemIds[i]));
-    			
-    		}
-    	}
+    	if(updateCount!=itemIds.size()) throw new IllegalArgumentException("Expected same update row between requested ids but was "+updateCount+".");
     	
-    	return items;
+    	return itemIds;
+    	
+    }
+    
+    public List<Long> createItems(List<ItemCreateRequest> itemDtos){
+    	
+    	List<Item>itemEntities=itemDtos.stream()
+    							.map(dto->dto.toEntity())
+    							.toList();
+    	
+    	int insertCount=itemMapper.insertItems(itemEntities);
+    	
+    	if(insertCount!=itemDtos.size())throw new IllegalArgumentException("Expected same insert row between requested items but was "+insertCount+".");
+    	
+    	return itemEntities.stream()
+    			.map(item->item.getItemId())
+    			.toList();
     	
     }
     

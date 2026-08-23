@@ -12,10 +12,13 @@
 
 
 
-    <select id="selectItemByItemId" resultMap="itemMap" parameterType="int">
+    <select id="selectItemsByItemIds" resultMap="itemMap">
         SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
         FROM ITEM_TABLE
-        WHERE ITEMID = #{itemId}
+        WHERE ITEMID IN
+        <foreach item="id" collection="itemIds" open="(" separator="," close=")">
+        	#{id}
+        </foreach>
     </select>
 
 	<select id="selectAllItems" resultMap="itemMap">
@@ -25,17 +28,23 @@
 
 
 
-    <insert id="insertItem" parameterType="com.cdmts.paymentApps.model.entity.Item">
+    <insert id="insertItems">
         INSERT INTO ITEM_TABLE (ITEMID, ITEM_NAME, PRICE, AVAILABLE)
-        VALUES (#{itemId}, #{itemName}, #{price}, #{available})
+        VALUES 
+        <foreach item="item" collection="Items" open="(" separator="," close=")">
+        	(#{item.itemId}, #{item.itemName}, #{item.price}, #{item.available})
+        </foreach>
     </insert>
     
     
     
-    <update id="updateItemAvailabilityByItemId" parameterType="com.cdmts.paymentApps.model.entity.Item">
+    <update id="updateItemAvailabilityByItemId">
         UPDATE ITEM_TABLE
         SET AVAILABLE = #{available}
-        WHERE ITEMID = #{itemId}
+        WHERE ITEMID IN
+        <foreach item="id" collection="itemIds" open="(" separator="," close=")">
+        	#{id}
+        </foreach>
     </update>    
 
 </mapper>
