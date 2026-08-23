@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cdmts.paymentApps.mapper.ItemMapper;
 import com.cdmts.paymentApps.mapper.OrderItemMapper;
@@ -43,6 +44,7 @@ public class PaymentService {
 	
 	private final PaymentMapper paymentMapper;
 	
+	@Transactional
 	public PaymentResponse createPayment(Long orderId,String sourceId) {
 		
 		try {

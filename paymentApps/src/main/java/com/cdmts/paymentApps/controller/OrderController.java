@@ -6,6 +6,7 @@ import com.cdmts.paymentApps.model.dto.OrderCreateRequest;
 import com.cdmts.paymentApps.model.dto.OrderResponse;
 import com.cdmts.paymentApps.service.OrderService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class OrderController {
      * 
      */
     @PostMapping("/set")
-    public Long createOrder(@RequestBody OrderCreateRequest orderDto) {
+    public Long createOrder(@Valid @RequestBody OrderCreateRequest orderDto) {
     	return orderService.createOrder(orderDto);
     }
     

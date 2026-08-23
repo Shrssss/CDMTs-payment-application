@@ -3,6 +3,7 @@ package com.cdmts.paymentApps.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.cdmts.paymentApps.mapper.ItemMapper;
 import com.cdmts.paymentApps.model.dto.ItemCreateRequest;
@@ -48,6 +49,7 @@ public class ItemService {
     	
     }
     
+    @Transactional
     public List<Long> updateAvailablity(List<Long> itemIds,Boolean available) {
     	
     	int updateCount=itemMapper.updateItemAvailabilityByItemId(itemIds,available);
@@ -58,6 +60,7 @@ public class ItemService {
     	
     }
     
+    @Transactional
     public List<Long> createItems(List<ItemCreateRequest> itemDtos){
     	
     	List<Item>itemEntities=itemDtos.stream()
