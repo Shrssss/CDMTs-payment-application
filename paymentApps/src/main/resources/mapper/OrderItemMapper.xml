@@ -23,9 +23,9 @@
     <insert id="insertOrderItems" useGeneratedKeys="true" keyProperty="orderItemId">
         INSERT INTO ORDER_ITEM_TABLE (ITEMID, ORDERID, QUANTITY)
         VALUES 
-        <foreach item="item" collection="items" separator=",">
-        	(#{itemId}, #{orderId}, #{quantity})
-        </foreach>
+		<foreach item="item" collection="items" separator=",">
+   			 (#{item.itemId}, #{item.orderId}, #{item.quantity})
+		</foreach>
     </insert>
 
 </mapper>

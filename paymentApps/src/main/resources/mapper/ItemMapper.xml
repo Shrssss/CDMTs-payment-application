@@ -28,7 +28,7 @@
 
 
 
-    <insert id="insertItems">
+    <insert id="insertItems" useGeneratedKeys="true" keyProperty="itemId">
         INSERT INTO ITEM_TABLE (ITEMID, ITEM_NAME, PRICE, AVAILABLE)
         VALUES 
         <foreach item="item" collection="items" separator="," >
