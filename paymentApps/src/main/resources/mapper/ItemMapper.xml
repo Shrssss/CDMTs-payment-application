@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cdmts.paymentApps.mapper.ItemMapper">
+
+    <!-- ITEMマップ -->
+    <resultMap id="itemMap" type="com.cdmts.paymentApps.model.entity.Item">
+        <id column="ITEMID" property="itemId"/>
+        <result column="ITEM_NAME" property="itemName"/>
+        <result column="PRICE" property="price"/>
+        <result column="AVAILABLE" property="available"/>
+    </resultMap>
+
+
+
+    <select id="selectItemsByItemIds" resultMap="itemMap">
+        SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
+        FROM ITEM_TABLE
+        WHERE ITEMID IN
+        <foreach item="id" collection="itemIds" open="(" separator="," close=")">
+        	#{id}
+        </foreach>
+    </select>
+
+	<select id="selectAllItems" resultMap="itemMap">
+        SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
+        FROM ITEM_TABLE
+    </select>
+
+
+
+    <insert id="insertItems" useGeneratedKeys="true" keyProperty="itemId">
+        INSERT INTO ITEM_TABLE (ITEMID, ITEM_NAME, PRICE, AVAILABLE)
+        VALUES 
+        <foreach item="item" collection="items" separator="," >
+        	(#{item.itemId}, #{item.itemName}, #{item.price}, #{item.available})
+        </foreach>
+    </insert>
+    
+    
+    
+    <update id="updateItemAvailabilityByItemId">
+        UPDATE ITEM_TABLE
+        SET AVAILABLE = #{available}
+        WHERE ITEMID IN
+        <foreach item="id" collection="itemIds" open="(" separator="," close=")">
+        	#{id}
+        </foreach>
+    </update>    
+
+</mapper>

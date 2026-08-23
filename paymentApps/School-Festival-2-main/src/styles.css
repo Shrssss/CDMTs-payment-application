@@ -1,0 +1,25 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+}
+
+.center-alignment {
+  /* Menuコンポーネントの幅と間隔に合わせて適切な値を設定 */
+  max-width: 840px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  gap: 16px; /* Menu間の間隔 */
+  margin-bottom: 16px;
+}
+
+body {
+  margin: 0; /* body要素のデフォルトマージンをリセット */
+  padding: 0;
+  background-color: #e5f2ff;
+}

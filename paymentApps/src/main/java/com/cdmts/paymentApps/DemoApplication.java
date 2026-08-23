@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.mybatis.spring.annotation.MapperScan;
 
 @SpringBootApplication
-@MapperScan("com.cdmts.paymentApps.entity.mapper")
+@MapperScan("com.cdmts.paymentApps.mapper")
 public class DemoApplication {	//起動前処理
 
 	public static void main(String[] args) {
