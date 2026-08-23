@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.PaymentMapper">
+
+    <!-- ORDERマップ -->
+    <resultMap id="orderMap" type="com.cdmts.paymentApps.model.entity.Order">
+        <id column="ORDERID" property="orderId"/>
+        <result column="ORDER_DATE" property="orderDate"/>
+        <result column="RESERVED_TIME" property="reservedTime"/>
+        <result column="SERVING_STATUS" property="servingStatus"/>
+        <result column="PAYMENTID" property="paymentId"/>
+        <result column="PAYMENT_STATUS" property="paymentStatus"/>
+        <result column="IDEMPOTENCY_KEY" property="idempotencyKey"/>
+    </resultMap>
+    
+   	<select id="selectPaymentStatusByOrderId" resultType="Boolean">
+        SELECT PAYMENT_STATUS
+        FROM ORDER_TABLE
+        WHERE ORDERID = #{orderId}
+    </select>
+
+	<select id="selectIdempotencyKeyByOrderId" resultType="String">
+   		 SELECT IDEMPOTENCY_KEY
+   		 FROM ORDER_TABLE
+    	WHERE ORDERID = #{orderId}
+	</select>
+	
+	
+	
+	<update id="updatePaymentIdAndStatusAndKey">
+    	UPDATE ORDER_TABLE
+   		SET PAYMENTID = #{paymentId},PAYMENT_STATUS = #{paymentStatus},IDEMPOTENCY_KEY = #{idempotencyKey}
+   		WHERE ORDERID = #{orderId}
+    </update>
+
+</mapper>
