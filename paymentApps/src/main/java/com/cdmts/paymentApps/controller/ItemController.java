@@ -16,6 +16,7 @@ import com.cdmts.paymentApps.model.dto.ItemCreateRequest;
 import com.cdmts.paymentApps.model.dto.ItemResponse;
 import com.cdmts.paymentApps.service.ItemService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -88,7 +89,7 @@ public class ItemController {
      * 
      */
 	@PostMapping
-	public List<Long> createItems(@RequestBody List<ItemCreateRequest>ItemDtos){
+	public List<Long> createItems(@Valid @RequestBody List<ItemCreateRequest>ItemDtos){
 		
 		return itemService.createItems(ItemDtos);
 		

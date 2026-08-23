@@ -2,6 +2,7 @@ package com.cdmts.paymentApps.model.dto;
 
 import java.util.List;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.Setter;
 public class OrderPaymentResponse {
 
 	/** 注文番号（外部キー） */
+	@NotNull
 	private Long orderId;
 	
 	private List<OrderedItem> orderedItems;
@@ -24,10 +26,11 @@ public class OrderPaymentResponse {
 	@AllArgsConstructor
 	public static class OrderedItem{
 		
+		@NotNull
 		private Long itemId;
-		
+		@NotNull
 		private Integer price;
-		
+		@NotNull
 		private Integer quantity;
 	}
 	

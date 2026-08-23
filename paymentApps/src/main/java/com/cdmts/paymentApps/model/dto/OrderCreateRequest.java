@@ -5,25 +5,24 @@ import java.util.List;
 
 import com.cdmts.paymentApps.model.entity.Order;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
 public class OrderCreateRequest {
 
-//	/** 注文番号（主キー） */
-//	private Long orderId;
 	/** 注文日時 */
+	@NotNull
 	private LocalDateTime orderDate;
 	/** 予約時間 */
+	@NotNull
 	private LocalDateTime reservedTime;
 	/** 受け渡しの状態(0,1,2) */
+	@NotNull
 	private Short servingStatus;
-//	/** 決済番号(SquareApi依存) */
-//	private String paymentId;
 	/** 決済状況 */
+	@NotNull
 	private Boolean paymentStatus;
-
-//	private String idempotencyKey;
 	/** 注文商品 */
 	private List<OrderItemCreateRequest>items;
 
