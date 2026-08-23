@@ -12,7 +12,7 @@
     
     
     
-	<select id="selectOrderItemsByOrderId" resultMap="orderItemMap" parameterType="int">
+	<select id="selectOrderItemsByOrderId" resultMap="orderItemMap">
         SELECT ORDER_ITEM_ID, ORDERID, ITEMID, QUANTITY
         FROM ORDER_ITEM_TABLE
         WHERE ORDERID = #{orderId}
@@ -20,9 +20,12 @@
     
     
     
-    <insert id="insertOrderItem" parameterType="com.cdmts.paymentApps.model.entity.OrderItem" useGeneratedKeys="true" keyProperty="orderItemId">
+    <insert id="insertOrderItems" useGeneratedKeys="true" keyProperty="orderItemId">
         INSERT INTO ORDER_ITEM_TABLE (ITEMID, ORDERID, QUANTITY)
-        VALUES (#{itemId}, #{orderId}, #{quantity})
+        VALUES 
+        <foreach item="item" collection="items" separator=",">
+        	(#{itemId}, #{orderId}, #{quantity})
+        </foreach>
     </insert>
 
 </mapper>

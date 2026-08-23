@@ -3,6 +3,7 @@ package com.cdmts.paymentApps.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.cdmts.paymentApps.model.entity.OrderItem;
 
@@ -13,6 +14,6 @@ public interface OrderItemMapper {
 	public List<OrderItem> selectOrderItemsByOrderId(Long orderId);
 	
 	/** 注文商品を登録 */
-	public int insertOrderItems(List<OrderItem> items);
+	public int insertOrderItems(@Param("items")List<OrderItem> items);
 
 }
