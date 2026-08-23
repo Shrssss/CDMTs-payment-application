@@ -18,10 +18,13 @@
 
 
 
-    <select id="selectOrdersByOrderId" resultMap="orderMap" parameterType="int">
+    <select id="selectOrdersByOrderIds" resultMap="orderMap">
         SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS, IDEMPOTENCY_KEY
         FROM ORDER_TABLE
-        WHERE ORDERID = #{orderId}
+        WHERE ORDERID IN
+        <foreach item="orderId" collection="orderIds" open="(" separator="," close=")">
+        	#{orderId}
+        </foreach>
     </select>
 
     <select id="selectAllOrders" resultMap="orderMap">
@@ -29,18 +32,19 @@
         FROM ORDER_TABLE
     </select>
 
-    <select id="selectServingStatusByOrderId" resultType="int" parameterType="int">
+    <select id="selectServingStatusByOrderId" resultType="Short">
         SELECT SERVING_STATUS
         FROM ORDER_TABLE
         WHERE ORDERID = #{orderId}
     </select>
 
-    <select id="selectOrdersByServingStatus" resultMap="orderMap" parameterType="int">
+    <select id="selectOrdersByServingStatus" resultMap="orderMap">
         SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS, IDEMPOTENCY_KEY
         FROM ORDER_TABLE
         WHERE SERVING_STATUS = #{servingStatus}
     </select>
 
+<!--
 	<select id="selectPaymentStatusByOrderId" resultType="boolean" parameterType="int">
         SELECT PAYMENT_STATUS
         FROM ORDER_TABLE
@@ -54,7 +58,7 @@
    		 FROM ORDER_TABLE
     	WHERE ORDERID = #{orderId}
 	</select>
-
+-->
 
 
     <insert id="insertOrder" parameterType="com.cdmts.paymentApps.model.entity.Order" useGeneratedKeys="true" keyProperty="orderId">
@@ -64,29 +68,29 @@
 
 
     
-    <update id="updateServingStatusByOrderId" parameterType="com.cdmts.paymentApps.model.entity.Order">
+    <update id="updateServingStatusByOrderId">
         UPDATE ORDER_TABLE
         SET SERVING_STATUS = #{servingStatus}
         WHERE ORDERID = #{orderId}
     </update>
-
-    <update id="updatePaymentStatusByOrderId" parameterType="com.cdmts.paymentApps.model.entity.Order">
-        UPDATE ORDER_TABLE
-        SET PAYMENT_STATUS = #{paymentStatus}
-        WHERE ORDERID = #{orderId}
-    </update>
-    
-    <update id="updatePaymentIdByOrderId" parameterType="com.cdmts.paymentApps.model.entity.Order">
+<!--    
+    <update id="updatePaymentIdByOrderId">
     	UPDATE ORDER_TABLE
    		SET PAYMENTID = #{paymentId}
    		WHERE ORDERID = #{orderId}
     </update>
-    
+-->
+    <update id="updatePaymentStatusByOrderId">
+        UPDATE ORDER_TABLE
+        SET PAYMENT_STATUS = #{paymentStatus}
+        WHERE ORDERID = #{orderId}
+    </update>
+<!--
     <update id="updateIdempotencyKeyByOrderId" parameterType="com.cdmts.paymentApps.model.entity.Order">
     	UPDATE ORDER_TABLE
    		SET IDEMPOTENCY_KEY = #{idempotencyKey}
    		WHERE ORDERID = #{orderId}
     </update>
-    
+-->
 
 </mapper>
