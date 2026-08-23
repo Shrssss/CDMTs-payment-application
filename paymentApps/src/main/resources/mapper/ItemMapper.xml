@@ -31,7 +31,7 @@
     <insert id="insertItems">
         INSERT INTO ITEM_TABLE (ITEMID, ITEM_NAME, PRICE, AVAILABLE)
         VALUES 
-        <foreach item="item" collection="Items" open="(" separator="," close=")">
+        <foreach item="item" collection="items" separator="," >
         	(#{item.itemId}, #{item.itemName}, #{item.price}, #{item.available})
         </foreach>
     </insert>
