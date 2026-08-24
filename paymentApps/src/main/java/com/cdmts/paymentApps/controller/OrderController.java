@@ -65,21 +65,20 @@ public class OrderController {
     	return orderService.updateServingStatus(orderId,servingStatus);
     }
 
-//		!! 使用しない !!
-//    /*
-//     * 提供状態更新
-//     * 
-//     * メソッド名 	: updatePaymentStatus
-//     * 戻り値		: Long orderId
-//     * 引数		: Long orderId, Boolean paymentStatus
-//     * 
-//     * 		PUT /api/orders/update/paymentStatus/{orderId}/{paymentStatus}
-//     * 
-//     */
-//	@PutMapping("/update/paymentStatus/{orderId}/{paymentStatus}")
-//	public Long updatePaymentStatus(@PathVariable Long orderId,@PathVariable Boolean paymentStatus) {
-//		return orderService.updatePaymentStatus(orderId,paymentStatus);
-//	}
+    /*
+     * 提供状態更新
+     * 
+     * メソッド名 	: updatePaymentStatus
+     * 戻り値		: Long orderId
+     * 引数		: Long orderId, Boolean paymentStatus
+     * 
+     * 		PUT /api/orders/update/paymentStatus/{orderId}/{paymentStatus}
+     * 
+     */
+	@PutMapping("/update/paymentStatus/{orderId}/{paymentStatus}")
+	public Long updatePaymentStatus(@PathVariable Long orderId,@PathVariable Boolean paymentStatus) {
+		return orderService.updatePaymentStatus(orderId,paymentStatus);
+	}
     
     /*
      * 注文からの提供状態取得
