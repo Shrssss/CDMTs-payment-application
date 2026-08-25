@@ -7,13 +7,14 @@
         <id column="ITEMID" property="itemId"/>
         <result column="ITEM_NAME" property="itemName"/>
         <result column="PRICE" property="price"/>
+        <result column="IMAGE_PATH" property="imagePath"/>
         <result column="AVAILABLE" property="available"/>
     </resultMap>
 
 
 
     <select id="selectItemsByItemIds" resultMap="itemMap">
-        SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
+        SELECT ITEMID, ITEM_NAME, PRICE, IMAGE_PATH, AVAILABLE
         FROM ITEM_TABLE
         WHERE ITEMID IN
         <foreach item="id" collection="itemIds" open="(" separator="," close=")">
@@ -22,17 +23,17 @@
     </select>
 
 	<select id="selectAllItems" resultMap="itemMap">
-        SELECT ITEMID, ITEM_NAME, PRICE, AVAILABLE
+        SELECT ITEMID, ITEM_NAME, PRICE, IMAGE_PATH, AVAILABLE
         FROM ITEM_TABLE
     </select>
 
 
 
     <insert id="insertItems" useGeneratedKeys="true" keyProperty="itemId">
-        INSERT INTO ITEM_TABLE (ITEMID, ITEM_NAME, PRICE, AVAILABLE)
+        INSERT INTO ITEM_TABLE (ITEMID, ITEM_NAME, PRICE, IMAGE_PATH, AVAILABLE)
         VALUES 
         <foreach item="item" collection="items" separator="," >
-        	(#{item.itemId}, #{item.itemName}, #{item.price}, #{item.available})
+        	(#{item.itemId}, #{item.itemName}, #{item.price}, #{item.imagePath}, #{item.available})
         </foreach>
     </insert>
     
