@@ -24,6 +24,7 @@ public class ItemService {
 					itemEntity.getItemId(),
 					itemEntity.getItemName(),
 					itemEntity.getPrice(),
+					itemEntity.getImagePath(),
 					itemEntity.getAvailable()
 				);
 		

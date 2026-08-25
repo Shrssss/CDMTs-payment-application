@@ -20,6 +20,8 @@ public class ItemResponse {
 	/** 単価 */
 	@NotNull
 	private Integer price;
+	/** 商品画像のパス */
+	private String imagePath;
 	/** 在庫の有無*/
 	@NotNull
 	private Boolean available;

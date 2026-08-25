@@ -21,8 +21,8 @@ spring:
     environment: production #production #<-本番
     access-token: ${SQUARE_TOKEN}
     
-  mybatis:
-     mapper-locations: classpath:mapper/*.xml
+mybatis:
+   mapper-locations: classpath:mapper/*.xml
 
 server:
    port: 8080

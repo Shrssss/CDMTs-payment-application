@@ -17,6 +17,8 @@ public class Item {
 	private String itemName;
 	/** 単価 */
 	private Integer price;
+	/** 商品画像のパス */
+	private String imagePath;
 	/** 在庫の有無*/
 	private Boolean available;
 	
