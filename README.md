@@ -270,7 +270,8 @@ ITEM_TABLE (
 }
 ```
 
-
+> ⚠️ `locationId` は現状 sandbox 用の値がハードコードされている（コード内コメントに明記）。
+> 本番運用前に `environment` と `locationId` の組み合わせを必ず確認すること。
 
 ---
 
@@ -372,3 +373,186 @@ public class DemoApplication { ... }
    （一部IDが存在しない場合の不整合検知）。
 
 ---
+
+---
+
+## 7. 変更点（2026-08-27）
+
+今回のバックエンドコードを確認し、既存の仕様書に対して以下の変更・追加点を追記する。
+
+### 7.1 商品情報に画像パスを追加
+
+`Item` エンティティおよび商品関連DTOに `imagePath` を追加した。
+
+- `Item.imagePath`：商品画像のパス
+- `ItemCreateRequest.imagePath`：商品登録時の画像パス
+- `ItemResponse.imagePath`：商品取得時の画像パス
+- `ItemMapper.xml` のSELECT/INSERTにも `IMAGE_PATH` を追加
+
+これにより、商品情報は以下の構成となる。
+
+| フィールド | 型 | 説明 |
+|---|---|---|
+| itemId | Long | 商品番号 |
+| itemName | String | 商品名 |
+| price | Integer | 単価 |
+| imagePath | String | 商品画像のパス |
+| available | Boolean | 在庫の有無 |
+
+### 7.2 注文取得時に注文商品明細を返却
+
+注文取得処理を拡張し、`OrderResponse` に `orderedItems` を含めるようになった。
+
+`OrderService.getOrdersByIds()` および `getOrdersByServingStatus()` では、
+
+1. 注文情報を取得
+2. 注文IDに紐づく商品明細を取得
+3. 商品ID・商品名・数量を注文IDごとにグループ化
+4. `OrderResponse.OrderedItem` としてレスポンスへ格納
+
+という処理を行う。
+
+`OrderResponse.OrderedItem` の項目は以下のとおり。
+
+| フィールド | 型 | 説明 |
+|---|---|---|
+| itemId | Long | 商品番号 |
+| name | String | 商品名 |
+| quantity | Integer | 注文数量 |
+
+### 7.3 注文商品取得用Mapper処理を追加
+
+`OrderMapper` に `selectOrderedItemsByOrderIds(List<Long> orderIds)` を追加し、
+複数の注文IDに紐づく商品情報をまとめて取得する処理を追加した。
+
+取得対象は以下。
+
+- orderId
+- itemId
+- itemName（レスポンス上は `name`）
+- quantity
+
+なお、現在の `OrderMapper.xml` ではSQLのカラム名に `ORDER_ID` / `ITEM_ID` を使用している一方、
+既存のテーブル定義では `ORDERID` / `ITEMID` が使用されているため、実DBのカラム名との整合性を確認する必要がある。
+
+### 7.4 注文一覧を受け渡し状態から取得するAPIを追加
+
+以下のAPIを追加した。
+
+`GET /api/orders/get/byServingStatus/{servingStatus}`
+
+指定した `servingStatus` の注文一覧を取得し、各注文の商品明細も `orderedItems` として返却する。
+
+また、該当する注文が0件の場合は、商品明細取得用SQLを実行せず空のリストを使用する。
+
+### 7.5 商品一括登録APIを追加
+
+以下のAPIを追加した。
+
+`POST /api/items`
+
+複数の `ItemCreateRequest` を受け取り、商品を一括登録する。
+
+レスポンスは生成された `itemId` のリスト。
+
+登録件数とリクエスト件数が一致しない場合は `IllegalArgumentException` を送出する。
+
+### 7.6 商品在庫状況の一括更新を追加
+
+以下のAPIを追加した。
+
+`PUT /api/items/update/available/{available}`
+
+クエリパラメータ `itemIds` で指定された複数商品について、
+`available` を一括更新する。
+
+更新件数と指定された `itemIds` の件数が一致しない場合は
+`IllegalArgumentException` を送出する。
+
+### 7.7 商品一覧取得APIを追加
+
+以下のAPIを追加した。
+
+`GET /api/items/get/allItems`
+
+商品テーブルの全商品を取得し、`ItemResponse` のリストとして返却する。
+
+### 7.8 Square設定の本番環境化
+
+`SquareConfig` で生成する `SquareClient` の環境を `Environment.PRODUCTION` に設定した。
+
+また、`application.yaml` でも以下の設定となっている。
+
+```yaml
+square:
+  environment: production
+  access-token: ${SQUARE_TOKEN}
+```
+
+Squareのアクセストークンは環境変数 `SQUARE_TOKEN` から取得する。
+
+### 7.9 CORS設定を追加・整理
+
+`WebConfig` に `/api/**` を対象としたCORS設定を追加した。
+
+許可オリジン：
+
+```text
+https://cdmts-pay.codemates.net
+```
+
+許可メソッド：
+
+- GET
+- POST
+- PUT
+- DELETE
+- OPTIONS
+
+さらに、`OrderController` および `ItemController` にも同一オリジンを対象とする `@CrossOrigin` を設定している。
+
+### 7.10 決済処理の二重実行防止を強化
+
+`PaymentService.createPayment()` では、以下の場合にSquareへの決済処理を実行しない。
+
+- `paymentStatus == true`
+- `idempotencyKey` が既に設定されている
+
+該当した場合は `PaymentResponse.hasKeyError = true` として返却する。
+
+通常の決済ではUUIDを利用して新しい冪等キーを生成し、Square APIへ送信する。
+
+決済後は以下を `Order` テーブルへ保存する。
+
+- `paymentId`
+- `paymentStatus`
+- `idempotencyKey`
+
+### 7.11 Square決済結果の再取得
+
+決済作成後、Square APIから決済IDを取得するだけでなく、
+`payments().get()` を利用して決済詳細を再取得する処理を追加している。
+
+再取得した決済情報から以下を `PaymentResponse` に設定する。
+
+- paymentId
+- status
+- amount
+- currency
+- hasKeyError
+
+`status` が `COMPLETED` の場合のみ `paymentStatus` を `true` とする。
+
+### 7.12 トランザクション管理を追加
+
+注文作成、商品登録、在庫更新、提供状態更新、決済処理などのサービス処理に
+`@Transactional` を使用している。
+
+特に注文作成では、
+
+1. `ORDER_TABLE` に注文を登録
+2. 採番された `orderId` を取得
+3. 注文商品を `ORDER_ITEM_TABLE` に一括登録
+
+を1つのトランザクションとして処理する。
+
