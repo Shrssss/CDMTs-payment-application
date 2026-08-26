@@ -63,8 +63,8 @@
     
 	<select id="selectOrderedItemsByOrderIds" resultType="com.example.dto.OrderedItemRow">
     	SELECT
-      	  o.ORDER_ID   AS orderId,
-     	   i.ITEM_ID    AS itemId,
+      	  o.ORDERID   AS orderId,
+     	   i.ITEMID    AS itemId,
      	   i.ITEM_NAME  AS name,
      	   o.QUANTITY   AS quantity
  	   FROM ITEM_TABLE i
