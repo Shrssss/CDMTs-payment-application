@@ -61,7 +61,7 @@
         WHERE SERVING_STATUS = #{servingStatus}
     </select>
     
-	<select id="selectOrderedItemsByOrderIds" resultType="com.example.dto.OrderItemRow">
+	<select id="selectOrderedItemsByOrderIds" resultType="com.example.dto.OrderedItemRow">
     	SELECT
       	  o.ORDER_ID   AS orderId,
      	   i.ITEM_ID    AS itemId,
