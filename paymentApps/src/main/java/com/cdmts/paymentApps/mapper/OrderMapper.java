@@ -3,6 +3,9 @@ package com.cdmts.paymentApps.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.cdmts.paymentApps.model.dto.OrderResponse;
+import com.cdmts.paymentApps.model.dto.OrderedItemRow;
+import com.cdmts.paymentApps.model.entity.Item;
 import com.cdmts.paymentApps.model.entity.Order;
 
 import java.util.List;
@@ -18,6 +21,8 @@ public interface OrderMapper {
 	public Short selectServingStatusByOrderId(Long orderId);
 	/** servingStatusでorderを取得 */
 	public List<Order> selectOrdersByServingStatus(Short servingStatus);
+	
+	public List<OrderedItemRow> selectOrderedItemsByOrderIds(@Param("orderIds")List<Long>ids);
 
 	
 	/** 注文を登録 */

@@ -15,8 +15,25 @@
         <result column="PAYMENT_STATUS" property="paymentStatus"/>
         <result column="IDEMPOTENCY_KEY" property="idempotencyKey"/>
     </resultMap>
+    
+    <!-- ITEMマップ -->
+    <resultMap id="itemMap" type="com.cdmts.paymentApps.model.entity.Item">
+        <id column="ITEMID" property="itemId"/>
+        <result column="ITEM_NAME" property="itemName"/>
+        <result column="PRICE" property="price"/>
+        <result column="IMAGE_PATH" property="imagePath"/>
+        <result column="AVAILABLE" property="available"/>
+    </resultMap>
 
-
+    <!-- ORDER_ITEMマップ -->
+    <resultMap id="orderItemMap" type="com.cdmts.paymentApps.model.entity.OrderItem">
+        <id column="ORDER_ITEM_ID" property="orderItemId"/>
+        <result column="ORDERID" property="orderId"/>
+        <result column="ITEMID" property="itemId"/>
+        <result column="QUANTITY" property="quantity"/>
+    </resultMap>
+    
+    
 
     <select id="selectOrdersByOrderIds" resultMap="orderMap">
         SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS, PAYMENTID, PAYMENT_STATUS, IDEMPOTENCY_KEY
@@ -43,6 +60,21 @@
         FROM ORDER_TABLE
         WHERE SERVING_STATUS = #{servingStatus}
     </select>
+    
+	<select id="selectOrderedItemsByOrderIds" resultType="com.example.dto.OrderItemRow">
+    	SELECT
+      	  o.ORDER_ID   AS orderId,
+     	   i.ITEM_ID    AS itemId,
+     	   i.ITEM_NAME  AS name,
+     	   o.QUANTITY   AS quantity
+ 	   FROM ITEM_TABLE i
+ 	   INNER JOIN ORDER_ITEM_TABLE o
+  	      ON i.ITEM_ID = o.ITEM_ID
+ 	   WHERE o.ORDER_ID IN
+  	      <foreach item="id" collection="orderIds" open="(" separator="," close=")">
+   	         #{id}
+   	     </foreach>
+	</select>
 
 
     <insert id="insertOrder" parameterType="com.cdmts.paymentApps.model.entity.Order" useGeneratedKeys="true" keyProperty="orderId">
