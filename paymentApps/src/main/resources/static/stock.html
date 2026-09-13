@@ -1,5 +1,3 @@
-<!--現在json-serverの不具合でitemIdと書くところをidと書いている、-before参照-->
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -14,52 +12,9 @@
         <h1>商品提供ステータス管理画面</h1>
         <p>スイッチを切り替えると、リアルタイムで提供状況が更新されます。</p>
         
-        <div id="item-list" class="item-list-container">
-            <div class="item-card">
-                <span class="item-name">角煮</span>
-                <label class="switch">
-                    <input type="checkbox" class="availability-toggle" data-id="10">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="item-card">
-                <span class="item-name">角煮大盛り</span>
-                <label class="switch">
-                    <input type="checkbox" class="availability-toggle" data-id="20">
-                    <span class="slider"></span>
-                </label>
-            </div>
-
-            <div class="item-card">
-                <span class="item-name">コーラ</span>
-                <label class="switch">
-                    <input type="checkbox" class="availability-toggle" data-id="31">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="item-card">
-                <span class="item-name">なっちゃんオレンジ</span>
-                <label class="switch">
-                    <input type="checkbox" class="availability-toggle" data-id="32">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="item-card">
-                <span class="item-name">三ツ矢サイダー</span>
-                <label class="switch">
-                    <input type="checkbox" class="availability-toggle" data-id="33">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            <div class="item-card">
-                <span class="item-name">烏龍茶</span>
-                <label class="switch">
-                    <input type="checkbox" class="availability-toggle" data-id="34">
-                    <span class="slider"></span>
-                </label>
-            </div>
-            
-            </div>
+        <!-- 商品カードは stock.js が商品マスタから生成する。
+             ここに商品名やIDを直接書くと、マスタを更新したときにズレる -->
+        <div id="item-list" class="item-list-container"></div>
 
         <div id="error-message" class="error-message"></div>
     </div>
