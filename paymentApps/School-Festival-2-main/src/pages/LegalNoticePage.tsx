@@ -1,18 +1,9 @@
 // 特定商取引法に基づく表示のモック画面。実際の記載内容は未確定のためプレースホルダーを表示する。
 import type { CSSProperties } from "react";
+import { MOCK_LEGAL_NOTICE } from "../constants/mocks/legalNoticeMock";
 
-const NOTICE_ITEMS = [
-  { label: "販売事業者", value: "［要記入：団体名］" },
-  { label: "運営責任者", value: "［要記入：責任者氏名］" },
-  { label: "所在地", value: "［要記入：住所］" },
-  { label: "連絡先", value: "［要記入：電話番号・メールアドレス］" },
-  { label: "販売価格", value: "各商品ページに記載の価格（消費税込み）" },
-  { label: "商品代金以外の必要料金", value: "なし" },
-  { label: "お支払い方法", value: "クレジットカード決済、PayPay決済" },
-  { label: "お支払い時期", value: "ご注文確定時" },
-  { label: "商品の引渡時期", value: "ご予約いただいたお受け取り時刻" },
-  { label: "返品・キャンセルについて", value: "お客様都合によるキャンセル・返金には応じられません" },
-];
+// バックエンドから特定商取引法の表記を取得予定
+
 
 interface LegalNoticePageProps {
   onClose: () => void;
@@ -24,7 +15,7 @@ export const LegalNoticePage = ({ onClose }: LegalNoticePageProps) => {
       <div style={card}>
         <h1 style={title}>特定商取引法に基づく表示</h1>
         <dl style={list}>
-          {NOTICE_ITEMS.map(({ label, value }) => (
+          {MOCK_LEGAL_NOTICE.map(({ label, value }) => (
             <div key={label} style={row}>
               <dt style={term}>{label}</dt>
               <dd style={desc}>{value}</dd>
