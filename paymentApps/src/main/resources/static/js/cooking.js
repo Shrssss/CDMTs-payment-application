@@ -1,28 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 設定 ---
-    const API_BASE_URL = "https://cdmts-pay.codemates.net/api";
-    const POLLING_INTERVAL = 10000; // 10秒ごとにデータを自動更新
 
-    // --- DOM要素の取得 ---
+    const API_BASE_URL = "/api";
+    const POLLING_INTERVAL = 10000;
+    const CANCEL_GRACE_PERIOD = 10000;
+    const URGENT_THRESHOLD_MINUTES = 10;
+
     const mainElement = document.querySelector('main');
     const upcomingContainer = document.getElementById('upcoming-orders-container');
     const overdueContainer = document.getElementById('overdue-orders-container');
 
-    // --- API通信関数 ---
-
-    /**
-     * 調理中(servingStatus=0)の注文をサーバーから取得する
-     * paymentStatusがtrueのみ返す
-     * @returns {Promise<Array>} 注文データの配列
-     */
     async function fetchCookingOrders() {
         try {
-            const response = await fetch(`${API_BASE_URL}/order/get/bystatus/0`);
+            const response = await fetch(`${API_BASE_URL}/orders/get/byServingStatus/0`);
             if (!response.ok) {
                 throw new Error(`APIエラー: ${response.status}`);
             }
             const orders = await response.json();
-            // paymentStatusがtrueのみ残す
+            // TODO(backend): OrderResponse に paymentStatus が無いため、このフィルタは現状すべて除外する
+            // （undefined === true が false になる）。hrs にフィールド追加を依頼中。
+            // 未払いを調理しないための防御なので、追加されるまではこのままでよい。
             return orders.filter(order => order.paymentStatus === true);
         } catch (error) {
             console.error('注文の取得に失敗しました:', error);
@@ -31,38 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * orderIdで単一注文を取得する
-     * @param {number|string} orderId
-     * @returns {Promise<Object|null>} 注文データ（order.items含む）、失敗時はnull
-     */
-    async function fetchOrder(orderId) {
-        try {
-            const response = await fetch(`${API_BASE_URL}/order/get/byorderId/${orderId}`);
-            if (!response.ok) throw new Error(`APIエラー: ${response.status}`);
-            const order = await response.json();
-            return order; // order.items が含まれている
-        } catch (error) {
-            console.error('注文の取得に失敗しました:', error);
-            return null;
-        }
-    }
-
-    /**
-     * 注文のステータスを更新する
-     * @param {string|number} orderId 更新する注文のID
-     * @param {number} newStatus 新しいステータス (1: READY, 2: DONEなど)
-     * @returns {Promise<Object|null>} 更新後の注文データ、失敗時はnull
+     * @param {number} newStatus servingStatus。0=調理待ち / 1=受渡待ち / 2=受け渡し完了
      */
     async function patchOrderStatus(orderId, newStatus) {
         try {
-            const response = await fetch(`${API_BASE_URL}/order/set/servingStatus/${orderId}/${newStatus}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    servingStatus: newStatus,
-                }),
+            const response = await fetch(`${API_BASE_URL}/orders/update/servingStatus/${orderId}/${newStatus}`, {
+                method: 'PUT',
             });
             if (!response.ok) {
                 throw new Error(`APIエラー: ${response.status}`);
@@ -75,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- UI描画関数 ---
     function getTimeInfoText(reservedTimeStr) {
         const now = new Date();
         const reservedTime = new Date(reservedTimeStr);
@@ -96,19 +65,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const reservedTime = new Date(order.reservedTime);
         const diffMinutes = (reservedTime - now) / (1000 * 60);
         if (diffMinutes < 0) card.classList.add('is-overdue');
-        else if (diffMinutes <= 10) card.classList.add('is-urgent');
+        else if (diffMinutes <= URGENT_THRESHOLD_MINUTES) card.classList.add('is-urgent');
 
-        const itemsList = (order.items || []).map(item => `<li>${item.itemName} x ${item.quantity}</li>`).join('');
+        const number = document.createElement('div');
+        number.className = 'ticket-number';
+        number.textContent = order.orderId;
 
-        card.innerHTML = `
-            <div class="ticket-number">${order.orderId}</div>
-            <div class="order-details">
-                <div class="time-info">${getTimeInfoText(order.reservedTime)}</div>
-                <ul class="order-items">${itemsList}</ul>
-            </div>
-            <button class="action-button complete-btn">調理完了</button>
-            <div class="loading-spinner"></div>
-        `;
+        const time = document.createElement('div');
+        time.className = 'time-info';
+        time.textContent = getTimeInfoText(order.reservedTime);
+
+        // 商品名は商品マスタ由来の値。innerHTML に流すとHTMLとして実行されるため textContent を使う
+        const list = document.createElement('ul');
+        list.className = 'order-items';
+        for (const item of order.orderedItems ?? []) {
+            const li = document.createElement('li');
+            li.textContent = `${item.name} x ${item.quantity}`;
+            list.appendChild(li);
+        }
+
+        const details = document.createElement('div');
+        details.className = 'order-details';
+        details.append(time, list);
+
+        const button = document.createElement('button');
+        button.className = 'action-button complete-btn';
+        button.textContent = '調理完了';
+
+        const spinner = document.createElement('div');
+        spinner.className = 'loading-spinner';
+
+        card.append(number, details, button, spinner);
         return card;
     }
 
@@ -116,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const waitingIds = Object.keys(cancellationTimers);
         upcomingContainer.innerHTML = '';
         overdueContainer.innerHTML = '';
+
         const now = new Date();
         const upcomingOrders = orders.filter(o => new Date(o.reservedTime) >= now);
         const overdueOrders = orders.filter(o => new Date(o.reservedTime) < now);
@@ -125,6 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function renderCard(order) {
             const card = createOrderCard(order);
+            // ポーリングで作り直したときに、取り消し待ちの見た目を復元する
             if (waitingIds.includes(order.orderId.toString())) {
                 const button = card.querySelector('.action-button');
                 card.classList.add('waiting-cancellation');
@@ -138,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
         overdueOrders.forEach(order => overdueContainer.appendChild(renderCard(order)));
     }
 
-    // --- イベントハンドラ ---
     let cancellationTimers = {};
 
     mainElement.addEventListener('click', async (event) => {
@@ -152,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const orderId = card.dataset.orderId;
 
-        // (1) 「取り消し」ボタンがクリックされた場合
         if (button.classList.contains('cancel')) {
             if (cancellationTimers[orderId]) {
                 clearTimeout(cancellationTimers[orderId]);
@@ -162,15 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 button.textContent = '調理完了';
                 button.classList.remove('cancel');
             }
-        }
-        // (2) 「調理完了」ボタンがクリックされた場合
-        else if (button.classList.contains('complete-btn')) {
+        } else if (button.classList.contains('complete-btn')) {
             if (card.classList.contains('waiting-cancellation')) return;
 
             card.classList.add('waiting-cancellation');
             button.textContent = '取り消し';
             button.classList.add('cancel');
 
+            // 押し間違いを取り消せるよう、猶予をおいてからサーバーに送る
             const timerId = setTimeout(async () => {
                 card.classList.add('loading');
                 button.style.display = 'none';
@@ -188,14 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     button.classList.remove('cancel');
                 }
                 delete cancellationTimers[orderId];
-            //変更：取り消し猶予時間を10秒に変更
-            }, 10000);
+            }, CANCEL_GRACE_PERIOD);
 
             cancellationTimers[orderId] = timerId;
         }
     });
 
-    // --- 初期化処理 ---
     async function initialize() {
         const orders = await fetchCookingOrders();
         renderOrders(orders);
