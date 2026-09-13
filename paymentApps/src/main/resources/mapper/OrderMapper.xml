@@ -61,7 +61,7 @@
         WHERE SERVING_STATUS = #{servingStatus}
     </select>
     
-	<select id="selectOrderedItemsByOrderIds" resultType="com.example.dto.OrderedItemRow">
+	<select id="selectOrderedItemsByOrderIds" resultType="com.cdmts.paymentApps.model.dto.OrderedItemRow">
     	SELECT
       	  o.ORDERID   AS orderId,
      	   i.ITEMID    AS itemId,
@@ -69,8 +69,8 @@
      	   o.QUANTITY   AS quantity
  	   FROM ITEM_TABLE i
  	   INNER JOIN ORDER_ITEM_TABLE o
-  	      ON i.ITEM_ID = o.ITEM_ID
- 	   WHERE o.ORDER_ID IN
+  	      ON i.ITEMID = o.ITEMID
+ 	   WHERE o.ORDERID IN
   	      <foreach item="id" collection="orderIds" open="(" separator="," close=")">
    	         #{id}
    	     </foreach>
