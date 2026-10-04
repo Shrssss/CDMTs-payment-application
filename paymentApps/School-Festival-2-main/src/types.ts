@@ -84,3 +84,6 @@ export interface OrderSnapshot {
   itemsCart: Cart;
   displayReserved: string | null;
 }
+
+/** 決済手段の型。 */
+export type PaymentMethod = "card" | "paypay";
