@@ -1,8 +1,7 @@
 package com.cdmts.paymentApps.model.dto;
 
-import java.util.List;
+import java.util.Map;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,32 +14,21 @@ import lombok.Setter;
 @AllArgsConstructor
 public class OrderPaymentResponse {
 
-	/** 注文番号（外部キー） */
 	@NotNull
 	private Long orderId;
-	@NotEmpty
-	private List<OrderedItem> orderedItems;
 	
-	@Getter
-	@Setter
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class OrderedItem{
-		
-		@NotNull
-		private Long itemId;
-		@NotNull
-		private Integer price;
-		@NotNull
-		private Integer quantity;
-	}
-	
-	public long getTotalAmount() {
-		long sum=0;
-		for(OrderedItem item:orderedItems) {
-			sum+=item.getPrice()*item.getQuantity();
-		}
-		return sum;
-	}
-	
+	@NotNull 
+    private String sid;
+
+	/** 決済金額 */
+	@NotNull 
+    private Long amount;
+
+	/** 決済URL */
+	@NotNull 
+    private String action;
+
+	/** 外部フォームの送信フィールド */
+	@NotNull 
+    private Map<String, String> fields;
 }

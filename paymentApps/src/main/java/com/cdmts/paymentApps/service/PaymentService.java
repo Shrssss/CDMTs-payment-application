@@ -48,40 +48,35 @@ public class PaymentService {
 	public PaymentResponse createPayment(Long orderId,String sourceId) {
 		
 		try {
-			
-			Order orderEntity=orderMapper.selectOrdersByOrderIds(List.of(orderId)).getFirst();
-			
+			List<Order> orderEntities = orderMapper.selectOrdersByOrderIds(List.of(orderId));
+				
+			if(orderEntities == null || orderEntities.isEmpty())
+				throw new IllegalArgumentException("指定された注文が存在しません");
+				
+			Order orderEntity = orderEntities.get(0);
+				
 			List<OrderItem> orderItemEntities=orderItemMapper.selectOrderItemsByOrderId(orderId);
-			
-			if(orderItemEntities==null||orderItemEntities.isEmpty()) throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
-			
+				
+			if(orderItemEntities==null||orderItemEntities.isEmpty())
+				throw new IllegalArgumentException("注文に明細がありません: "+orderId);
+				
 			List<Item> itemEntities=itemMapper.selectItemsByItemIds(
 										orderItemEntities.stream()
 											.map(orderItem->orderItem.getItemId())
 											.toList()
 										);
-			
+				
 			Map<Long,Item>itemMap=itemEntities.stream()
 									.collect(Collectors.toMap(Item::getItemId,item->item));
 			
-			OrderPaymentResponse orderPaymentDto=new OrderPaymentResponse(
-														orderId,
-														orderItemEntities.stream()
-															.map(orderItem->new OrderPaymentResponse.OrderedItem(
-																						orderItem.getItemId(),
-																						itemMap.get(orderItem.getItemId()).getPrice(),
-																						orderItem.getQuantity()
-																					)
-																)
-															.toList()
-													);
+			long amount = calculateAmount(itemMap, orderItemEntities);
+			
+			validateAmount(amount);
 			
 			PaymentResponse result=new PaymentResponse();
-			
+
 			boolean hasKeyError=false;
-			
-			long amount=orderPaymentDto.getTotalAmount();
-			
+
 			String existingKey=orderEntity.getIdempotencyKey();
 			
 			if(Boolean.TRUE.equals(orderEntity.getPaymentStatus())) hasKeyError=true;
@@ -165,5 +160,71 @@ public class PaymentService {
 		return client;
 	}
 	
+	private long calculateAmount(Map<Long, Item> itemMap, List<OrderItem> orderItemEntities){
+			long amount= 0L;
+
+			for (OrderItem orderItem : orderItemEntities) {
+    			Item item = itemMap.get(orderItem.getItemId());
+
+    			if (item == null) {
+					throw new IllegalArgumentException("指定されたitemIdが存在しません");
+				}
+
+				amount += (long) item.getPrice() * orderItem.getQuantity();
+			}
+			
+			return amount;
+	}
 	
+	private void validateAmount(long amount) {
+    	if (amount <= 0 || amount > 9_999_999L) {
+        	throw new IllegalArgumentException("決済金額が範囲外です");
+    	}
+	}
+
+	public OrderPaymentResponse preparePayment(Long orderId, String sid) {
+		if (orderId == null) {
+			throw new IllegalArgumentException("注文番号が必要です");
+		}
+		if (sid == null || !sid.matches("[A-Za-z0-9]{1,16}")) {
+			throw new IllegalArgumentException("SIDは半角英数字16文字以内で指定してください");
+		}
+
+		List<Order> orderEntities = orderMapper.selectOrdersByOrderIds(List.of(orderId));
+
+		if (orderEntities == null || orderEntities.isEmpty()) {
+			throw new IllegalArgumentException("指定された注文が存在しません: " + orderId);
+		}
+
+		List<OrderItem> orderItemEntities = orderItemMapper.selectOrderItemsByOrderId(orderId);
+		
+		if (orderItemEntities == null || orderItemEntities.isEmpty()) {
+			throw new IllegalArgumentException("注文に明細がありません: " + orderId);
+		}
+
+		List<Item> itemEntities = itemMapper.selectItemsByItemIds(
+				orderItemEntities.stream().map(OrderItem::getItemId).toList());
+		
+		Map<Long, Item> itemMap = itemEntities.stream()
+				.collect(Collectors.toMap(Item::getItemId, item -> item));
+
+		var orderpaymentResponse = new OrderPaymentResponse();
+
+		long amount=calculateAmount(itemMap, orderItemEntities);
+
+		validateAmount(amount);
+		
+		Map<String, String> fields = new HashMap<>();
+			fields.put("K1", Long.toString(amount));
+		
+		String action = "https://www.paydesign.jp/settle/settle3/bp3.dll";
+		
+		orderpaymentResponse.setOrderId(orderId);
+		orderpaymentResponse.setSid(sid);
+		orderpaymentResponse.setAmount(amount);
+		orderpaymentResponse.setAction(action);
+		orderpaymentResponse.setFields(fields);
+
+		return orderpaymentResponse;
+	}
 }
