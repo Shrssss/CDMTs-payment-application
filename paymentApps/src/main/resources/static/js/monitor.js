@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchAndUpdateBoard = async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/orders/get/byServingStatus/1`);
+            const response = await apiFetch(`${API_BASE_URL}/orders/get/byServingStatus/1`);
 
             if (!response.ok) {
                 throw new Error(`サーバーからの応答が不正です: ${response.status}`);

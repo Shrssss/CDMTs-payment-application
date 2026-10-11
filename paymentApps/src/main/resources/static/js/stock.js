@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchItems = async () => {
         if (USE_MOCK) return MOCK_ITEMS;
 
-        const response = await fetch(`${baseURL}/items/get/allItems`);
+        const response = await apiFetch(`${baseURL}/items/get/allItems`);
         if (!response.ok) {
             throw new Error(`APIからのデータ取得に失敗 (HTTP: ${response.status})`);
         }
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newAvailability = toggle.checked;
 
         try {
-            const response = await fetch(
+            const response = await apiFetch(
                 `${baseURL}/items/update/available/${newAvailability}?itemIds=${itemId}`,
                 { method: 'PUT' }
             );

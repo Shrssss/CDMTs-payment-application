@@ -24,7 +24,25 @@ spring:
 mybatis:
    mapper-locations: classpath:mapper/*.xml
 
+# 店舗用UI（monitor/stock/handover/cooking）の認証。
+# パスワードはここに書かず、環境変数 ADMIN_PASSWORD で渡す。
+admin:
+  auth:
+    enabled: ${ADMIN_AUTH_ENABLED:true}
+    password: ${ADMIN_PASSWORD:}
+
 server:
    port: 8080
    address: 0.0.0.0
    use-forward-headers: true
+   servlet:
+     session:
+       # 学祭当日、朝に一度ログインすれば閉店まで持つようにする
+       timeout: 12h
+       cookie:
+         http-only: true
+         # 他サイトからの PUT/POST に cookie を付けさせない＝CSRF対策。
+         # CSRFトークンを別に持たずに済ませているのはこの設定があるため。
+         same-site: lax
+         # 本番(HTTPS)では true。ローカルは http なので既定は false
+         secure: ${SESSION_COOKIE_SECURE:false}

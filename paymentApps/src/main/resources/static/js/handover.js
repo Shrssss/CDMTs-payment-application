@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchReadyOrders() {
         try {
-            const response = await fetch(`${API_BASE_URL}/orders/get/byServingStatus/1`);
+            const response = await apiFetch(`${API_BASE_URL}/orders/get/byServingStatus/1`);
             if (!response.ok) {
                 throw new Error(`APIエラー: ${response.status}`);
             }
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function patchOrderStatus(orderId, newStatus) {
         try {
-            const response = await fetch(`${API_BASE_URL}/orders/update/servingStatus/${orderId}/${newStatus}`, {
+            const response = await apiFetch(`${API_BASE_URL}/orders/update/servingStatus/${orderId}/${newStatus}`, {
                 method: 'PUT',
             });
             if (!response.ok) {
