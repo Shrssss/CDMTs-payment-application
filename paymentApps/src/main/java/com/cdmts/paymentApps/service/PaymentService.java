@@ -182,13 +182,19 @@ public class PaymentService {
     	}
 	}
 
-	public OrderPaymentResponse preparePayment(Long orderId, String sid) {
-		if (orderId == null) {
+	private String generateSid(Long orderId){
+		if(orderId==null || orderId<=0) {
 			throw new IllegalArgumentException("注文番号が必要です");
 		}
-		if (sid == null || !sid.matches("[A-Za-z0-9]{1,16}")) {
-			throw new IllegalArgumentException("SIDは半角英数字16文字以内で指定してください");
-		}
+
+		String sid=Long.toString(orderId, 36);
+
+		return "O" + sid;
+	}
+
+	public OrderPaymentResponse preparePayment(Long orderId) {
+
+		String sid = generateSid(orderId);
 
 		List<Order> orderEntities = orderMapper.selectOrdersByOrderIds(List.of(orderId));
 
@@ -213,6 +219,12 @@ public class PaymentService {
 		long amount=calculateAmount(itemMap, orderItemEntities);
 
 		validateAmount(amount);
+
+		int updatedRows = paymentMapper.updateSidByOrderId(orderId, sid);
+
+		if (updatedRows != 1) {
+			throw new IllegalStateException("注文へのSID保存に失敗しました");
+		}
 		
 		Map<String, String> fields = new HashMap<>();
 			fields.put("K1", Long.toString(amount));

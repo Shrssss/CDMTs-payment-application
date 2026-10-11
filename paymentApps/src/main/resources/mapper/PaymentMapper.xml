@@ -20,10 +20,17 @@
     </select>
 
 	<select id="selectIdempotencyKeyByOrderId" resultType="String">
-   		 SELECT IDEMPOTENCY_KEY
-   		 FROM ORDER_TABLE
+        SELECT IDEMPOTENCY_KEY
+        FROM ORDER_TABLE
     	WHERE ORDERID = #{orderId}
 	</select>
+
+    <select id="selectOrderBySid" resultMap="orderMap">
+        SELECT ORDERID, ORDER_DATE, RESERVED_TIME, SERVING_STATUS,
+               PAYMENTID, PAYMENT_STATUS, IDEMPOTENCY_KEY
+        FROM ORDER_TABLE
+        WHERE PAYMENTID = #{sid}
+    </select>
 	
 	
 	
@@ -31,6 +38,12 @@
     	UPDATE ORDER_TABLE
    		SET PAYMENTID = #{paymentId},PAYMENT_STATUS = #{paymentStatus},IDEMPOTENCY_KEY = #{idempotencyKey}
    		WHERE ORDERID = #{orderId}
+    </update>
+
+    <update id="updateSidByOrderId">
+        UPDATE ORDER_TABLE
+        SET PAYMENTID = #{sid}
+        WHERE ORDERID = #{orderId}
     </update>
 
 </mapper>

@@ -2,6 +2,7 @@ package com.cdmts.paymentApps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -49,7 +50,7 @@ class PaymentServiceTest {
     @Test
     void preparePaymentReturnsCalculatedAmount() {
         Long orderId = 123L;
-        String sid = "TEST000000000001";
+        String sid = "O3f";
 
         Order order = new Order();
         order.setOrderId(orderId);
@@ -82,8 +83,10 @@ class PaymentServiceTest {
         when(itemMapper.selectItemsByItemIds(List.of(10L, 20L)))
                 .thenReturn(List.of(firstItem, secondItem));
 
+        when(paymentMapper.updateSidByOrderId(orderId, sid)).thenReturn(1);
+
         OrderPaymentResponse response =
-                paymentService.preparePayment(orderId, sid);
+                paymentService.preparePayment(orderId);
 
         assertEquals(orderId, response.getOrderId());
         assertEquals(sid, response.getSid());
@@ -93,14 +96,15 @@ class PaymentServiceTest {
                 "https://www.paydesign.jp/settle/settle3/bp3.dll",
                 response.getAction());
 
-        verifyNoInteractions(squareClient, paymentMapper);
+        verify(paymentMapper).updateSidByOrderId(orderId, sid);
+        verifyNoInteractions(squareClient);
     }
 
     // 条件超過の確認テスト
     @Test
     void InvalidAmountThrowsException() {
         Long orderId = 123L;
-        String sid = "TEST000000000001";
+        String sid = "O3f";
 
         Order order = new Order();
         order.setOrderId(orderId);
@@ -134,8 +138,42 @@ class PaymentServiceTest {
                 .thenReturn(List.of(firstItem, secondItem));
 
         assertThrows(IllegalArgumentException.class, () -> {
-            paymentService.preparePayment(orderId, sid);
-            verifyNoInteractions(squareClient, paymentMapper);
+            paymentService.preparePayment(orderId);
         });
+        verifyNoInteractions(squareClient, paymentMapper);
+    }
+
+    // SID保存で注文を更新できなければ、開始情報を返さない
+    @Test
+    void preparePaymentThrowsWhenSidCannotBeSaved() {
+        Long orderId = 123L;
+        String sid = "O3f";
+
+        Order order = new Order();
+        order.setOrderId(orderId);
+        order.setPaymentStatus(false);
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setOrderId(orderId);
+        orderItem.setItemId(10L);
+        orderItem.setQuantity(2);
+
+        Item item = new Item();
+        item.setItemId(10L);
+        item.setPrice(300);
+
+        when(orderMapper.selectOrdersByOrderIds(List.of(orderId)))
+                .thenReturn(List.of(order));
+        when(orderItemMapper.selectOrderItemsByOrderId(orderId))
+                .thenReturn(List.of(orderItem));
+        when(itemMapper.selectItemsByItemIds(List.of(10L)))
+                .thenReturn(List.of(item));
+        when(paymentMapper.updateSidByOrderId(orderId, sid)).thenReturn(0);
+
+        assertThrows(IllegalStateException.class,
+                () -> paymentService.preparePayment(orderId));
+
+        verify(paymentMapper).updateSidByOrderId(orderId, sid);
+        verifyNoInteractions(squareClient);
     }
 }
