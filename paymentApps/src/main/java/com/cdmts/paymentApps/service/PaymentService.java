@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cdmts.paymentApps.mapper.ItemMapper;
@@ -43,7 +44,31 @@ public class PaymentService {
 	private final ItemMapper itemMapper;
 	
 	private final PaymentMapper paymentMapper;
+
+	@Value("${paysys.public-origin}")
+	private String publicOrigin;
 	
+	@Value("${paysys.action-url}")
+	private String paymentActionUrl;
+
+	@Value("${paysys.card-ip}")
+	private String cardIp;
+
+	@Value("${paysys.paypay-ip}")
+	private String paypayIp;
+
+	@Value("${paysys.return-paths.card-ok}")
+	private String cardOkReturnPath;
+
+	@Value("${paysys.return-paths.card-error}")
+	private String cardErrorReturnPath;
+
+	@Value("${paysys.return-paths.paypay-ok}")
+	private String paypayOkReturnPath;
+
+	@Value("${paysys.return-paths.paypay-cancel}")
+	private String paypayCancelReturnPath;
+
 	@Transactional
 	public PaymentResponse createPayment(Long orderId,String sourceId) {
 		
@@ -192,6 +217,22 @@ public class PaymentService {
 		return "O" + sid;
 	}
 
+	public String getCardOkReturnUrl() {
+		return publicOrigin + cardOkReturnPath;
+	}
+
+	public String getCardErrorReturnUrl() {
+		return publicOrigin + cardErrorReturnPath;
+	}
+
+	public String getPaypayOkReturnUrl() {
+		return publicOrigin + paypayOkReturnPath;
+	}
+
+	public String getPaypayCancelReturnUrl() {
+		return publicOrigin + paypayCancelReturnPath;
+	}
+
 	public OrderPaymentResponse preparePayment(Long orderId) {
 
 		String sid = generateSid(orderId);
@@ -229,7 +270,7 @@ public class PaymentService {
 		Map<String, String> fields = new HashMap<>();
 			fields.put("K1", Long.toString(amount));
 		
-		String action = "https://www.paydesign.jp/settle/settle3/bp3.dll";
+		String action = paymentActionUrl;
 		
 		orderpaymentResponse.setOrderId(orderId);
 		orderpaymentResponse.setSid(sid);

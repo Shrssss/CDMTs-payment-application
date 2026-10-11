@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cdmts.paymentApps.mapper.ItemMapper;
 import com.cdmts.paymentApps.mapper.OrderItemMapper;
@@ -51,6 +52,8 @@ class PaymentServiceTest {
     void preparePaymentReturnsCalculatedAmount() {
         Long orderId = 123L;
         String sid = "O3f";
+
+        ReflectionTestUtils.setField(paymentService, "paymentActionUrl", "https://www.testpayment.com/settle");
 
         Order order = new Order();
         order.setOrderId(orderId);
@@ -93,7 +96,7 @@ class PaymentServiceTest {
         assertEquals(Long.valueOf(1100L), response.getAmount());
         assertEquals("1100", response.getFields().get("K1"));
         assertEquals(
-                "https://www.paydesign.jp/settle/settle3/bp3.dll",
+                "https://www.testpayment.com/settle",
                 response.getAction());
 
         verify(paymentMapper).updateSidByOrderId(orderId, sid);
