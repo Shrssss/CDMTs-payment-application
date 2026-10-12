@@ -31,6 +31,9 @@ public class OrderResponse {
 	/** 受け渡しの状態(0,1,2) */
 	@NotNull
 	private Short servingStatus;
+	
+	@NotNull
+	private Boolean paymentStatus;
 
 	@NotEmpty
 	private List<OrderedItem> orderedItems;
