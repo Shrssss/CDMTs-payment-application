@@ -46,7 +46,7 @@ export const App = () => {
     setPaymentState,
     setSelectedTime,
   });
-  usePaymentReturn({ dispatch, setPaymentState, setSelectedTime });
+  const { refreshPaymentStatus, checking } = usePaymentReturn({ dispatch, setPaymentState, setSelectedTime });
 
   return (
     <>
@@ -78,6 +78,8 @@ export const App = () => {
           setSelectedTime={setSelectedTime}
           currentTestTime={currentTestTime}
           paymentState={paymentState}
+          onRefreshPaymentStatus={refreshPaymentStatus}
+          checkingPaymentStatus={checking}
           setPaymentState={setPaymentState}
           dispatch={dispatch}
           onOpenLegalNotice={() => setIsLegalNoticeOpen(true)}
