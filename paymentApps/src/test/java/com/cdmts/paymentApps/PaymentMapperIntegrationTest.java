@@ -66,6 +66,14 @@ class PaymentMapperIntegrationTest {
         // Serviceが再準備を保存成功と判断できる戻り値か確認する。
         assertEquals(1, paymentMapper.updateSidByOrderId(original.getOrderId(), sid),
                 "同一SIDの再保存が0件なら、Serviceの更新件数判定を見直してください");
+
+        assertEquals(1, paymentMapper.markPaidBySid(sid));
+        Order paid = paymentMapper.selectOrderBySid(sid);
+        assertTrue(paid.getPaymentStatus());
+        assertTrue(paymentMapper.selectPaymentStatusByOrderId(original.getOrderId()));
+        assertEquals(sid, paid.getPaymentId());
+        assertEquals(original.getIdempotencyKey(), paid.getIdempotencyKey());
+        assertEquals(original.getServingStatus(), paid.getServingStatus());
     }
 
     @Test
@@ -74,5 +82,6 @@ class PaymentMapperIntegrationTest {
         assertEquals(0, jdbc.queryForObject(
                 "SELECT COUNT(*) FROM ORDER_TABLE WHERE PAYMENTID = ?", Integer.class, sid));
         assertNull(paymentMapper.selectOrderBySid(sid));
+        assertEquals(0, paymentMapper.markPaidBySid(sid));
     }
 }

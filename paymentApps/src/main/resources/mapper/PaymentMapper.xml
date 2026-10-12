@@ -40,6 +40,13 @@
    		WHERE ORDERID = #{orderId}
     </update>
 
+    <!-- SIDや既存キーは維持し、決済状態だけを更新する。 -->
+    <update id="markPaidBySid">
+        UPDATE ORDER_TABLE
+        SET PAYMENT_STATUS = true
+        WHERE PAYMENTID = #{sid}
+    </update>
+
     <update id="updateSidByOrderId">
         UPDATE ORDER_TABLE
         SET PAYMENTID = #{sid}

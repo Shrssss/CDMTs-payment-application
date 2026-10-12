@@ -9,6 +9,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import com.cdmts.paymentApps.model.dto.PaymentStatusResponse;
 
 import com.cdmts.paymentApps.mapper.ItemMapper;
 import com.cdmts.paymentApps.mapper.OrderItemMapper;
@@ -279,6 +282,17 @@ public class PaymentService {
 		orderpaymentResponse.setFields(fields);
 
 		return orderpaymentResponse;
+	}
+
+	public PaymentStatusResponse getPaymentStatus(Long orderId) {
+		if (orderId == null || orderId <= 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "正の注文番号が必要です");
+		}
+		Boolean paid = paymentMapper.selectPaymentStatusByOrderId(orderId);
+		if (paid == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "対応する注文がありません");
+		}
+		return new PaymentStatusResponse(orderId, paid ? "PAID" : "WAITING");
 	}
 
 	public OrderPaymentResponse prepareCardpayment(Long orderId, String cardToken, String mail){

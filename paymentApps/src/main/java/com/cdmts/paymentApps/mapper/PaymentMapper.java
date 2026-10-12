@@ -16,6 +16,8 @@ public interface PaymentMapper {
 									@Param("sid") String sid);
 
 	public Order selectOrderBySid(@Param("sid") String sid);
+
+	public int markPaidBySid(@Param("sid") String sid);
 	
 	public int updatePaymentIdAndStatusAndKey(@Param("orderId")Long orderId,
 													@Param("paymentId")String paymentId,
