@@ -11,3 +11,6 @@ node_modules
 .env.production
 .claude/
 .codex/
+
+# Local implementation notes containing sensitive information
+docs/Paysys決済移行_実装手順書.md
