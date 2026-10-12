@@ -1,12 +1,4 @@
-// カード・PayPay決済の送信・結果更新をまとめて扱う共通フック。
-// useCardPaymentFlow.ts/usePayPayPaymentFlow.tsの実体で、決済手段ごとに違う値
-// (モック注文ID・未実装時のエラー文言)だけをパラメータとして受け取る。
-// 以前はカード用・PayPay用でほぼ同一の実装を別々のファイルに複製していたが、
-// 決済完了フローの修正のたびに二重メンテが必要になっていたため統合した。
-//
-// PaySys(カード・PayPayとも)の実バックエンド連携は後任フロントエンド開発者が担当する。
-// USE_MOCK_PAYMENTがオンの場合のみ、モックで決済成功画面まで到達できる迂回策であり、
-// 実際のAPI接続(バックエンドへの注文作成・決済実行)は一切行っていない。
+// 方式別フックからモック有効時に使う共通処理。旧注文作成のみの分岐は互換のため保持。
 import { useCallback, useState, type Dispatch, type SetStateAction } from "react";
 
 import { ORDER_SNAPSHOT_CONFIG, USE_MOCK_PAYMENT } from "../constants/config";
