@@ -4,6 +4,7 @@
 
 import { API_ENDPOINTS, SQUARE_FALLBACK_CONFIG } from "../constants/config";
 import type { MenuItemResponse, PaymentApiResponse, SquareConfig } from "../types";
+import type { PaymentPrepareResponse } from "../types";
 
 function isValidAppId(id: unknown): id is string {
   if (!id || typeof id !== "string") return false;
@@ -12,6 +13,18 @@ function isValidAppId(id: unknown): id is string {
 }
 
 export const Api = {
+  async fetchPaymentStatus(orderId: number): Promise<{ orderId: number; state: "WAITING" | "PAID" }> {
+    const res = await fetch(`/api/payments/${orderId}/status`, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error("決済状況を取得できませんでした。");
+    const data = await res.json();
+    if (data.orderId !== orderId || !["WAITING", "PAID"].includes(data.state)) {
+      throw new Error("決済状況の応答が不正です。");
+    }
+    return data;
+  },
   // ⚠️ 未使用(Square廃止に伴い隔離。src/legacy/square/ 以外から呼び出さないこと)
   // Square の applicationId / locationId / environment を取得する。
   async getSquareConfig({
@@ -79,6 +92,48 @@ export const Api = {
     // 2) 最後はフロント内 fallback で継続する。
     console.warn("getSquareConfig: using SQUARE_FALLBACK_CONFIG (development only)");
     return { ...SQUARE_FALLBACK_CONFIG };
+  },
+
+  // クレジットカード決済の準備を行う。
+  async prepareCardPayment({
+    orderId,
+    cardToken,
+    mail,
+  }: {
+    orderId: number;
+    cardToken: string;
+    mail: string;
+  }): Promise<PaymentPrepareResponse> {
+
+    const res = await fetch(API_ENDPOINTS.PAYMENT_CARD_PREPARE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId, cardToken, mail }),
+    });
+
+    if (!res.ok) {
+      throw new Error("カード決済の準備に失敗しました");
+    }
+
+    return res.json();
+  },
+
+  async preparePayPayPayment({
+    orderId,
+  }: {
+    orderId: number;
+  }): Promise<PaymentPrepareResponse> {
+    const res = await fetch(API_ENDPOINTS.PAYMENT_PAYPAY_PREPARE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+    });
+
+    if (!res.ok) {
+      throw new Error("PayPay決済の準備に失敗しました");
+    }
+
+    return res.json();
   },
 
   // 全商品(価格・商品名・画像パス・在庫状況)を取得する。

@@ -19,6 +19,7 @@ describe("useMockPaymentFlow", () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     document.body.removeChild(container);
     container = null;
     process.env = originalEnv;
@@ -76,8 +77,10 @@ describe("useMockPaymentFlow", () => {
     expect(saved.itemsCart).toEqual({ 10: 1 });
   });
 
-  test("モックオフの場合、未実装エラーを返しバックエンドへは接続しない", async () => {
+  test("共通フックの旧実通信分岐は注文作成後も支払済みとして保存しない", async () => {
     process.env.VITE_USE_MOCK_PAYMENT = "false";
+    const { Api } = require("../services/apiService");
+    const createOrder = jest.spyOn(Api, "createOrder").mockResolvedValue(42);
     const dispatch = jest.fn();
     const setPaymentState = jest.fn();
 
@@ -95,8 +98,11 @@ describe("useMockPaymentFlow", () => {
       outcome: { ok: false, orderId: null, error: null, receiptUrl: null, displayReserved: null },
     });
     expect(result.outcome).toEqual(
-      expect.objectContaining({ ok: false, orderId: null, error: "カード決済は未実装です" })
+      expect.objectContaining({ ok: false, orderId: 42, error: "カード決済は未実装です" })
     );
+    expect(createOrder).toHaveBeenCalledWith(expect.objectContaining({
+      items: [{ itemId: 10, quantity: 1 }], servingStatus: 0, paymentStatus: false,
+    }));
 
     expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "paymentResult" });
     // 未実装エラーなので、localStorageへは何も保存しない

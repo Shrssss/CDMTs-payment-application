@@ -3,7 +3,6 @@ package com.cdmts.paymentApps.model.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.cdmts.paymentApps.model.dto.OrderPaymentResponse.OrderedItem;
 import com.cdmts.paymentApps.model.entity.Item;
 
 import jakarta.validation.constraints.NotBlank;
