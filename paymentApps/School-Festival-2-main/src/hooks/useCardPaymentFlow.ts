@@ -14,6 +14,7 @@ import { Api } from "../services/apiService";
 import { parseReservedToDate } from "../utils/orderUtils";
 import { buildOrderItems } from "../utils/orderUtils";
 import { toLocalDateTimeString } from "../utils/dateFormat";
+import { savePendingPayment } from "../features/payment/pendingPayment";
 import { submitPaymentForm } from "../features/payment/submitPaymentForm";
 
 import { useState } from "react";
@@ -118,6 +119,10 @@ export function useCardPaymentFlow({
           mail: email,
         });
 
+        savePendingPayment({
+          orderId, sid: prepared.sid, method: "card", cart,
+          reservedAtIso: reservedDate.toISOString(), createdAt: new Date().toISOString(),
+        });
         submitPaymentForm(prepared);
 
       } catch {

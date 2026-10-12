@@ -13,6 +13,18 @@ function isValidAppId(id: unknown): id is string {
 }
 
 export const Api = {
+  async fetchPaymentStatus(orderId: number): Promise<{ orderId: number; state: "WAITING" | "PAID" }> {
+    const res = await fetch(`/api/payments/${orderId}/status`, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error("決済状況を取得できませんでした。");
+    const data = await res.json();
+    if (data.orderId !== orderId || !["WAITING", "PAID"].includes(data.state)) {
+      throw new Error("決済状況の応答が不正です。");
+    }
+    return data;
+  },
   // ⚠️ 未使用(Square廃止に伴い隔離。src/legacy/square/ 以外から呼び出さないこと)
   // Square の applicationId / locationId / environment を取得する。
   async getSquareConfig({

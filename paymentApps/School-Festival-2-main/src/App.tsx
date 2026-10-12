@@ -8,6 +8,7 @@ import { useAppFlow } from "./hooks/useAppFlow";
 import { useOrderSummary } from "./hooks/useOrderSummary";
 import { useMenuItems } from "./hooks/useMenuItems";
 import { useOrderSnapshotRestore } from "./hooks/useOrderSnapshotRestore";
+import { usePaymentReturn } from "./hooks/usePaymentReturn";
 import { AppScreenRenderer } from "./AppScreenRenderer";
 import { LegalNoticePage } from "./pages/LegalNoticePage";
 import { INITIAL_PAYMENT_STATE } from "./constants/initialState";
@@ -45,6 +46,7 @@ export const App = () => {
     setPaymentState,
     setSelectedTime,
   });
+  usePaymentReturn({ dispatch, setPaymentState, setSelectedTime });
 
   return (
     <>

@@ -29,6 +29,7 @@ export interface BillingInfo {
 }
 
 export interface PaymentOutcome {
+  status?: "WAITING" | "PAID" | "UNRESOLVED";
   ok: boolean;
   orderId: string | number | null;
   error: string | null;
