@@ -10,19 +10,22 @@ import { useMockPaymentFlow } from "./useMockPaymentFlow";
 import { MOCK_PAYSYS_CARD_ORDER_ID } from "../constants/mocks/paysysCardMock";
 import type { AppAction, Cart, PaymentState } from "../types";
 import { USE_MOCK_PAYMENT } from "../constants/config";
+import { Api } from "../services/apiService";
+import { parseReservedToDate } from "../utils/orderUtils";
+import { buildOrderItems } from "../utils/orderUtils";
+import { toLocalDateTimeString } from "../utils/dateFormat";
+import { submitPaymentForm } from "../features/payment/submitPaymentForm";
 
 import { useState } from "react";
 
 export function useCardPaymentFlow({
   email,
-  prepareCardPayment,
   cart,
   selectedTime,
   dispatch,
   setPaymentState,
 }: {
   email: string;
-  prepareCardPayment?: (token: string, email: string) => Promise<void>;
   cart: Cart;
   selectedTime: string | null;
   dispatch: Dispatch<AppAction>;
@@ -88,14 +91,35 @@ export function useCardPaymentFlow({
         return;
       }
 
-      alert("カード情報の確認に成功しました");
-
       try {
-        if (prepareCardPayment) {
-          await prepareCardPayment(response.id, email);
-        } else {
-          alert("決済開始処理は未実装です。まだお支払いは行われていません。");
+        const reservedDate = parseReservedToDate(selectedTime);
+
+        if (!reservedDate) {
+          throw new Error("予約時刻が不正です。");
         }
+
+        const { items } = buildOrderItems(cart);
+
+        if (items.length === 0) {
+          throw new Error("注文内容が空です。");
+        }
+
+        const orderId = await Api.createOrder({
+          items,
+          orderDate: toLocalDateTimeString(new Date()),
+          reservedTime: toLocalDateTimeString(reservedDate),
+          servingStatus: 0,
+          paymentStatus: false,
+        });
+
+        const prepared = await Api.prepareCardPayment({
+          orderId,
+          cardToken: response.id,
+          mail: email,
+        });
+
+        submitPaymentForm(prepared);
+
       } catch {
         alert("決済準備に失敗しました。再度お試しください。");
       }finally {

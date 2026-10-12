@@ -280,4 +280,37 @@ public class PaymentService {
 
 		return orderpaymentResponse;
 	}
+
+	public OrderPaymentResponse prepareCardpayment(Long orderId, String cardToken, String mail){
+		
+		OrderPaymentResponse response = preparePayment(orderId);
+		
+		Map<String, String> fields = response.getFields();
+
+		fields.put("IP", cardIp);
+		fields.put("SID", response.getSid());
+		fields.put("STORE", "51");
+		fields.put("TOKEN", cardToken);
+		fields.put("KAKUTEI", "1");
+		fields.put("MAIL", mail);
+		fields.put("OKURL", getCardOkReturnUrl());
+		fields.put("RT", getCardErrorReturnUrl());
+
+		return response;
+	}
+
+	public OrderPaymentResponse preparePaypayPayment(Long orderId){
+		
+		OrderPaymentResponse response = preparePayment(orderId);
+		
+		Map<String, String> fields = response.getFields();
+
+		fields.put("IP", paypayIp);
+		fields.put("SID", response.getSid());
+		fields.put("STORE", "42");
+		fields.put("OKURL", getPaypayOkReturnUrl());
+		fields.put("RT", getPaypayCancelReturnUrl());
+
+		return response;
+	}
 }

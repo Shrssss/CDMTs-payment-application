@@ -42,7 +42,14 @@ export interface PaymentState {
   phase?: "input" | undefined;
   cardAttached?: boolean;
 }
-
+/** 両決済の準備を行うAPIのレスポンス形。 */
+export interface PaymentPrepareResponse {
+  orderId: number;
+  sid: string;
+  amount: number;
+  action: string;
+  fields: Record<string, string>;
+}
 /** buildOrderItems() が組み立てる、バックエンドへ送る注文データの形。 */
 export interface OrderItemsPayload {
   items: { itemId: number; quantity: number }[];
