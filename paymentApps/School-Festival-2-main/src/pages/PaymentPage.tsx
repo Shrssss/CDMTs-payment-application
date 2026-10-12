@@ -1,5 +1,6 @@
 // クレジットカード決済画面。useCardPaymentFlowフックが送信・結果更新を担う。
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
+import { useState } from "react";
 import { useCardPaymentFlow } from "../hooks/useCardPaymentFlow";
 import type { AppAction, Cart, PaymentState } from "../types";
 
@@ -18,7 +19,9 @@ export const PaymentPage = ({
   cart,
   onOpenLegalNotice,
 }: PaymentPageProps) => {
-  const { handlePayWithCard, submitting } = useCardPaymentFlow({
+  const [email, setEmail] = useState("");
+  const { handlePayWithCard, submitting, emailError } = useCardPaymentFlow({
+    email,
     cart,
     selectedTime,
     dispatch,
@@ -28,6 +31,22 @@ export const PaymentPage = ({
   return (
     <div style={{ padding: "12px 10px" }}>
       <p style={{ margin: "6px 10px" }}>クレジットカードでのお支払い</p>
+
+      <label htmlFor="payment-email">メールアドレス（必須）</label>
+      <input
+        id="payment-email"
+        placeholder="example@example.com"
+        style={{ boxSizing: "border-box", width: "100%", height: "40px", fontSize: "16px", padding: "0 8px", marginTop: "8px" }}
+        type="email"
+        autoComplete="email"
+        required
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        disabled={submitting}
+        aria-invalid={Boolean(emailError)}
+        aria-describedby={emailError ? "payment-email-error" : undefined}
+      />
+      {emailError && <p id="payment-email-error" role="alert" style={{ color: "#b00020" }}>{emailError}</p>}
 
       <button
         style={{ ...payBtnStyle, opacity: submitting ? 0.5 : 1 }}
@@ -39,6 +58,7 @@ export const PaymentPage = ({
 
       <p style={{ color: "#808080" }}>この決済は外部決済サービス「Paysys」によって行われます</p>
       <p style={{ color: "#808080" }}>決済には数秒〜数十秒ほど時間がかかる場合があります。</p>
+      <p style={{ color: "#808080" }}>また、EMV-3Dセキュア決済のためにメールアドレスの入力が必要です。ご了承ください。</p>
 
       <p style={{ textAlign: "center", marginTop: "16px" }}>
         <button style={legalLinkStyle} onClick={onOpenLegalNotice}>

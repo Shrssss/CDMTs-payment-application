@@ -14,11 +14,15 @@ import { USE_MOCK_PAYMENT } from "../constants/config";
 import { useState } from "react";
 
 export function useCardPaymentFlow({
+  email,
+  prepareCardPayment,
   cart,
   selectedTime,
   dispatch,
   setPaymentState,
 }: {
+  email: string;
+  prepareCardPayment?: (token: string, email: string) => Promise<void>;
   cart: Cart;
   selectedTime: string | null;
   dispatch: Dispatch<AppAction>;
@@ -36,8 +40,16 @@ export function useCardPaymentFlow({
   });
 
   const [cardSubmitting, setSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const handlePayWithCard = async () => {
+
+    const validationError = validateCardEmail(email);
+
+    setEmailError(validationError);
+    
+    if (validationError) return;
+
     if (USE_MOCK_PAYMENT) {
       await handlePay();
       return;
@@ -79,15 +91,19 @@ export function useCardPaymentFlow({
       alert("カード情報の確認に成功しました");
 
       try {
-        await prepareCardPayment(response.id);
-      } catch (error) {
+        if (prepareCardPayment) {
+          await prepareCardPayment(response.id, email);
+        } else {
+          alert("決済開始処理は未実装です。まだお支払いは行われていません。");
+        }
+      } catch {
         alert("決済準備に失敗しました。再度お試しください。");
       }finally {
         setSubmitting(false);
       }
     });
 
-  } catch (error) {
+  } catch {
     alert("エラーが発生しました。再度お試しください。");
     setSubmitting(false);
   }
@@ -96,5 +112,37 @@ export function useCardPaymentFlow({
   return {
     handlePayWithCard,
     submitting: mockSubmitting || cardSubmitting,
+    emailError,
   };
+}
+
+export function validateCardEmail(email: string): string | null {
+  if (!email) 
+    return "メールアドレスを入力してください。";
+
+  if (!/^[A-Za-z0-9_.@-]+$/.test(email)) {
+    return "半角英数字と記号 - _ . @ のみ使用できます。";
+  }
+
+
+  if (email.length > 100)
+    return "メールアドレスは100文字以内で入力してください。";
+
+  const parts = email.split("@");
+
+  const local = parts[0];
+
+  const domain = parts[1];
+  
+  if (parts.length !== 2
+    || !local
+    || local.startsWith(".")
+    || local.endsWith(".")
+    || local.includes("..")
+    || !domain
+    || !domain.split(".").every((label) => /^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/.test(label)))
+      {
+        return "正しいメールアドレスを入力してください。";
+    }
+  return null;
 }
