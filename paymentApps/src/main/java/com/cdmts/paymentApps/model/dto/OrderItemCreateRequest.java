@@ -3,7 +3,11 @@ package com.cdmts.paymentApps.model.dto;
 import com.cdmts.paymentApps.model.entity.OrderItem;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class OrderItemCreateRequest {
 	
 	    /** 商品番号（外部キー） */

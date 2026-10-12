@@ -33,7 +33,7 @@ public class OrderCreateRequest {
 					reservedTime,
 					servingStatus,
 					null,
-					paymentStatus,
+					Boolean.FALSE,
 					null
 				);
 	}
