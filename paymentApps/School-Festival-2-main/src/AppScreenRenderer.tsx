@@ -24,6 +24,8 @@ import type {
 } from "./types";
 
 interface AppScreenRendererProps {
+  onRefreshPaymentStatus?: () => void;
+  checkingPaymentStatus?: boolean;
   step: Step;
   next: () => void;
   prev: () => void;
@@ -53,6 +55,8 @@ interface AppScreenRendererProps {
 type RenderPageProps = Omit<AppScreenRendererProps, "prev" | "calculateSumInMenu" | "calculateSumPrice">;
 
 const renderPage = ({
+  onRefreshPaymentStatus,
+  checkingPaymentStatus,
   step,
   next,
   cart,
@@ -140,6 +144,8 @@ const renderPage = ({
     case "paymentResult":
       return (
         <PaymentResultPage
+          onRefreshPaymentStatus={onRefreshPaymentStatus}
+          checkingPaymentStatus={checkingPaymentStatus}
           paymentState={paymentState}
           selectedTime={selectedTime}
           setPaymentState={setPaymentState}
@@ -161,6 +167,8 @@ const renderPage = ({
 };
 
 export const AppScreenRenderer = ({
+  onRefreshPaymentStatus,
+  checkingPaymentStatus,
   // 現在の画面状態に応じて各ページコンポーネントを切り替えて描画する補助コンポーネント。
   step,
   next,
@@ -190,6 +198,8 @@ export const AppScreenRenderer = ({
   return (
     <>
       {renderPage({
+        onRefreshPaymentStatus,
+        checkingPaymentStatus,
         step,
         next,
         cart,

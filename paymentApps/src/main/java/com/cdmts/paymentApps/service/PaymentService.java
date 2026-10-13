@@ -7,7 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import com.cdmts.paymentApps.model.dto.PaymentStatusResponse;
 
 import com.cdmts.paymentApps.mapper.ItemMapper;
 import com.cdmts.paymentApps.mapper.OrderItemMapper;
@@ -43,45 +47,64 @@ public class PaymentService {
 	private final ItemMapper itemMapper;
 	
 	private final PaymentMapper paymentMapper;
+
+	@Value("${paysys.public-origin}")
+	private String publicOrigin;
 	
+	@Value("${paysys.action-url}")
+	private String paymentActionUrl;
+
+	@Value("${paysys.card-ip}")
+	private String cardIp;
+
+	@Value("${paysys.paypay-ip}")
+	private String paypayIp;
+
+	@Value("${paysys.return-paths.card-ok}")
+	private String cardOkReturnPath;
+
+	@Value("${paysys.return-paths.card-error}")
+	private String cardErrorReturnPath;
+
+	@Value("${paysys.return-paths.paypay-ok}")
+	private String paypayOkReturnPath;
+
+	@Value("${paysys.return-paths.paypay-cancel}")
+	private String paypayCancelReturnPath;
+
 	@Transactional
 	public PaymentResponse createPayment(Long orderId,String sourceId) {
 		
 		try {
-			
-			Order orderEntity=orderMapper.selectOrdersByOrderIds(List.of(orderId)).getFirst();
-			
+			List<Order> orderEntities = orderMapper.selectOrdersByOrderIds(List.of(orderId));
+				
+			if(orderEntities == null || orderEntities.isEmpty())
+				throw new IllegalArgumentException("指定された注文が存在しません");
+				
+			Order orderEntity = orderEntities.get(0);
+				
 			List<OrderItem> orderItemEntities=orderItemMapper.selectOrderItemsByOrderId(orderId);
-			
-			if(orderItemEntities==null||orderItemEntities.isEmpty()) throw new IllegalArgumentException("指定されたorderIdが存在しません: "+orderId);
-			
+				
+			if(orderItemEntities==null||orderItemEntities.isEmpty())
+				throw new IllegalArgumentException("注文に明細がありません: "+orderId);
+				
 			List<Item> itemEntities=itemMapper.selectItemsByItemIds(
 										orderItemEntities.stream()
 											.map(orderItem->orderItem.getItemId())
 											.toList()
 										);
-			
+				
 			Map<Long,Item>itemMap=itemEntities.stream()
 									.collect(Collectors.toMap(Item::getItemId,item->item));
 			
-			OrderPaymentResponse orderPaymentDto=new OrderPaymentResponse(
-														orderId,
-														orderItemEntities.stream()
-															.map(orderItem->new OrderPaymentResponse.OrderedItem(
-																						orderItem.getItemId(),
-																						itemMap.get(orderItem.getItemId()).getPrice(),
-																						orderItem.getQuantity()
-																					)
-																)
-															.toList()
-													);
+			long amount = calculateAmount(itemMap, orderItemEntities);
+			
+			validateAmount(amount);
 			
 			PaymentResponse result=new PaymentResponse();
-			
+
 			boolean hasKeyError=false;
-			
-			long amount=orderPaymentDto.getTotalAmount();
-			
+
 			String existingKey=orderEntity.getIdempotencyKey();
 			
 			if(Boolean.TRUE.equals(orderEntity.getPaymentStatus())) hasKeyError=true;
@@ -165,5 +188,143 @@ public class PaymentService {
 		return client;
 	}
 	
+	private long calculateAmount(Map<Long, Item> itemMap, List<OrderItem> orderItemEntities){
+			long amount= 0L;
+
+			for (OrderItem orderItem : orderItemEntities) {
+    			Item item = itemMap.get(orderItem.getItemId());
+
+    			if (item == null) {
+					throw new IllegalArgumentException("指定されたitemIdが存在しません");
+				}
+
+				amount += (long) item.getPrice() * orderItem.getQuantity();
+			}
+			
+			return amount;
+	}
 	
+	private void validateAmount(long amount) {
+    	if (amount <= 0 || amount > 9_999_999L) {
+        	throw new IllegalArgumentException("決済金額が範囲外です");
+    	}
+	}
+
+	private String generateSid(Long orderId){
+		if(orderId==null || orderId<=0) {
+			throw new IllegalArgumentException("注文番号が必要です");
+		}
+
+		String sid=Long.toString(orderId, 36);
+
+		return "O" + sid;
+	}
+
+	public String getCardOkReturnUrl() {
+		return publicOrigin + cardOkReturnPath;
+	}
+
+	public String getCardErrorReturnUrl() {
+		return publicOrigin + cardErrorReturnPath;
+	}
+
+	public String getPaypayOkReturnUrl() {
+		return publicOrigin + paypayOkReturnPath;
+	}
+
+	public String getPaypayCancelReturnUrl() {
+		return publicOrigin + paypayCancelReturnPath;
+	}
+
+	public OrderPaymentResponse preparePayment(Long orderId) {
+
+		String sid = generateSid(orderId);
+
+		List<Order> orderEntities = orderMapper.selectOrdersByOrderIds(List.of(orderId));
+
+		if (orderEntities == null || orderEntities.isEmpty()) {
+			throw new IllegalArgumentException("指定された注文が存在しません: " + orderId);
+		}
+
+		List<OrderItem> orderItemEntities = orderItemMapper.selectOrderItemsByOrderId(orderId);
+		
+		if (orderItemEntities == null || orderItemEntities.isEmpty()) {
+			throw new IllegalArgumentException("注文に明細がありません: " + orderId);
+		}
+
+		List<Item> itemEntities = itemMapper.selectItemsByItemIds(
+				orderItemEntities.stream().map(OrderItem::getItemId).toList());
+		
+		Map<Long, Item> itemMap = itemEntities.stream()
+				.collect(Collectors.toMap(Item::getItemId, item -> item));
+
+		var orderpaymentResponse = new OrderPaymentResponse();
+
+		long amount=calculateAmount(itemMap, orderItemEntities);
+
+		validateAmount(amount);
+
+		int updatedRows = paymentMapper.updateSidByOrderId(orderId, sid);
+
+		if (updatedRows != 1) {
+			throw new IllegalStateException("注文へのSID保存に失敗しました");
+		}
+		
+		Map<String, String> fields = new HashMap<>();
+			fields.put("K1", Long.toString(amount));
+		
+		String action = paymentActionUrl;
+		
+		orderpaymentResponse.setOrderId(orderId);
+		orderpaymentResponse.setSid(sid);
+		orderpaymentResponse.setAmount(amount);
+		orderpaymentResponse.setAction(action);
+		orderpaymentResponse.setFields(fields);
+
+		return orderpaymentResponse;
+	}
+
+	public PaymentStatusResponse getPaymentStatus(Long orderId) {
+		if (orderId == null || orderId <= 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "正の注文番号が必要です");
+		}
+		Boolean paid = paymentMapper.selectPaymentStatusByOrderId(orderId);
+		if (paid == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "対応する注文がありません");
+		}
+		return new PaymentStatusResponse(orderId, paid ? "PAID" : "WAITING");
+	}
+
+	public OrderPaymentResponse prepareCardpayment(Long orderId, String cardToken, String mail){
+		
+		OrderPaymentResponse response = preparePayment(orderId);
+		
+		Map<String, String> fields = response.getFields();
+
+		fields.put("IP", cardIp);
+		fields.put("SID", response.getSid());
+		fields.put("STORE", "51");
+		fields.put("TOKEN", cardToken);
+		fields.put("KAKUTEI", "1");
+		fields.put("MAIL", mail);
+		fields.put("OKURL", getCardOkReturnUrl());
+		fields.put("RT", getCardErrorReturnUrl());
+
+		return response;
+	}
+
+	public OrderPaymentResponse preparePaypayPayment(Long orderId){
+		
+		OrderPaymentResponse response = preparePayment(orderId);
+		
+		Map<String, String> fields = response.getFields();
+
+		fields.put("IP", paypayIp);
+		fields.put("SID", response.getSid());
+		fields.put("STORE", "42");
+		fields.put("OKURL", getPaypayOkReturnUrl());
+		fields.put("RT", getPaypayCancelReturnUrl());
+
+		return response;
+	}
 }

@@ -4,19 +4,37 @@ import { formatReservedTimeHHmm, parseReservedToDate } from "../utils/orderUtils
 import type { AppAction, PaymentState } from "../types";
 
 interface PaymentResultPageProps {
+  onRefreshPaymentStatus?: () => void;
+  checkingPaymentStatus?: boolean;
   paymentState: PaymentState;
   selectedTime: string | null;
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
   dispatch: Dispatch<AppAction>;
 }
 
-export const PaymentResultPage = ({ paymentState, selectedTime, setPaymentState, dispatch }: PaymentResultPageProps) => {
+export const PaymentResultPage = ({ paymentState, selectedTime, setPaymentState, dispatch, onRefreshPaymentStatus, checkingPaymentStatus = false }: PaymentResultPageProps) => {
   const resetOutcome = () => {
     setPaymentState((prev) => ({
       ...prev,
       outcome: { ok: false, orderId: null, error: null, receiptUrl: null, displayReserved: null },
     }));
   };
+
+  if (paymentState.outcome.status === "WAITING" || paymentState.outcome.status === "UNRESOLVED") {
+    const canRefresh = paymentState.outcome.status === "WAITING";
+    return (
+      <div style={{ padding: 12, textAlign: "center" }} aria-live="polite" aria-busy={checkingPaymentStatus}>
+        <h2>{canRefresh ? "決済結果を確認中" : "注文情報を確認できません"}</h2>
+        {paymentState.outcome.orderId && <p>注文番号：<b>{paymentState.outcome.orderId}</b></p>}
+        <p>支払いが完了していても、結果の反映に時間がかかる場合があります。再度支払いを行わないでください。</p>
+        {paymentState.outcome.error && <p>{paymentState.outcome.error}</p>}
+        {canRefresh && <button onClick={onRefreshPaymentStatus} disabled={checkingPaymentStatus || !onRefreshPaymentStatus}>
+          {checkingPaymentStatus ? "確認しています…" : "支払い状況を再確認"}
+        </button>}
+        <p>確認が続く場合は、注文番号を係員にお伝えください。</p>
+      </div>
+    );
+  }
 
   return (
     <>

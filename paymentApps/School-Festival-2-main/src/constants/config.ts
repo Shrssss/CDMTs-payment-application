@@ -4,6 +4,8 @@ export const API_ENDPOINTS = {
   SQUARE_CONFIG: "/api/square/config",
   ALL_ITEMS: "/api/items/get/allItems",
   ORDER_CREATE: "/api/orders/set",
+  PAYMENT_CARD_PREPARE: "/api/payments/card",
+  PAYMENT_PAYPAY_PREPARE: "/api/payments/paypay",
   PAYMENT_CHARGE: (orderId: string | number, sourceId: string) =>
     `/api/payments/create/${orderId}/${encodeURIComponent(sourceId)}`,
   ORDER_GET: (orderId: string | number) => `/api/order/get/byorderId/${orderId}`,
