@@ -33,6 +33,7 @@ public class OrderService {
 						order.getOrderDate(),
 						order.getReservedTime(),
 						order.getServingStatus(),
+						order.getPaymentStatus(),
 						orderedItems
 				);
 	}
