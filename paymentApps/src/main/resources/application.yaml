@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: 'jdbc:mysql://127.0.0.1:3306/release_db?useSSL=false&serverTimezone=Asia/Tokyo&allowPublicKeyRetrieval=false'
+    url: 'jdbc:mysql://${BACK_DB_HOST:localhost127.0.0.1}:3306/dev_db?useSSL=false&serverTimezone=Asia/Tokyo&allowPublicKeyRetrieval=false'
     username: 'test_user'
     password: ${DB_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -17,10 +17,12 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     
 paysys:
-  public-origin: https://mobile-order.codemates.org
+  public-origin: https://otogi.codemates.org
   action-url: ${PAYMENT_ACTION_URL}
   card-ip: ${PAYSYS_CARD_IP}
   paypay-ip: ${PAYSYS_PAYPAY_IP}
+  cors:
+    allowedOrigins: ${CORS_ALLOWED_ORIGINS:"http://localhost:3000"} 
   return-paths:
     card-ok: '/?paysys_return=card&result=ok'
     card-error: '/?paysys_return=card&result=error'
