@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/items")
-@CrossOrigin(origins = "https://cdmts-pay.codemates.net")
 @RequiredArgsConstructor
 public class ItemController {
 	

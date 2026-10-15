@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "https://cdmts-pay.codemates.net")
 @RequiredArgsConstructor
 public class OrderController {
 	
