@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final List<String> allowedOrigins = Arrays.stream(
-            System.getenv().getOrDefault("ALLOWED_ORIGINS", "").split(","))
+            System.getenv().getOrDefault("CORS_ALLOWED_ORIGINS", "").split(","))
         .map(String::trim)
         .filter(origin -> !origin.isEmpty())
         .toList();
