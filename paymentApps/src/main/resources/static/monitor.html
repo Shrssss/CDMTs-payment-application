@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>呼出しモニター</title>
+    <link rel="stylesheet" href="/css/monitor_style.css">
+</head>
+<body>
+    <header>
+        <h1>お呼び出し番号</h1>
+    </header>
+    <main>
+        <div id="ticket-board-container">
+            </div>
+        <p id="status-message">データを読み込んでいます...</p>
+    </main>
+
+    <!-- apiFetch を定義する。monitor.js より先に読み込む必要がある -->
+    <script src="/js/auth-guard.js"></script>
+    <script src="/js/monitor.js"></script>
+</body>
+</html>
