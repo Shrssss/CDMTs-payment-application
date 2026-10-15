@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: 'jdbc:mysql://${BACK_DB_HOST:localhost127.0.0.1}:3306/dev_db?sslMode=VERIFY_IDENTITY&serverTimezone=Asia/Tokyo'
+    url: 'jdbc:mysql://${BACK_DB_HOST:localhost127.0.0.1}:3306/dev_db?sslMode=VERIFY_CA&serverTimezone=Asia/Tokyo'
     username: 'otogi'
     password: ${DB_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
