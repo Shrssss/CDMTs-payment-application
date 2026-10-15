@@ -14,6 +14,7 @@ interface MenuProps {
   difference?: number;
   isDrinkScreen?: boolean;
   isSoldout?: boolean;
+  isDrink:boolean;
 }
 
 export const Menu = (props: MenuProps) => {
@@ -30,6 +31,7 @@ export const Menu = (props: MenuProps) => {
     difference = 0,
     isDrinkScreen = false,
     isSoldout,
+    isDrink
   } = props;
 
   // 無効条件
@@ -68,7 +70,7 @@ export const Menu = (props: MenuProps) => {
           fontSize: "20px",
         }}
       >
-        {isSoldout ? "売り切れ" : itemPrice}
+        {!isDrink && <>&yen;</>}{isSoldout ? "売り切れ" : itemPrice}
       </p>
       <p style={{ margin: "2px" }}>{itemName}</p>
       <div style={{ margin: "0px" }}>
