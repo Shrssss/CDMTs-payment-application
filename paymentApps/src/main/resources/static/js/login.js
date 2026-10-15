@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // next はURLから来るので、検査せずに location へ入れると
     // //evil.example のような値で外部サイトへ飛ばされる（オープンリダイレクト）
     const ALLOWED_NEXT = ['/monitor.html', '/cooking.html', '/handover.html', '/stock.html'];
-    const DEFAULT_NEXT = '/monitor.html';
+    const DEFAULT_NEXT = '/login.html';
 
     const loginForm = document.getElementById('login-form');
     const loggedInBox = document.getElementById('logged-in');
