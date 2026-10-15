@@ -1,14 +1,16 @@
 // API エンドポイント
 // API 接続先、タイムアウト、Square 設定、予約関連の共通定数をまとめるファイル。
+
+export const apiUrl=import.meta.env.VITE_API_URL
+
 export const API_ENDPOINTS = {
-  SQUARE_CONFIG: "/api/square/config",
-  ALL_ITEMS: "/api/items/get/allItems",
-  ORDER_CREATE: "/api/orders/set",
-  PAYMENT_CARD_PREPARE: "/api/payments/card",
-  PAYMENT_PAYPAY_PREPARE: "/api/payments/paypay",
-  PAYMENT_CHARGE: (orderId: string | number, sourceId: string) =>
-    `/api/payments/create/${orderId}/${encodeURIComponent(sourceId)}`,
-  ORDER_GET: (orderId: string | number) => `/api/order/get/byorderId/${orderId}`,
+  SQUARE_CONFIG: `${apiUrl}/api/square/config`,
+  ALL_ITEMS: `${apiUrl}/api/items/get/allItems`,
+  ORDER_CREATE: `${apiUrl}/api/orders/set`,
+  PAYMENT_CARD_PREPARE: `${apiUrl}/api/payments/card`,
+  PAYMENT_PAYPAY_PREPARE: `${apiUrl}/api/payments/paypay`,
+  PAYMENT_CHARGE: (orderId: string | number, sourceId: string) =>`${apiUrl}/api/payments/create/${orderId}/${encodeURIComponent(sourceId)}`,
+  ORDER_GET: (orderId: string | number) => `${apiUrl}/api/order/get/byorderId/${orderId}`,
 };
 
 // ⚠️ 未使用(Square廃止に伴い隔離。src/legacy/square/ 以外から参照しないこと)

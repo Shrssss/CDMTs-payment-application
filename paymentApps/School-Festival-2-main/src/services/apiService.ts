@@ -2,7 +2,7 @@
 // フロントからバックエンドへ送る API 通信だけをまとめるラッパー。
 // Square 設定、売り切れ取得、注文作成、決済、注文取得をこの 1 ファイルに集約する。
 
-import { API_ENDPOINTS, SQUARE_FALLBACK_CONFIG } from "../constants/config";
+import { API_ENDPOINTS, apiUrl, SQUARE_FALLBACK_CONFIG } from "../constants/config";
 import type { MenuItemResponse, PaymentApiResponse, SquareConfig } from "../types";
 import type { PaymentPrepareResponse } from "../types";
 
@@ -14,7 +14,7 @@ function isValidAppId(id: unknown): id is string {
 
 export const Api = {
   async fetchPaymentStatus(orderId: number): Promise<{ orderId: number; state: "WAITING" | "PAID" }> {
-    const res = await fetch(`/api/payments/${orderId}/status`, {
+    const res = await fetch(`${apiUrl}/api/payments/${orderId}/status`, {
       cache: "no-store",
       headers: { Accept: "application/json" },
     });
