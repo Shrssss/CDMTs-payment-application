@@ -1,7 +1,8 @@
 // API エンドポイント
 // API 接続先、タイムアウト、Square 設定、予約関連の共通定数をまとめるファイル。
 
-export const apiUrl=import.meta.env.VITE_API_URL
+// 未設定時は空文字にし、同一オリジンの相対パス(/api/...)で呼ぶ("undefined/api/..." になるのを防ぐ)。
+export const apiUrl = import.meta.env.VITE_API_URL ?? "";
 
 export const API_ENDPOINTS = {
   SQUARE_CONFIG: `${apiUrl}/api/square/config`,
