@@ -7,9 +7,11 @@ interface NumberTagPageProps {
   price: PriceMap;
   names: NameMap;
   paymentState: PaymentState;
+  /** タイトル(注文履歴の一覧・新しい注文)へ戻る。 */
+  onBackToTitle?: () => void;
 }
 
-export const NumberTagPage = ({ cart, price, names, paymentState }: NumberTagPageProps) => {
+export const NumberTagPage = ({ cart, price, names, paymentState, onBackToTitle }: NumberTagPageProps) => {
   return (
     <>
       <p
@@ -47,6 +49,13 @@ export const NumberTagPage = ({ cart, price, names, paymentState }: NumberTagPag
         </p>
       )}
       <Order cart={cart} price={price} names={names} />
+      {onBackToTitle && (
+        <div style={{ textAlign: "center", margin: "16px 0" }}>
+          <button style={{ width: 200, height: 44, fontSize: 16 }} onClick={onBackToTitle}>
+            タイトルに戻る
+          </button>
+        </div>
+      )}
     </>
   );
 };

@@ -123,4 +123,19 @@ describe("PaymentResultPage", () => {
     const result = updater({ billingInfo: {}, outcome: { ok: true, orderId: "X", error: null, receiptUrl: null, displayReserved: null } });
     expect(result.outcome).toEqual({ ok: false, orderId: null, error: null, receiptUrl: null, displayReserved: null });
   });
+
+  test("確認中(WAITING)と確認不能(UNRESOLVED)の画面に「トップに戻る」を出し、押すとonLeavePaymentResultを呼ぶ", () => {
+    for (const status of ["WAITING", "UNRESOLVED"]) {
+      const onLeavePaymentResult = jest.fn();
+      render(
+        { outcome: { ok: false, status, orderId: 42, error: null, receiptUrl: null, displayReserved: null } },
+        { onLeavePaymentResult, onRefreshPaymentStatus: () => {}, checkingPaymentStatus: true }
+      );
+      const leave = Array.from(container.querySelectorAll("button")).find((b) => b.textContent === "トップに戻る");
+      // 照会中でも押せる
+      expect(leave.disabled).toBe(false);
+      act(() => leave.click());
+      expect(onLeavePaymentResult).toHaveBeenCalledTimes(1);
+    }
+  });
 });

@@ -59,7 +59,7 @@ flowchart TD
     A["App.tsx"] -->|"useAppFlow()"| B["state (step, cart)"]
     A -->|"useMenuItems()"| C["prices, itemNames, imagePaths, isSoldout"]
     A -->|"useOrderSummary()"| D["合計金額・個数の計算関数"]
-    A -->|"useOrderSnapshotRestore()"| E["保存済み注文の復元"]
+    A -->|"useOrderSnapshotRestore()"| E["注文履歴の一覧と番号札の復元"]
     B --> F["AppScreenRenderer.tsx"]
     C --> F
     D --> F
@@ -70,6 +70,19 @@ flowchart TD
 `App.tsx`が状態管理フック(`useAppFlow`等)を呼び出し、結果をpropsとして`AppScreenRenderer.tsx`→各`pages/`コンポーネントへ渡していきます。Reduxのような外部の状態管理ライブラリは使っていません。React標準の`useReducer`/`useState`で足りる規模だと判断した設計です。
 
 > **豆知識(Reactの`useReducer`とは)**: 「今の状態」と「何が起きたか(アクション)」を受け取って「次の状態」を返す関数(この場合は[`screenState`](../src/hooks/useAppFlow.ts))を1つ書いておくと、Reactがその関数を使って状態を管理してくれる仕組みです。`dispatch({type: "NEXT"})`のように「何が起きたか」を送ると、`screenState`関数が次の状態を計算してくれます。Reduxの考え方をReact標準機能だけで実現したもの、とイメージすると分かりやすいです。
+
+### 注文履歴(タイトル画面の「これまでのご注文」)
+
+- 決済完了(`usePaymentReturn`で状態がPAIDになった時、またはモック決済の成功時)に、注文を localStorage の `cm_order_history_v1` へ追記します(`features/order/orderSnapshot.ts`の`appendOrderHistory`)。
+- 履歴は**上書きも削除もしません**。予約時刻を過ぎた注文も残り、タイトル画面に新しい順で全件並びます。同じ注文(`orderId`+`createdAt`)の再保存だけは1件にまとめます。
+- 旧形式の `cm_order_v1`(最新1件のみ)が残っていれば一覧に含めます。旧キー自体も消しません。
+- 番号札画面の「タイトルに戻る」で一覧へ戻れます。「注文に進む」は毎回カートを空にしてから始めます。
+
+### 決済が未完了のまま戻ってきた場合
+
+- Paysysから戻ると、`usePaymentReturn`がsessionStorageの保留注文(`cm_pending_payment_v1`)を使って支払い状況を照会し、「決済結果を確認中」画面を出します。
+- この画面の「トップに戻る」は、最後に1回だけ照会してPAIDなら履歴へ残し、そのうえで保留注文とURLの戻りパラメータを消してタイトルへ戻ります。キャンセル・失敗の後でも、同じタブで次の注文ができます。
+- 決済方法・カード・PayPayの各画面には戻るボタンがあり、「処理中...」のまま止まっても抜けられます。
 
 ---
 
@@ -158,7 +171,8 @@ type Cart = Record<number, number>;  // 商品ID/ドリンク種別ID → 個数
 |---|---|
 | `API_ENDPOINTS` | バックエンドAPIのパス一覧 |
 | `RESERVATION_CONFIG` | 予約受付の開始オフセット・最終受付時刻(17:10)・時刻の刻み幅 |
-| `ORDER_SNAPSHOT_CONFIG` | localStorageに保存する注文情報のキー名・有効期限(1時間) |
+| `ORDER_HISTORY_CONFIG` | 注文履歴(localStorage)のキー名。決済完了した注文を配列で積み、上書き・削除はしない |
+| `ORDER_SNAPSHOT_CONFIG` | 旧形式(最新1件のみ)のキー名。新規保存には使わず、読み出し時に履歴へ含めるのと legacy/square 用に残している |
 | `USE_MOCK_PAYMENT` | ⚠️ 決済のモックスイッチ。詳細はセクション8 |
 | `USE_MOCK_MENU` | メニュー(価格・商品名・画像)のモックスイッチ |
 | `USE_TEST_TIME` | テスト用の固定時刻を使うかどうかのスイッチ |
@@ -322,7 +336,7 @@ npx jest      # テスト
 1. **PaySysの実装そのものが未着手**(セクション8参照、最優先)
 2. `updatePaymentStatus`/`createPayment`のIDOR脆弱性(バックエンド側対応待ち)
 3. ドリンク割り振りロジックのバックエンド実装が未着手
-4. 注文照会用トークンAPIが未実装(現状localStorageで暫定対応。詳細は[docs/ver2.0-changes.md](./ver2.0-changes.md)参照)
+4. 注文照会用トークンAPIが未実装(注文履歴はlocalStorageの端末内保存のみ。閲覧データを消すと履歴も消える。詳細は[docs/ver2.0-changes.md](./ver2.0-changes.md)参照)
 5. 予約時刻の営業時間内チェックがフロントのみ
 
 **本番公開前には、必ず`.env.production`の3つのモックスイッチが全て`false`になっていることを確認してください。**

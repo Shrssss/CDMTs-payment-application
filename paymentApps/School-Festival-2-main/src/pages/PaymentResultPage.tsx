@@ -5,6 +5,8 @@ import type { AppAction, PaymentState } from "../types";
 
 interface PaymentResultPageProps {
   onRefreshPaymentStatus?: () => void;
+  /** 確認画面から抜けてタイトルへ戻る(保留注文を破棄する)。 */
+  onLeavePaymentResult?: () => void;
   checkingPaymentStatus?: boolean;
   paymentState: PaymentState;
   selectedTime: string | null;
@@ -12,7 +14,7 @@ interface PaymentResultPageProps {
   dispatch: Dispatch<AppAction>;
 }
 
-export const PaymentResultPage = ({ paymentState, selectedTime, setPaymentState, dispatch, onRefreshPaymentStatus, checkingPaymentStatus = false }: PaymentResultPageProps) => {
+export const PaymentResultPage = ({ paymentState, selectedTime, setPaymentState, dispatch, onRefreshPaymentStatus, onLeavePaymentResult, checkingPaymentStatus = false }: PaymentResultPageProps) => {
   const resetOutcome = () => {
     setPaymentState((prev) => ({
       ...prev,
@@ -32,6 +34,14 @@ export const PaymentResultPage = ({ paymentState, selectedTime, setPaymentState,
           {checkingPaymentStatus ? "確認しています…" : "支払い状況を再確認"}
         </button>}
         <p>確認が続く場合は、注文番号を係員にお伝えください。</p>
+        {onLeavePaymentResult && (
+          <>
+            <p>お支払いをやめた場合や、新しく注文し直す場合はトップに戻ってください。</p>
+            <button onClick={onLeavePaymentResult}>
+              トップに戻る
+            </button>
+          </>
+        )}
       </div>
     );
   }

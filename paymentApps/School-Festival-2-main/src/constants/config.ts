@@ -29,10 +29,15 @@ export const RETRY_CONFIG = {
   CARD_ATTACH_DELAY: 300, // ms
 };
 
-// 注文スナップショット（localStorage）設定
+// 旧形式の注文スナップショット（localStorage、最新1件のみ）のキー。
+// 新規保存には使わない。読み出し時に注文履歴へ含めるのと、src/legacy/square/ からの参照のために残す。
 export const ORDER_SNAPSHOT_CONFIG = {
   KEY: "cm_order_v1",
-  RESERVATION_VALID_DURATION_MS: 60 * 60 * 1000, // 1時間
+};
+
+// 注文履歴（localStorage）設定。決済完了した注文を配列で積み、上書き・削除しない。
+export const ORDER_HISTORY_CONFIG = {
+  KEY: "cm_order_history_v1",
 };
 
 // ⚠️ 未使用(Square廃止に伴い隔離。src/legacy/square/ 以外から参照しないこと)

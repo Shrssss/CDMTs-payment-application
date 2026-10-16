@@ -216,7 +216,7 @@ export const Api = {
   },
 
   // ⚠️ 現状どこからも呼ばれていない(未使用)。「注文を確認する」機能は現状
-  // localStorageベースで、このAPIを経由しない(src/features/order/orderSnapshot.ts
+  // localStorageの注文履歴ベースで、このAPIを経由しない(src/features/order/orderSnapshot.ts
   // 参照)。パス(単数形"order"。ORDER_CREATE/ORDER_GET以外のエンドポイントは
   // すべて複数形"orders")もバックエンドの実装に対して未検証のままの想定であり、
   // このコメントの元ネタである仕様書上の記載を鵜呑みにしているだけの状態。

@@ -1,69 +1,45 @@
-// localStorage に保存された注文スナップショットの有無を判定し、要求に応じて画面へ復元するフック。
+// localStorage の注文履歴を読み出し、タイトル画面に一覧を出し、選ばれた注文の番号札を復元するフック。
+// 履歴は期限切れでも削除しない(表示も残す)。
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
 
-import { ORDER_SNAPSHOT_CONFIG } from "../constants/config";
-import { getLocalStorageJSON, removeLocalStorageItem } from "../utils/localStorage";
+import { STEPS, type Step } from "../constants/steps";
 import { formatDisplayReserved } from "../utils/dateFormat";
 import { parseReservedToDate } from "../utils/orderUtils";
-import { clearOrderSnapshot, isReservationExpired } from "../features/order/orderSnapshot";
+import { orderSnapshotKey, readOrderHistory } from "../features/order/orderSnapshot";
 import type { AppAction, OrderSnapshot, PaymentState } from "../types";
 
 export function useOrderSnapshotRestore({
+  step,
   dispatch,
   setPaymentState,
   setSelectedTime,
 }: {
+  step: Step;
   dispatch: Dispatch<AppAction>;
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
   setSelectedTime: Dispatch<SetStateAction<string | null>>;
 }) {
-  const [hasSavedOrder, setHasSavedOrder] = useState(false);
+  const [savedOrders, setSavedOrders] = useState<OrderSnapshot[]>(() => readOrderHistory());
 
-  const clearSavedOrder = useCallback(() => {
-    clearOrderSnapshot(removeLocalStorageItem, ORDER_SNAPSHOT_CONFIG.KEY);
-    setHasSavedOrder(false);
-  }, []);
-
-  const readValidSnapshot = useCallback((): (OrderSnapshot & { reserved: Date }) | null => {
-    const saved = getLocalStorageJSON<OrderSnapshot>(ORDER_SNAPSHOT_CONFIG.KEY);
-    if (!saved) return null;
-
-    const { reservedAtIso, createdAt } = saved;
-    if (!reservedAtIso) return null;
-
-    const reserved = parseReservedToDate(reservedAtIso, createdAt ? new Date(createdAt) : new Date());
-    if (!reserved) return null;
-
-    if (
-      isReservationExpired(reserved, new Date(), ORDER_SNAPSHOT_CONFIG.RESERVATION_VALID_DURATION_MS)
-    ) {
-      return null;
-    }
-
-    return { ...saved, reserved };
-  }, []);
-
+  // タイトルへ戻るたびに読み直し、直前に完了した注文も一覧に出す。
   useEffect(() => {
-    const valid = readValidSnapshot();
-    if (valid) {
-      setHasSavedOrder(true);
-    } else {
-      clearSavedOrder();
-    }
-  }, [readValidSnapshot, clearSavedOrder]);
+    if (step === STEPS.TITLE) setSavedOrders(readOrderHistory());
+  }, [step]);
 
-  const viewSavedOrder = useCallback(() => {
-    const valid = readValidSnapshot();
-    if (!valid) {
-      clearSavedOrder();
+  const viewSavedOrder = useCallback((key: string) => {
+    const saved = readOrderHistory().find((s) => orderSnapshotKey(s) === key);
+    if (!saved) {
+      setSavedOrders(readOrderHistory());
       return;
     }
 
-    const { reserved, orderId, itemsCart, displayReserved } = valid;
-    if (itemsCart && typeof itemsCart === "object") {
-      dispatch({ type: "REPLACE_CART", cart: itemsCart });
-    }
-    setSelectedTime(reserved.toISOString());
+    const { reservedAtIso, createdAt, orderId, itemsCart, displayReserved } = saved;
+    const reserved = parseReservedToDate(reservedAtIso, new Date(createdAt));
+
+    // REPLACE_CART は既存カートと合成するため、先に空にして別の注文の商品が混ざらないようにする。
+    dispatch({ type: "RESET_CART" });
+    dispatch({ type: "REPLACE_CART", cart: itemsCart });
+    setSelectedTime(reserved ? reserved.toISOString() : null);
     setPaymentState((prev) => ({
       ...prev,
       outcome: {
@@ -71,11 +47,11 @@ export function useOrderSnapshotRestore({
         orderId: orderId || null,
         error: null,
         receiptUrl: null,
-        displayReserved: displayReserved || formatDisplayReserved(reserved),
+        displayReserved: displayReserved || (reserved ? formatDisplayReserved(reserved) : null),
       },
     }));
-    dispatch({ type: "GOTO", step: "numberTag" });
-  }, [readValidSnapshot, clearSavedOrder, dispatch, setPaymentState, setSelectedTime]);
+    dispatch({ type: "GOTO", step: STEPS.NUMBER_TAG });
+  }, [dispatch, setPaymentState, setSelectedTime]);
 
-  return { hasSavedOrder, viewSavedOrder, clearSavedOrder };
+  return { savedOrders, viewSavedOrder };
 }

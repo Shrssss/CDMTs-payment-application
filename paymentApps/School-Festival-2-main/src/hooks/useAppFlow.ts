@@ -70,6 +70,9 @@ export const screenState = (state: AppState, action: AppAction): AppState => {
     case "REPLACE_CART": {
       return { ...state, cart: { ...state.cart, ...action.cart } };
     }
+    case "RESET_CART": {
+      return { ...state, cart: INITIAL_APP_STATE.cart };
+    }
     default:
       return state;
   }

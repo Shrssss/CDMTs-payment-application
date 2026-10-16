@@ -26,6 +26,10 @@ export const PaymentMethodPage = ({ dispatch, onOpenLegalNotice }: PaymentMethod
         PayPayで支払う
       </button>
 
+      <button style={backBtnStyle} onClick={() => dispatch({ type: "GOTO", step: "time" })}>
+        予約時間の選択に戻る
+      </button>
+
       <p style={{ textAlign: "center", marginTop: "16px" }}>
         <button style={legalLinkStyle} onClick={onOpenLegalNotice}>
           特定商取引法に基づく表示
@@ -56,4 +60,16 @@ const legalLinkStyle: CSSProperties = {
   fontSize: "14px",
   cursor: "pointer",
   padding: 0,
+};
+
+const backBtnStyle: CSSProperties = {
+  display: "block",
+  width: "100%",
+  height: "44px",
+  fontSize: "16px",
+  borderRadius: "8px",
+  border: "2px solid #888",
+  backgroundColor: "#f4f4f4",
+  margin: "12px 0",
+  cursor: "pointer",
 };

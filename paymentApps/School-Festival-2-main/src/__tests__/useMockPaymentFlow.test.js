@@ -4,7 +4,7 @@
 // テストごとに読み直す(useMenuItems.test.jsと同じパターン)。
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
-import { ORDER_SNAPSHOT_CONFIG } from "../constants/config";
+import { ORDER_HISTORY_CONFIG } from "../constants/config";
 
 describe("useMockPaymentFlow", () => {
   const originalEnv = { ...process.env };
@@ -72,9 +72,10 @@ describe("useMockPaymentFlow", () => {
 
     expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "paymentResult" });
 
-    const saved = JSON.parse(window.localStorage.getItem(ORDER_SNAPSHOT_CONFIG.KEY));
-    expect(saved.orderId).toBe("MOCK-ORDER-1");
-    expect(saved.itemsCart).toEqual({ 10: 1 });
+    const saved = JSON.parse(window.localStorage.getItem(ORDER_HISTORY_CONFIG.KEY));
+    expect(saved).toHaveLength(1);
+    expect(saved[0].orderId).toBe("MOCK-ORDER-1");
+    expect(saved[0].itemsCart).toEqual({ 10: 1 });
   });
 
   test("共通フックの旧実通信分岐は注文作成後も支払済みとして保存しない", async () => {
@@ -106,7 +107,7 @@ describe("useMockPaymentFlow", () => {
 
     expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "paymentResult" });
     // 未実装エラーなので、localStorageへは何も保存しない
-    expect(window.localStorage.getItem(ORDER_SNAPSHOT_CONFIG.KEY)).toBeNull();
+    expect(window.localStorage.getItem(ORDER_HISTORY_CONFIG.KEY)).toBeNull();
   });
 
   test("予約時刻が不正な場合はalertを出して何もせず終了する", async () => {

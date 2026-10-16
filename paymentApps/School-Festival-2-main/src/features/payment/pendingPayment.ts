@@ -19,6 +19,22 @@ export function savePendingPayment(pending: PendingPayment): void {
   }));
 }
 
+// 保留注文を破棄する。決済結果画面から抜けるときに使い、同じタブの再読込で結果画面へ戻されないようにする。
+export function clearPendingPayment(): void {
+  try {
+    sessionStorage.removeItem(PENDING_PAYMENT_KEY);
+  } catch { /* 使えない場合は残っていないので何もしない */ }
+}
+
+const PAYMENT_RETURN_PARAMS = ["paysys_return", "result", "SID", "ERROR"];
+
+// Paysysからの戻りパラメータをURLから消す(履歴は増やさない)。
+export function clearPaymentReturnParams(): void {
+  const url = new URL(window.location.href);
+  PAYMENT_RETURN_PARAMS.forEach(key => url.searchParams.delete(key));
+  window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+}
+
 export function readPendingPayment(): PendingPayment | null {
   try {
     const value = JSON.parse(sessionStorage.getItem(PENDING_PAYMENT_KEY) || "null");

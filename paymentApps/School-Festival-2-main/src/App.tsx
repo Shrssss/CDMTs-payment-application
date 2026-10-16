@@ -41,12 +41,13 @@ export const App = () => {
     calculateSumPrice,
   } = useOrderSummary(state.cart, prices);
   const [paymentState, setPaymentState] = useState(INITIAL_PAYMENT_STATE);
-  const { hasSavedOrder, viewSavedOrder } = useOrderSnapshotRestore({
+  const { savedOrders, viewSavedOrder } = useOrderSnapshotRestore({
+    step: state.step,
     dispatch,
     setPaymentState,
     setSelectedTime,
   });
-  const { refreshPaymentStatus, checking } = usePaymentReturn({ dispatch, setPaymentState, setSelectedTime });
+  const { refreshPaymentStatus, leavePaymentResult, checking } = usePaymentReturn({ dispatch, setPaymentState, setSelectedTime });
 
   return (
     <>
@@ -79,11 +80,12 @@ export const App = () => {
           currentTestTime={currentTestTime}
           paymentState={paymentState}
           onRefreshPaymentStatus={refreshPaymentStatus}
+          onLeavePaymentResult={leavePaymentResult}
           checkingPaymentStatus={checking}
           setPaymentState={setPaymentState}
           dispatch={dispatch}
           onOpenLegalNotice={() => setIsLegalNoticeOpen(true)}
-          hasSavedOrder={hasSavedOrder}
+          savedOrders={savedOrders}
           onViewSavedOrder={viewSavedOrder}
         />
       </ErrorBoundary>

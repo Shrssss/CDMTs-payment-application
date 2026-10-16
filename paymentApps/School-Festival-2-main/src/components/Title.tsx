@@ -1,15 +1,27 @@
 // タイトル画面で使用する見出し表示コンポーネント。
 import type { CSSProperties } from "react";
 import logoImg from "../image/logo.jpg";
+import { orderSnapshotKey } from "../features/order/orderSnapshot";
+import { formatDisplayReserved } from "../utils/dateFormat";
+import { parseReservedToDate } from "../utils/orderUtils";
+import type { OrderSnapshot } from "../types";
 
 interface TitleProps {
   onStart: () => void;
   onOpenLegalNotice: () => void;
-  hasSavedOrder?: boolean;
-  onViewSavedOrder?: () => void;
+  /** 注文履歴(新しい順)。 */
+  savedOrders?: OrderSnapshot[];
+  onViewSavedOrder?: (key: string) => void;
 }
 
-export const Title = ({ onStart, onOpenLegalNotice, hasSavedOrder, onViewSavedOrder }: TitleProps) => {
+// 履歴ボタンに出す受取日時。保存時の表示文字列を優先し、無ければ予約日時から作る。
+const reservedLabel = (s: OrderSnapshot): string => {
+  if (s.displayReserved) return s.displayReserved;
+  const d = parseReservedToDate(s.reservedAtIso, new Date(s.createdAt));
+  return d ? formatDisplayReserved(d) : "";
+};
+
+export const Title = ({ onStart, onOpenLegalNotice, savedOrders = [], onViewSavedOrder }: TitleProps) => {
   return (
     <div style={wrap}>
       <div style={card}>
@@ -31,10 +43,20 @@ export const Title = ({ onStart, onOpenLegalNotice, hasSavedOrder, onViewSavedOr
           注文に進む
         </button>
 
-        {hasSavedOrder && (
-          <button style={savedOrderBtn} onClick={onViewSavedOrder}>
-            注文番号を確認する
-          </button>
+        {savedOrders.length > 0 && (
+          <section style={historyBox} aria-label="これまでのご注文">
+            <h2 style={historyTitle}>これまでのご注文</h2>
+            {savedOrders.map((s) => {
+              const key = orderSnapshotKey(s);
+              const reserved = reservedLabel(s);
+              return (
+                <button key={key} style={savedOrderBtn} onClick={() => onViewSavedOrder?.(key)}>
+                  注文番号 {s.orderId}
+                  {reserved && <span style={savedOrderSub}>{reserved} 受取</span>}
+                </button>
+              );
+            })}
+          </section>
         )}
 
         {/* 注意事項 */}
@@ -145,16 +167,34 @@ const primaryBtn: CSSProperties = {
   cursor: "pointer",
 };
 
+const historyBox: CSSProperties = {
+  marginTop: "16px",
+};
+
+const historyTitle: CSSProperties = {
+  fontSize: "16px",
+  margin: "0 0 4px 0",
+  color: "#555",
+};
+
 const savedOrderBtn: CSSProperties = {
-  height: "48px",
+  minHeight: "48px",
   fontSize: "16px",
   fontWeight: "bold",
   borderRadius: "10px",
   border: "2px solid #222",
   background: "#fff",
   width: "calc(100% - 60px)",
-  marginTop: "12px",
+  marginTop: "8px",
+  padding: "6px 8px",
   cursor: "pointer",
+};
+
+const savedOrderSub: CSSProperties = {
+  display: "block",
+  fontSize: "13px",
+  fontWeight: "normal",
+  color: "#555",
 };
 
 const noticeBox: CSSProperties = {

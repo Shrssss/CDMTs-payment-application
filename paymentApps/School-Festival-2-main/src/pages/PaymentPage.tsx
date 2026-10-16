@@ -60,6 +60,11 @@ export const PaymentPage = ({
       <p style={{ color: "#808080" }}>決済には数秒〜数十秒ほど時間がかかる場合があります。</p>
       <p style={{ color: "#808080" }}>また、EMV-3Dセキュア決済のためにメールアドレスの入力が必要です。ご了承ください。</p>
 
+      {/* 処理中でも押せるようにする(カード入力画面を閉じて処理中のまま止まった場合の抜け道)。 */}
+      <button style={backBtnStyle} onClick={() => dispatch({ type: "GOTO", step: "paymentMethod" })}>
+        お支払い方法の選択に戻る
+      </button>
+
       <p style={{ textAlign: "center", marginTop: "16px" }}>
         <button style={legalLinkStyle} onClick={onOpenLegalNotice}>
           特定商取引法に基づく表示
@@ -90,4 +95,16 @@ const legalLinkStyle: CSSProperties = {
   fontSize: "14px",
   cursor: "pointer",
   padding: 0,
+};
+
+const backBtnStyle: CSSProperties = {
+  display: "block",
+  width: "100%",
+  height: "44px",
+  fontSize: "16px",
+  borderRadius: "8px",
+  border: "2px solid #888",
+  backgroundColor: "#f4f4f4",
+  margin: "12px 0",
+  cursor: "pointer",
 };

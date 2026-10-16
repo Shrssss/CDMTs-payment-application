@@ -1,10 +1,9 @@
 // 方式別フックからモック有効時に使う共通処理。旧注文作成のみの分岐は互換のため保持。
 import { useCallback, useState, type Dispatch, type SetStateAction } from "react";
 
-import { ORDER_SNAPSHOT_CONFIG, USE_MOCK_PAYMENT } from "../constants/config";
-import { buildOrderSnapshot } from "../features/order/orderSnapshot";
+import { USE_MOCK_PAYMENT } from "../constants/config";
+import { appendOrderHistory, buildOrderSnapshot } from "../features/order/orderSnapshot";
 import { formatDisplayReserved } from "../utils/dateFormat";
-import { setLocalStorageJSON } from "../utils/localStorage";
 import { parseReservedToDate, buildOrderItems } from "../utils/orderUtils";
 import type { AppAction, Cart, PaymentState, } from "../types";
 import { Api } from "../services/apiService";
@@ -48,16 +47,19 @@ export function useMockPaymentFlow({
 
     try {
     if (USE_MOCK_PAYMENT) {
-      setLocalStorageJSON(
-        ORDER_SNAPSHOT_CONFIG.KEY,
-        buildOrderSnapshot({
-          createdAtIso,
-          reservedAtIso,
-          orderId: mockOrderId,
-          itemsCart: cart,
-          displayReserved,
-        })
-      );
+      try {
+        appendOrderHistory(
+          buildOrderSnapshot({
+            createdAtIso,
+            reservedAtIso,
+            orderId: mockOrderId,
+            itemsCart: cart,
+            displayReserved,
+          })
+        );
+      } catch {
+        // プライベートブラウジング等でlocalStorageが使えない場合は保存せずに続行する
+      }
       setPaymentState((prev) => ({
         ...prev,
         outcome: {

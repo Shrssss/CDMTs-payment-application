@@ -20,7 +20,8 @@ export type AppAction =
   | { type: "PREV" }
   | { type: "CHANGE_ITEM_QUANTITY"; itemId: number; delta: number }
   | { type: "CLEAR_TEMPORARY_DRINKS" }
-  | { type: "REPLACE_CART"; cart: Cart };
+  | { type: "REPLACE_CART"; cart: Cart }
+  | { type: "RESET_CART" };
 
 export interface BillingInfo {
   familyName: string;

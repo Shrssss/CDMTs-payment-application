@@ -36,7 +36,7 @@ describe("AppScreenRenderer", () => {
     setPaymentState: () => {},
     dispatch: () => {},
     onOpenLegalNotice: () => {},
-    hasSavedOrder: false,
+    savedOrders: [],
     onViewSavedOrder: () => {},
   };
 
@@ -110,6 +110,29 @@ describe("AppScreenRenderer", () => {
     });
     expect(container.textContent).toContain("決済が完了しました");
     expect(container.querySelector("footer")).toBeNull();
+  });
+
+  test.each([
+    ["paymentMethod", "予約時間の選択に戻る", "time"],
+    ["payment", "お支払い方法の選択に戻る", "paymentMethod"],
+    ["paymentPaypay", "お支払い方法の選択に戻る", "paymentMethod"],
+  ])("%s: 戻るボタンで%sへ遷移する(処理中で止まっても抜けられる)", (step, label, target) => {
+    const dispatch = jest.fn();
+    renderStep(step, { dispatch });
+    const back = Array.from(container.querySelectorAll("button")).find((b) => b.textContent === label);
+    expect(back.disabled).toBe(false);
+    act(() => back.click());
+    expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: target });
+  });
+
+  test("title: 「注文に進む」はカートを空にしてから次へ進む", () => {
+    const dispatch = jest.fn();
+    const next = jest.fn();
+    renderStep("title", { dispatch, next });
+    const start = Array.from(container.querySelectorAll("button")).find((b) => b.textContent === "注文に進む");
+    act(() => start.click());
+    expect(dispatch).toHaveBeenCalledWith({ type: "RESET_CART" });
+    expect(next).toHaveBeenCalledTimes(1);
   });
 
   test("フッターのnextクリックでnext()が呼ばれる(cartステップ)", () => {

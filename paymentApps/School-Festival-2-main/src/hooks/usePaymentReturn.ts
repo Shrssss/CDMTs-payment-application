@@ -1,10 +1,25 @@
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
-import { getPaymentReturn, readPendingPayment, PENDING_PAYMENT_KEY } from "../features/payment/pendingPayment";
-import { ORDER_SNAPSHOT_CONFIG } from "../constants/config";
-import { buildOrderSnapshot } from "../features/order/orderSnapshot";
+import {
+  clearPaymentReturnParams, clearPendingPayment, getPaymentReturn, readPendingPayment,
+  type PendingPayment,
+} from "../features/payment/pendingPayment";
+import { appendOrderHistory, buildOrderSnapshot } from "../features/order/orderSnapshot";
+import { INITIAL_PAYMENT_STATE } from "../constants/initialState";
 import { Api } from "../services/apiService";
 import { formatDisplayReserved } from "../utils/dateFormat";
 import type { AppAction, PaymentState } from "../types";
+
+// 「トップに戻る」時の最終照会の待ち時間上限。通信が返らなくても抜けられることを優先する。
+const LEAVE_STATUS_TIMEOUT_MS = 5000;
+
+// 支払済みの保留注文を注文履歴へ追記する。書き込めなければ例外を投げる。
+function saveToHistory(pending: PendingPayment): void {
+  appendOrderHistory(buildOrderSnapshot({
+    createdAtIso: pending.createdAt, reservedAtIso: pending.reservedAtIso,
+    orderId: pending.orderId, itemsCart: pending.cart,
+    displayReserved: formatDisplayReserved(new Date(pending.reservedAtIso)),
+  }));
+}
 
 export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }: {
   dispatch: Dispatch<AppAction>;
@@ -41,14 +56,9 @@ export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }:
       if (result.state === "PAID") {
         // 完了保存が失敗した場合は保留データを残し、再読込時に再照会できるようにする。
         try {
-          localStorage.setItem(ORDER_SNAPSHOT_CONFIG.KEY, JSON.stringify(buildOrderSnapshot({
-            createdAtIso: pending.createdAt, reservedAtIso: pending.reservedAtIso,
-            orderId: pending.orderId, itemsCart: pending.cart, displayReserved: outcome.displayReserved,
-          })));
-          sessionStorage.removeItem(PENDING_PAYMENT_KEY);
-          const url = new URL(window.location.href);
-          ["paysys_return", "result", "SID", "ERROR"].forEach(key => url.searchParams.delete(key));
-          window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+          saveToHistory(pending);
+          clearPendingPayment();
+          clearPaymentReturnParams();
         } catch { /* 支払済みの表示は維持し、保留データから復旧可能にする。 */ }
       }
       setPaymentState(prev => ({ ...prev, outcome: {
@@ -65,6 +75,41 @@ export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }:
     }
   }, [returned, dispatch, setPaymentState, setSelectedTime]);
 
+  // 決済結果の確認画面(WAITING/UNRESOLVED)から抜けてタイトルへ戻る。
+  // 保留注文とURLの戻りパラメータを消すので、同じタブで再読込しても結果画面へ戻されない。
+  // 抜ける前に1回だけ照会し、支払済みなら注文履歴へ残す。
+  // 照会中(再確認ボタンの処理中)でも押せるよう、照会とは別のフラグで二重実行だけ防ぐ。
+  const leaving = useRef(false);
+  const leavePaymentResult = useCallback(async () => {
+    if (leaving.current) return;
+    leaving.current = true;
+    try {
+      const pending = readPendingPayment();
+      if (pending) {
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        try {
+          const result = await Promise.race([
+            Api.fetchPaymentStatus(pending.orderId),
+            new Promise<never>((_, reject) => {
+              timer = setTimeout(() => reject(new Error("timeout")), LEAVE_STATUS_TIMEOUT_MS);
+            }),
+          ]);
+          if (result.state === "PAID") saveToHistory(pending);
+        } catch { /* 照会・保存できなくても抜けられることを優先する。 */ } finally {
+          clearTimeout(timer);
+        }
+      }
+      clearPendingPayment();
+      clearPaymentReturnParams();
+      setPaymentState(prev => ({ ...prev, outcome: INITIAL_PAYMENT_STATE.outcome }));
+      setSelectedTime(null);
+      dispatch({ type: "RESET_CART" });
+      dispatch({ type: "GOTO", step: "title" });
+    } finally {
+      leaving.current = false;
+    }
+  }, [dispatch, setPaymentState, setSelectedTime]);
+
   useEffect(() => { void refreshPaymentStatus(); }, [refreshPaymentStatus]);
-  return { refreshPaymentStatus, checking };
+  return { refreshPaymentStatus, leavePaymentResult, checking };
 }

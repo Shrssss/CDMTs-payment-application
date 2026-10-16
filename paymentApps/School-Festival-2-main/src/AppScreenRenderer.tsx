@@ -12,12 +12,14 @@ import { PaymentPayPayPage } from "./pages/PaymentPayPayPage";
 import { PaymentResultPage } from "./pages/PaymentResultPage";
 import { NumberTagPage } from "./pages/NumberTagPage";
 import { shouldShowFooter } from "./constants/stepRules";
+import { INITIAL_PAYMENT_STATE } from "./constants/initialState";
 import type { Step } from "./constants/steps";
 import type {
   AppAction,
   Cart,
   ImagePathMap,
   NameMap,
+  OrderSnapshot,
   PaymentState,
   PriceMap,
   SoldoutMap,
@@ -25,6 +27,7 @@ import type {
 
 interface AppScreenRendererProps {
   onRefreshPaymentStatus?: () => void;
+  onLeavePaymentResult?: () => void;
   checkingPaymentStatus?: boolean;
   step: Step;
   next: () => void;
@@ -48,14 +51,15 @@ interface AppScreenRendererProps {
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
   dispatch: Dispatch<AppAction>;
   onOpenLegalNotice: () => void;
-  hasSavedOrder: boolean;
-  onViewSavedOrder: () => void;
+  savedOrders: OrderSnapshot[];
+  onViewSavedOrder: (key: string) => void;
 }
 
 type RenderPageProps = Omit<AppScreenRendererProps, "prev" | "calculateSumInMenu" | "calculateSumPrice">;
 
 const renderPage = ({
   onRefreshPaymentStatus,
+  onLeavePaymentResult,
   checkingPaymentStatus,
   step,
   next,
@@ -76,16 +80,20 @@ const renderPage = ({
   setPaymentState,
   dispatch,
   onOpenLegalNotice,
-  hasSavedOrder,
+  savedOrders,
   onViewSavedOrder,
 }: RenderPageProps) => {
   switch (step) {
     case "title":
       return (
         <TitlePage
-          onStart={next}
+          onStart={() => {
+            // 過去の注文を表示した後でも、新しい注文は空のカートから始める。
+            dispatch({ type: "RESET_CART" });
+            next();
+          }}
           onOpenLegalNotice={onOpenLegalNotice}
-          hasSavedOrder={hasSavedOrder}
+          savedOrders={savedOrders}
           onViewSavedOrder={onViewSavedOrder}
         />
       );
@@ -145,6 +153,7 @@ const renderPage = ({
       return (
         <PaymentResultPage
           onRefreshPaymentStatus={onRefreshPaymentStatus}
+          onLeavePaymentResult={onLeavePaymentResult}
           checkingPaymentStatus={checkingPaymentStatus}
           paymentState={paymentState}
           selectedTime={selectedTime}
@@ -159,6 +168,11 @@ const renderPage = ({
           price={prices}
           names={itemNames}
           paymentState={paymentState}
+          onBackToTitle={() => {
+            setPaymentState((prev) => ({ ...prev, outcome: INITIAL_PAYMENT_STATE.outcome }));
+            dispatch({ type: "RESET_CART" });
+            dispatch({ type: "GOTO", step: "title" });
+          }}
         />
       );
     default:
@@ -168,6 +182,7 @@ const renderPage = ({
 
 export const AppScreenRenderer = ({
   onRefreshPaymentStatus,
+  onLeavePaymentResult,
   checkingPaymentStatus,
   // 現在の画面状態に応じて各ページコンポーネントを切り替えて描画する補助コンポーネント。
   step,
@@ -192,13 +207,14 @@ export const AppScreenRenderer = ({
   setPaymentState,
   dispatch,
   onOpenLegalNotice,
-  hasSavedOrder,
+  savedOrders,
   onViewSavedOrder,
 }: AppScreenRendererProps) => {
   return (
     <>
       {renderPage({
         onRefreshPaymentStatus,
+        onLeavePaymentResult,
         checkingPaymentStatus,
         step,
         next,
@@ -219,7 +235,7 @@ export const AppScreenRenderer = ({
         setPaymentState,
         dispatch,
         onOpenLegalNotice,
-        hasSavedOrder,
+        savedOrders,
         onViewSavedOrder,
       })}
 
