@@ -29,7 +29,7 @@ describe("useMenuItems", () => {
     const { createRoot } = require("react-dom/client");
     const { act } = React;
     const { useMenuItems } = require("../hooks/useMenuItems");
-    const { MOCK_MENU_PRICES, MOCK_MENU_ITEM_NAMES } = require("../constants/mocks/menuMock");
+    const { MOCK_MENU_PRICES, MOCK_MENU_ITEM_NAMES, MOCK_MENU_IMAGE_PATHS } = require("../constants/mocks/menuMock");
 
     let captured;
     function Harness() {
@@ -44,6 +44,7 @@ describe("useMenuItems", () => {
     expect(fetchAllItems).not.toHaveBeenCalled();
     expect(captured.prices).toEqual(MOCK_MENU_PRICES);
     expect(captured.itemNames).toEqual(MOCK_MENU_ITEM_NAMES);
+    expect(captured.imagePaths).toEqual(MOCK_MENU_IMAGE_PATHS);
     expect(captured.fetchError).toBe(false);
   });
 
@@ -59,6 +60,7 @@ describe("useMenuItems", () => {
     const { createRoot } = require("react-dom/client");
     const { act } = React;
     const { useMenuItems } = require("../hooks/useMenuItems");
+    const { MOCK_MENU_IMAGE_PATHS } = require("../constants/mocks/menuMock");
 
     let captured;
     function Harness() {
@@ -78,7 +80,8 @@ describe("useMenuItems", () => {
     expect(captured.fetchError).toBe(false);
     expect(captured.prices[10]).toBe(999);
     expect(captured.itemNames[10]).toBe("テスト角煮");
-    expect(captured.imagePaths[10]).toBe("/x.jpg");
+    expect(captured.imagePaths).toEqual(MOCK_MENU_IMAGE_PATHS);
+    expect(captured.imagePaths[10]).not.toBe("/x.jpg");
     expect(captured.isSoldout[91]).toBe(true);
   });
 
