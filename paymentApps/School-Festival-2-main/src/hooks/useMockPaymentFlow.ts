@@ -72,9 +72,11 @@ export function useMockPaymentFlow({
       }));
 
     } else {
+        const { items, drinkCounts } = buildOrderItems(cart);
         const orderId = await Api.createOrder(
           {
-            items: buildOrderItems(cart).items,
+            items,
+            drinkCounts,
             orderDate: toLocalDateTimeString(new Date(createdAtIso)),
             reservedTime: toLocalDateTimeString(reservedDate),
             servingStatus: 0,

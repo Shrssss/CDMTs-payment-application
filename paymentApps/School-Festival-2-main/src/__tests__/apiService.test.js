@@ -61,14 +61,15 @@ describe("Api.createOrder", () => {
     });
   });
 
-  test("servingStatus/paymentStatus/drinkCountsを省略した場合は既定値(0, false, {})を送る", async () => {
+  test("servingStatus/paymentStatusを省略した場合は既定値(0, false)を送り、drinkCountsは渡したまま送る", async () => {
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       json: jest.fn().mockResolvedValue(1),
     });
 
     await Api.createOrder({
-      items: [{ itemId: 10, quantity: 1 }],
+      items: [{ itemId: 40, quantity: 1 }],
+      drinkCounts: { 91: 1 },
       orderDate: "2026-08-30T12:00:00",
       reservedTime: "2026-08-30T12:30:00",
     });
@@ -77,7 +78,7 @@ describe("Api.createOrder", () => {
     const body = JSON.parse(options.body);
     expect(body.servingStatus).toBe(0);
     expect(body.paymentStatus).toBe(false);
-    expect(body.drinkCounts).toEqual({});
+    expect(body.drinkCounts).toEqual({ 91: 1 });
   });
 
   test("レスポンスがokでない場合はエラーを投げる", async () => {

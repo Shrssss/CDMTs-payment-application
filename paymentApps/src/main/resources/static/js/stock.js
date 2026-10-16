@@ -35,6 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return response.json();
     };
 
+    // 31〜34 / 41〜44 / 51〜54 は注文明細用の内訳商品(セット+ドリンクの組み合わせ)。
+    // 売り切れは親カテゴリ(30/40/50)とドリンク(91〜94)で判定するので、在庫画面には出さない。
+    const isStockManagedItem = (item) => {
+        const id = Number(item.itemId);
+        return !(id > 30 && id < 60 && id % 10 !== 0);
+    };
+
     const createItemCard = (item) => {
         const card = document.createElement('div');
         card.className = 'item-card';
@@ -64,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderItems = async () => {
         try {
             const items = await fetchItems();
-            itemListElement.replaceChildren(...items.map(createItemCard));
+            itemListElement.replaceChildren(...items.filter(isStockManagedItem).map(createItemCard));
             showError('');
         } catch (error) {
             console.error('商品一覧の取得に失敗:', error);

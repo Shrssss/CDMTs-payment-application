@@ -152,20 +152,21 @@ export const Api = {
   // 送るボディは backend の OrderCreateRequest DTO に合わせる必要あり。
   // orderDate（作成日時）, reservedTime（LocalDateTime形式）, items（[{itemId,quantity}]）,
   // servingStatus（@NotNull、初期値0=調理待ち）, paymentStatus（@NotNull、初期値false=未決済）を送る。
-  // drinkCounts（ドリンク種別ごとの合計数、{drinkId: count}）は
-  // docs/backend-requirements.md 5番で提案中の新フィールド。
-  // バックエンド側がまだ対応していない場合、この項目は無視される想定。
+  // drinkCounts（ドリンク種別ごとの合計数、{drinkId: count}）も必ず送る。
+  // どのセット/単品にどのドリンクを付けるかはバックエンド(DrinkAllocator)が割り振り、
+  // 31〜34/41〜44/51〜54 の内訳商品として保存する(docs/backend-requirements.md 5番)。
+  // 送り忘れると調理画面にドリンクの種類が出ないため、省略できない引数にしている。
   // レスポンスは素の Long（例: 42）がそのまま返る。
   async createOrder({
     items,
-    drinkCounts = {},
+    drinkCounts,
     orderDate,
     reservedTime,
     servingStatus = 0,
     paymentStatus = false,
   }: {
     items: { itemId: number; quantity: number }[];
-    drinkCounts?: Record<number, number>;
+    drinkCounts: Record<number, number>;
     orderDate: string;
     reservedTime: string;
     servingStatus?: number;
@@ -175,7 +176,7 @@ export const Api = {
       orderDate, // LocalDateTime-ish string "yyyy-MM-dd'T'HH:mm:ss"
       reservedTime, // LocalDateTime-ish string
       items, // array of { itemId, quantity } filtered by buildOrderItems on frontend
-      drinkCounts, // { drinkId: count } ドリンク割り振りはバックエンドが行う想定
+      drinkCounts, // { drinkId: count } ドリンクの割り振りはバックエンドが行う
       servingStatus,
       paymentStatus,
     };
