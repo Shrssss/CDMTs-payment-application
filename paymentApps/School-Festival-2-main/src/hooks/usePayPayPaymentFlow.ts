@@ -57,7 +57,7 @@ export function usePayPayPaymentFlow({
           throw new Error("予約時刻が不正です。");
         }
 
-        const { items } = buildOrderItems(cart);
+        const { items, drinkCounts } = buildOrderItems(cart);
 
         if (items.length === 0) {
           throw new Error("注文内容が空です。");
@@ -65,6 +65,7 @@ export function usePayPayPaymentFlow({
 
         const orderId = await Api.createOrder({
           items,
+          drinkCounts, // どの商品に付けるかはバックエンドが割り振る
           orderDate: toLocalDateTimeString(new Date()),
           reservedTime: toLocalDateTimeString(reservedDate),
           servingStatus: 0,

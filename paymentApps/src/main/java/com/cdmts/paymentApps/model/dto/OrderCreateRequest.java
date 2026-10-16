@@ -2,6 +2,7 @@ package com.cdmts.paymentApps.model.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import com.cdmts.paymentApps.model.entity.Order;
 
@@ -25,6 +26,8 @@ public class OrderCreateRequest {
 	private Boolean paymentStatus;
 	/** 注文商品 */
 	private List<OrderItemCreateRequest>items;
+	/** ドリンク種別(91〜94)ごとの本数。どの商品に付けるかはサーバー側で割り振る(DrinkAllocator) */
+	private Map<Long,Integer> drinkCounts;
 
 	public Order toEntity() {
 		return new Order(

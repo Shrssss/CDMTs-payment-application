@@ -102,7 +102,7 @@ describe("useMockPaymentFlow", () => {
       expect.objectContaining({ ok: false, orderId: 42, error: "カード決済は未実装です" })
     );
     expect(createOrder).toHaveBeenCalledWith(expect.objectContaining({
-      items: [{ itemId: 10, quantity: 1 }], servingStatus: 0, paymentStatus: false,
+      items: [{ itemId: 10, quantity: 1 }], drinkCounts: {}, servingStatus: 0, paymentStatus: false,
     }));
 
     expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "paymentResult" });

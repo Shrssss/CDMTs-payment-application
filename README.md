@@ -134,17 +134,26 @@ ITEM_TABLE (
   "servingStatus": 0,
   "paymentStatus": false,
   "items": [
-    { "itemId": 1, "quantity": 2 },
-    { "itemId": 3, "quantity": 1 }
-  ]
+    { "itemId": 30, "quantity": 1 },
+    { "itemId": 40, "quantity": 1 }
+  ],
+  "drinkCounts": { "91": 1, "92": 1 }
 }
 ```
 
+- `items`: 商品カテゴリ（10 / 20 / 30 / 40 / 50）ごとの個数。
+- `drinkCounts`: ドリンク種別（91 コーラ / 92 オレンジ / 93 サイダー / 94 烏龍茶）ごとの本数。ドリンクの付かない注文では `{}`。
 - レスポンス: 作成された `orderId`（`Long`）
 - 処理概要:
-  1. `Order` を1件INSERTし、採番された `orderId` を取得
-  2. 各 `items` を `OrderItem` に変換し、`orderId` を紐付けて一括INSERT
-  3. `Order` のINSERT件数が1件でない、または `OrderItem` のINSERT件数が0件以下の場合は `IllegalArgumentException`
+  1. `DrinkAllocator` がドリンクを割り振り、保存する明細を決める
+     - ドリンクは 91→94 の順に、セット(40) → 大盛りセット(50) → 単品ドリンク(30) の空きへ先着で割り当てる
+     - ドリンク付き商品は「カテゴリ + ドリンク番号の下1桁」の内訳商品として保存する（例: 40 + コーラ(91) → 41）。10/20 はそのまま
+     - 上の例は `41`（セット・コーラ）×1 と `32`（単品・オレンジ）×1 になる
+     - ドリンクの本数がドリンク付き商品の数と合わない、注文できない商品番号・ドリンク番号、個数が0以下のときは 400（注文は作らない）
+  2. `Order` を1件INSERTし、採番された `orderId` を取得
+  3. 割り振った明細に `orderId` を紐付けて一括INSERT
+  4. `Order` のINSERT件数が1件でない、または `OrderItem` のINSERT件数が0件以下の場合は `IllegalArgumentException`
+- 前提: 内訳商品（31〜34 / 41〜44 / 51〜54）が `ITEM_TABLE` に登録されていること。`src/main/resources/db/migration/2026-10-add-drink-breakdown-items.sql` で、親カテゴリと同じ価格・「親の名前（ドリンク名）」の名前で登録する（何度流してもよい）。決済金額は明細の `ITEMID` の価格で計算するので、親カテゴリの価格を変えたらこのSQLを流し直すこと。
 
 #### 3.1.2 GET `/api/orders/get/byOrderIds`
 

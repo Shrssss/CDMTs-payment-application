@@ -25,6 +25,8 @@ public class OrderService {
 	
 	private final OrderItemMapper orderItemMapper;
 	
+	private final DrinkAllocator drinkAllocator;
+	
 	
 	
 	public OrderResponse toResponse(Order order,List<OrderResponse.OrderedItem> orderedItems) {
@@ -43,14 +45,17 @@ public class OrderService {
     @Transactional
     public Long createOrder(OrderCreateRequest orderDto) {
     	
+    	// 注文を保存する前に割り振る(不正な入力なら 400 で注文自体を作らない)
+    	Map<Long,Integer> allocatedItems=drinkAllocator.allocate(orderDto.getItems(),orderDto.getDrinkCounts());
+    	
     	Order orderEntity=orderDto.toEntity();
     	
     	int orderInsertCount=orderMapper.insertOrder(orderEntity);
     	
     	if(orderInsertCount!=1) throw new IllegalArgumentException("Expected 1 Order insert row but was "+orderInsertCount+".");
     	
-    	List<OrderItem> orderItemEntities=orderDto.getItems().stream()
-    										.map(item->item.toEntity(orderEntity.getOrderId()))
+    	List<OrderItem> orderItemEntities=allocatedItems.entrySet().stream()
+    										.map(entry->new OrderItem(null,orderEntity.getOrderId(),entry.getKey(),entry.getValue()))
     										.toList();
     	
     	int orderItemInsertCount=orderItemMapper.insertOrderItems(orderItemEntities);
