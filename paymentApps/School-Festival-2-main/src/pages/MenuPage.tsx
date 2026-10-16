@@ -66,6 +66,7 @@ export const MenuPage = ({
             remove={removeItems}
             image={imagePaths[PORK_DRINK_SET]}
             isSoldout={isSoldout[PORK_DRINK_SET]}
+            isDrink={false}
           />
           <Menu
             borderColor={"2px solid #ffbf7f"}
@@ -78,6 +79,7 @@ export const MenuPage = ({
             remove={removeItems}
             image={imagePaths[PORK_DRINK_SET_LARGE]}
             isSoldout={isSoldout[PORK_DRINK_SET_LARGE]}
+            isDrink={false}
           />
         </div>
         <div className="list-row">
@@ -92,6 +94,7 @@ export const MenuPage = ({
             remove={removeItems}
             image={imagePaths[PORK_SINGLE]}
             isSoldout={isSoldout[PORK_SINGLE]}
+            isDrink={false}
           />
           <Menu
             borderColor={"2px solid #ffbf7f"}
@@ -104,6 +107,7 @@ export const MenuPage = ({
             remove={removeItems}
             image={imagePaths[PORK_SINGLE_LARGE]}
             isSoldout={isSoldout[PORK_SINGLE_LARGE]}
+            isDrink={false}
           />
         </div>
         <div className="list-row">
@@ -118,6 +122,7 @@ export const MenuPage = ({
             remove={removeItems}
             image={imagePaths[DRINK_SINGLE]}
             isSoldout={isSoldout[DRINK_SINGLE]}
+            isDrink={false}
           />
         </div>
       </div>

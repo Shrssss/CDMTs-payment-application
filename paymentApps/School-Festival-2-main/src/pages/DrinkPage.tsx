@@ -82,6 +82,7 @@ export const DrinkPage = ({ itemNames, imagePaths, cart, addItems, removeItems, 
             isDrinkScreen={true}
             image={imagePaths[COLA]}
             isSoldout={isSoldout[COLA]}
+            isDrink
           />
           <Menu
             borderColor={"2px solid #7fbfff"}
@@ -95,6 +96,7 @@ export const DrinkPage = ({ itemNames, imagePaths, cart, addItems, removeItems, 
             isDrinkScreen={true}
             image={imagePaths[ORANGE]}
             isSoldout={isSoldout[ORANGE]}
+            isDrink
           />
         </div>
         <div className="list-row">
@@ -110,6 +112,7 @@ export const DrinkPage = ({ itemNames, imagePaths, cart, addItems, removeItems, 
             isDrinkScreen={true}
             image={imagePaths[CIDER]}
             isSoldout={isSoldout[CIDER]}
+            isDrink
           />
           <Menu
             borderColor={"2px solid #7fbfff"}
@@ -123,6 +126,7 @@ export const DrinkPage = ({ itemNames, imagePaths, cart, addItems, removeItems, 
             isDrinkScreen={true}
             image={imagePaths[OOLONG]}
             isSoldout={isSoldout[OOLONG]}
+            isDrink
           />
         </div>
       </div>
