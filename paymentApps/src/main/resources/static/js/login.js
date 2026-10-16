@@ -2,14 +2,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const API_BASE_URL = "/api";
 
-    // ログイン後の戻り先として許可するページ。
-    // next はURLから来るので、検査せずに location へ入れると
+    // 「前の画面に戻る」の行き先として許可するページと、その表示名。
+    // next はURLから来るので、検査せずにリンクへ入れると
     // //evil.example のような値で外部サイトへ飛ばされる（オープンリダイレクト）
-    const ALLOWED_NEXT = ['/monitor.html', '/cooking.html', '/handover.html', '/stock.html'];
-    const DEFAULT_NEXT = '/login.html';
+    const ALLOWED_NEXT = {
+        '/monitor.html': '呼び出しモニター',
+        '/cooking.html': '調理',
+        '/handover.html': '受け渡し',
+        '/stock.html': '在庫'
+    };
 
     const loginForm = document.getElementById('login-form');
     const loggedInBox = document.getElementById('logged-in');
+    const backLink = document.getElementById('back-link');
     const passwordInput = document.getElementById('password');
     const submitButton = document.getElementById('submit-button');
     const logoutButton = document.getElementById('logout-button');
@@ -20,9 +25,22 @@ document.addEventListener('DOMContentLoaded', () => {
         messageElement.classList.toggle('is-error', isError);
     };
 
-    const nextPath = () => {
+    /*
+     * ログイン後は next の画面へ直接飛ばさず、必ずこのリンク集を出す。
+     * 直接飛ばすと、店舗用画面からリンク集へ戻る導線が無いため、他の画面を開けなくなる。
+     * 元の画面へはここに出す「前の画面に戻る」から1タップで戻れる。
+     */
+    const showBackLink = () => {
         const requested = new URLSearchParams(location.search).get('next');
-        return ALLOWED_NEXT.includes(requested) ? requested : DEFAULT_NEXT;
+
+        if (!Object.hasOwn(ALLOWED_NEXT, requested)) {
+            backLink.hidden = true;
+            return;
+        }
+
+        backLink.href = requested;
+        backLink.textContent = `← 前の画面に戻る（${ALLOWED_NEXT[requested]}）`;
+        backLink.hidden = false;
     };
 
     // ログイン済みの人がこの画面を開いた場合は、フォームではなく行き先とログアウトを出す
@@ -35,7 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
             loginForm.hidden = authenticated;
             loggedInBox.hidden = !authenticated;
 
-            if (!authenticated) passwordInput.focus();
+            if (authenticated) {
+                showBackLink();
+            } else {
+                passwordInput.focus();
+            }
         } catch (error) {
             // 状態が取れなくてもログインはできるので、フォームを出して続行する
             console.error('ログイン状態の確認に失敗:', error);
@@ -58,7 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                location.replace(nextPath());
+                passwordInput.value = '';
+                await showCurrentState();
                 return;
             }
 

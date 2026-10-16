@@ -111,6 +111,27 @@ button.secondary:hover:not(:disabled) {
     background-color: #f4f7f6;
 }
 
+/* ログイン前に開こうとしていた画面へ戻るリンク。リンク集の中で一番目立たせる */
+.back-link {
+    display: block;
+    padding: 12px;
+    margin-bottom: 15px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    color: #fff;
+    background-color: #28a745;
+    border-radius: 6px;
+}
+
+.back-link:hover {
+    background-color: #229539;
+}
+
+.back-link[hidden] {
+    display: none;
+}
+
 .message {
     text-align: center;
     margin-top: 20px;
