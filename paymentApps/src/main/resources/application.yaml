@@ -17,7 +17,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQL8Dialect
 
 paysys:
-  public-origin: https://otogi.codemates.org
+  public-origin: https://mobile-order.codemates.org
   action-url: ${PAYMENT_ACTION_URL}
   card-ip: ${PAYSYS_CARD_IP}
   paypay-ip: ${PAYSYS_PAYPAY_IP}
