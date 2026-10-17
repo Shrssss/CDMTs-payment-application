@@ -1,5 +1,5 @@
-// ドリンク選択画面。商品画像はバックエンドのimagePathから取得する
-// (未取得時はMenu.tsxがプレースホルダーを表示する)。
+// ドリンク選択画面。商品画像はフロントエンド内の画像を使用する
+// (画像がない場合はMenu.tsxがプレースホルダーを表示する)。
 import { Menu } from "../components/Menu";
 import { StepPageLayout } from "../components/StepPageLayout";
 import { PRODUCT_CATEGORIES } from "../constants/items";

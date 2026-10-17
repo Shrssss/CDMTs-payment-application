@@ -12,6 +12,14 @@ import type { AppAction, PaymentState } from "../types";
 // 「トップに戻る」時の最終照会の待ち時間上限。通信が返らなくても抜けられることを優先する。
 const LEAVE_STATUS_TIMEOUT_MS = 5000;
 
+function returnSid(search: string): string | null {
+  const params = new URLSearchParams(search);
+  const sid = params.get("return_sid");
+  if (sid && /^[0-9a-f]{16}$/.test(sid)) return sid;
+  const gatewaySid = params.get("SID");
+  return gatewaySid && /^[0-9a-f]{16}$/.test(gatewaySid) ? gatewaySid : null;
+}
+
 // 支払済みの保留注文を注文履歴へ追記する。書き込めなければ例外を投げる。
 function saveToHistory(pending: PendingPayment): void {
   appendOrderHistory(buildOrderSnapshot({
@@ -26,7 +34,32 @@ export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }:
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
   setSelectedTime: Dispatch<SetStateAction<string | null>>;
 }) {
-  const [returned] = useState(() => getPaymentReturn(window.location.search, readPendingPayment()));
+  const [returned, setReturned] = useState(() => {
+    const pending = readPendingPayment();
+    const sid = returnSid(window.location.search);
+    return sid && pending?.sid !== sid ? null : getPaymentReturn(window.location.search, pending);
+  });
+
+  useEffect(() => {
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const sid = returnSid(search);
+    if (!sid || readPendingPayment()?.sid === sid) return;
+    let active = true;
+    void Api.fetchPaymentReturnOrder(sid).then(order => {
+      const method = params.get("paysys_return");
+      if (method && method !== "card" && method !== "paypay") throw new Error("決済方式が不正です。");
+      const pending: PendingPayment = {
+        orderId: order.orderId, sid, method: method === "card" ? "card" : "paypay", cart: order.cart,
+        createdAt: new Date(order.createdAt).toISOString(),
+        reservedAtIso: new Date(order.reservedAt).toISOString(),
+      };
+      if (active) setReturned(getPaymentReturn(search, pending));
+    }).catch(() => {
+      if (active) setReturned(getPaymentReturn(search, null));
+    });
+    return () => { active = false; };
+  }, []);
   const busy = useRef(false);
   const [checking, setChecking] = useState(false);
   const refreshPaymentStatus = useCallback(async () => {
@@ -84,7 +117,7 @@ export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }:
     if (leaving.current) return;
     leaving.current = true;
     try {
-      const pending = readPendingPayment();
+      const pending = readPendingPayment() ?? returned?.pending;
       if (pending) {
         let timer: ReturnType<typeof setTimeout> | undefined;
         try {
@@ -108,7 +141,7 @@ export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }:
     } finally {
       leaving.current = false;
     }
-  }, [dispatch, setPaymentState, setSelectedTime]);
+  }, [dispatch, returned, setPaymentState, setSelectedTime]);
 
   useEffect(() => { void refreshPaymentStatus(); }, [refreshPaymentStatus]);
   return { refreshPaymentStatus, leavePaymentResult, checking };

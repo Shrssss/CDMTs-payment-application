@@ -1,6 +1,8 @@
 package com.cdmts.paymentApps.service;
 
 import java.util.UUID;
+import java.security.SecureRandom;
+import java.util.HexFormat;
 import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
@@ -47,6 +49,7 @@ public class PaymentService {
 	private final ItemMapper itemMapper;
 	
 	private final PaymentMapper paymentMapper;
+	private static final SecureRandom RETURN_RANDOM = new SecureRandom();
 
 	@Value("${paysys.public-origin}")
 	private String publicOrigin;
@@ -215,9 +218,26 @@ public class PaymentService {
 			throw new IllegalArgumentException("注文番号が必要です");
 		}
 
-		String sid=Long.toString(orderId, 36);
+		byte[] bytes = new byte[8];
+		RETURN_RANDOM.nextBytes(bytes);
+		return HexFormat.of().formatHex(bytes);
+	}
 
-		return "O" + sid;
+	public record PaymentReturnOrder(Long orderId, String state,
+			java.time.LocalDateTime createdAt, java.time.LocalDateTime reservedAt,
+			Map<Long, Integer> cart) {}
+
+	public PaymentReturnOrder getPaymentReturnOrder(String sid) {
+		if (sid == null || !sid.matches("[0-9a-f]{16}")) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SIDが不正です");
+		}
+		Order order = paymentMapper.selectOrderBySid(sid);
+		if (order == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "注文がありません");
+		Map<Long, Integer> cart = orderItemMapper.selectOrderItemsByOrderId(order.getOrderId())
+			.stream().collect(Collectors.toMap(OrderItem::getItemId, OrderItem::getQuantity, Integer::sum));
+		return new PaymentReturnOrder(order.getOrderId(),
+			Boolean.TRUE.equals(order.getPaymentStatus()) ? "PAID" : "WAITING",
+			order.getOrderDate(), order.getReservedTime(), cart);
 	}
 
 	public String getCardOkReturnUrl() {
@@ -238,13 +258,14 @@ public class PaymentService {
 
 	public OrderPaymentResponse preparePayment(Long orderId) {
 
-		String sid = generateSid(orderId);
-
 		List<Order> orderEntities = orderMapper.selectOrdersByOrderIds(List.of(orderId));
 
 		if (orderEntities == null || orderEntities.isEmpty()) {
 			throw new IllegalArgumentException("指定された注文が存在しません: " + orderId);
 		}
+		String existingSid = orderEntities.get(0).getPaymentId();
+		String sid = existingSid != null && existingSid.matches("[0-9a-f]{16}")
+				? existingSid : generateSid(orderId);
 
 		List<OrderItem> orderItemEntities = orderItemMapper.selectOrderItemsByOrderId(orderId);
 		
@@ -307,8 +328,8 @@ public class PaymentService {
 		fields.put("TOKEN", cardToken);
 		fields.put("KAKUTEI", "1");
 		fields.put("MAIL", mail);
-		fields.put("OKURL", getCardOkReturnUrl());
-		fields.put("RT", getCardErrorReturnUrl());
+		fields.put("OKURL", getCardOkReturnUrl() + "&return_sid=" + response.getSid());
+		fields.put("RT", getCardErrorReturnUrl() + "&return_sid=" + response.getSid());
 
 		return response;
 	}
@@ -322,8 +343,8 @@ public class PaymentService {
 		fields.put("IP", paypayIp);
 		fields.put("SID", response.getSid());
 		fields.put("STORE", "42");
-		fields.put("OKURL", getPaypayOkReturnUrl());
-		fields.put("RT", getPaypayCancelReturnUrl());
+		fields.put("OKURL", getPaypayOkReturnUrl() + "&return_sid=" + response.getSid());
+		fields.put("RT", getPaypayCancelReturnUrl() + "&return_sid=" + response.getSid());
 
 		return response;
 	}
