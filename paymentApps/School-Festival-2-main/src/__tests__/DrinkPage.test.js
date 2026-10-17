@@ -5,6 +5,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 
 import { DrinkPage } from "../pages/DrinkPage";
+import { TestAppProvider } from "../test-utils/appContext";
 
 describe("DrinkPage", () => {
   let container;
@@ -18,6 +19,13 @@ describe("DrinkPage", () => {
     removeItems: () => {},
     isSoldout: {},
   };
+
+  const renderDrink = (difference) =>
+    root.render(
+      <TestAppProvider value={{ ...baseProps, calculateDifferenceOfDrinks: () => difference }}>
+        <DrinkPage />
+      </TestAppProvider>
+    );
 
   beforeEach(() => {
     container = document.createElement("div");
@@ -33,21 +41,21 @@ describe("DrinkPage", () => {
 
   test("difference > 0 のとき「あと◯個」を表示する", () => {
     act(() => {
-      root.render(<DrinkPage {...baseProps} difference={2} />);
+      renderDrink(2);
     });
     expect(container.textContent).toContain("あと 2 個");
   });
 
   test("difference === 0 のとき「OK！」を表示する", () => {
     act(() => {
-      root.render(<DrinkPage {...baseProps} difference={0} />);
+      renderDrink(0);
     });
     expect(container.textContent).toContain("OK！");
   });
 
   test("difference < 0 のとき「数を減らしてください」を表示する", () => {
     act(() => {
-      root.render(<DrinkPage {...baseProps} difference={-1} />);
+      renderDrink(-1);
     });
     expect(container.textContent).toContain("数を減らしてください");
   });

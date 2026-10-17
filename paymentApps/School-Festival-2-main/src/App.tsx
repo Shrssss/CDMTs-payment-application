@@ -1,56 +1,22 @@
-// アプリ全体の画面遷移と共通レイアウトをまとめるルートコンポーネント。
+// アプリ全体の共通レイアウトをまとめるルートコンポーネント。
+// 状態は AppProvider(context/)が持ち、画面の切り替えは AppScreenRenderer のルーティングで行う。
 import "./styles.css";
-import { useRef, useState } from "react";
 
 import { Header } from "./components/Header";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { useAppFlow } from "./hooks/useAppFlow";
-import { useOrderSummary } from "./hooks/useOrderSummary";
-import { useMenuItems } from "./hooks/useMenuItems";
-import { useOrderSnapshotRestore } from "./hooks/useOrderSnapshotRestore";
-import { usePaymentReturn } from "./hooks/usePaymentReturn";
 import { AppScreenRenderer } from "./AppScreenRenderer";
 import { LegalNoticePage } from "./pages/LegalNoticePage";
-import { INITIAL_PAYMENT_STATE } from "./constants/initialState";
-import { USE_TEST_TIME, TEST_DATE } from "./constants/config";
-import { getCurrentTestDate } from "./utils/dateClock";
+import { AppProvider } from "./context/AppProvider";
+import { useAppContext } from "./context/AppContext";
+
+const LegalNotice = () => {
+  const { isLegalNoticeOpen, closeLegalNotice } = useAppContext();
+  return isLegalNoticeOpen ? <LegalNoticePage onClose={closeLegalNotice} /> : null;
+};
 
 export const App = () => {
-  const appStartTimeRef = useRef(Date.now());
-  const [isLegalNoticeOpen, setIsLegalNoticeOpen] = useState(false);
-
-  const currentTestTime: Date | false = USE_TEST_TIME
-    ? getCurrentTestDate(appStartTimeRef.current, TEST_DATE)
-    : false;
-
-  const {
-    state,
-    dispatch,
-    next,
-    prev,
-    addItems,
-    removeItems,
-    selectedTime,
-    setSelectedTime,
-  } = useAppFlow();
-  const { prices, itemNames, imagePaths, isSoldout, fetchError, refreshMenuItems } =
-    useMenuItems(state.step);
-  const {
-    calculateDifferenceOfDrinks,
-    calculateSumInMenu,
-    calculateSumPrice,
-  } = useOrderSummary(state.cart, prices);
-  const [paymentState, setPaymentState] = useState(INITIAL_PAYMENT_STATE);
-  const { savedOrders, viewSavedOrder } = useOrderSnapshotRestore({
-    step: state.step,
-    dispatch,
-    setPaymentState,
-    setSelectedTime,
-  });
-  const { refreshPaymentStatus, leavePaymentResult, checking } = usePaymentReturn({ dispatch, setPaymentState, setSelectedTime });
-
   return (
-    <>
+    <AppProvider>
       <style>{`\n        @keyframes cm-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }\n      `}</style>
 
       <header>
@@ -59,40 +25,10 @@ export const App = () => {
       </header>
 
       <ErrorBoundary>
-        <AppScreenRenderer
-          step={state.step}
-          next={next}
-          prev={prev}
-          cart={state.cart}
-          addItems={addItems}
-          removeItems={removeItems}
-          prices={prices}
-          itemNames={itemNames}
-          imagePaths={imagePaths}
-          isSoldout={isSoldout}
-          menuFetchError={fetchError}
-          onRetryMenuFetch={refreshMenuItems}
-          calculateDifferenceOfDrinks={calculateDifferenceOfDrinks}
-          calculateSumInMenu={calculateSumInMenu}
-          calculateSumPrice={calculateSumPrice}
-          selectedTime={selectedTime}
-          setSelectedTime={setSelectedTime}
-          currentTestTime={currentTestTime}
-          paymentState={paymentState}
-          onRefreshPaymentStatus={refreshPaymentStatus}
-          onLeavePaymentResult={leavePaymentResult}
-          checkingPaymentStatus={checking}
-          setPaymentState={setPaymentState}
-          dispatch={dispatch}
-          onOpenLegalNotice={() => setIsLegalNoticeOpen(true)}
-          savedOrders={savedOrders}
-          onViewSavedOrder={viewSavedOrder}
-        />
+        <AppScreenRenderer />
       </ErrorBoundary>
 
-      {isLegalNoticeOpen && (
-        <LegalNoticePage onClose={() => setIsLegalNoticeOpen(false)} />
-      )}
-    </>
+      <LegalNotice />
+    </AppProvider>
   );
 };

@@ -3,13 +3,15 @@ import type { Dispatch, SetStateAction } from "react";
 
 import { useMockPaymentFlow } from "./useMockPaymentFlow";
 import { MOCK_PAYSYS_CARD_ORDER_ID } from "../constants/mocks/paysysCardMock";
-import type { AppAction, Cart, PaymentState } from "../types";
+import type { Cart, Goto, PaymentState } from "../types";
 import { USE_MOCK_PAYMENT } from "../constants/config";
 import { Api } from "../services/apiService";
 import { parseReservedToDate } from "../utils/orderUtils";
 import { buildOrderItems } from "../utils/orderUtils";
 import { toLocalDateTimeString } from "../utils/dateFormat";
-import { savePendingPayment } from "../features/payment/pendingPayment";
+import {
+  canSavePendingPayment, savePendingPayment, STORAGE_UNAVAILABLE_MESSAGE,
+} from "../features/payment/pendingPayment";
 import { submitPaymentForm } from "../features/payment/submitPaymentForm";
 
 import { useState } from "react";
@@ -18,20 +20,20 @@ export function useCardPaymentFlow({
   email,
   cart,
   selectedTime,
-  dispatch,
+  goto,
   setPaymentState,
 }: {
   email: string;
   cart: Cart;
   selectedTime: string | null;
-  dispatch: Dispatch<AppAction>;
+  goto: Goto;
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
 }) {
 
   const { handlePay, submitting: mockSubmitting } = useMockPaymentFlow({
     cart,
     selectedTime,
-    dispatch,
+    goto,
     setPaymentState,
     mockOrderId: MOCK_PAYSYS_CARD_ORDER_ID,
     notImplementedMessage:
@@ -51,6 +53,12 @@ export function useCardPaymentFlow({
 
     if (USE_MOCK_PAYMENT) {
       await handlePay();
+      return;
+    }
+
+    // 照合IDを保存できない環境では、注文を作る前に止める(未払いの注文をDBに残さないため)。
+    if (!canSavePendingPayment()) {
+      alert(STORAGE_UNAVAILABLE_MESSAGE);
       return;
     }
 
@@ -114,10 +122,8 @@ export function useCardPaymentFlow({
           mail: email,
         });
 
-        savePendingPayment({
-          orderId, sid: prepared.sid, method: "card", cart,
-          reservedAtIso: reservedDate.toISOString(), createdAt: new Date().toISOString(),
-        });
+        // 戻ってこなかった場合でも後から照会できるよう、送り出す前に照合IDを残す。
+        savePendingPayment(prepared.sid);
         submitPaymentForm(prepared);
 
       } catch {

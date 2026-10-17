@@ -1,30 +1,17 @@
 // クレジットカード決済画面。useCardPaymentFlowフックが送信・結果更新を担う。
-import type { CSSProperties, Dispatch, SetStateAction } from "react";
+import type { CSSProperties } from "react";
 import { useState } from "react";
 import { useCardPaymentFlow } from "../hooks/useCardPaymentFlow";
-import type { AppAction, Cart, PaymentState } from "../types";
+import { useAppContext } from "../context/AppContext";
 
-interface PaymentPageProps {
-  dispatch: Dispatch<AppAction>;
-  setPaymentState: Dispatch<SetStateAction<PaymentState>>;
-  selectedTime: string | null;
-  cart: Cart;
-  onOpenLegalNotice: () => void;
-}
-
-export const PaymentPage = ({
-  dispatch,
-  setPaymentState,
-  selectedTime,
-  cart,
-  onOpenLegalNotice,
-}: PaymentPageProps) => {
+export const PaymentPage = () => {
+  const { goto, setPaymentState, selectedTime, cart, openLegalNotice: onOpenLegalNotice } = useAppContext();
   const [email, setEmail] = useState("");
   const { handlePayWithCard, submitting, emailError } = useCardPaymentFlow({
     email,
     cart,
     selectedTime,
-    dispatch,
+    goto,
     setPaymentState,
   });
 
@@ -61,7 +48,7 @@ export const PaymentPage = ({
       <p style={{ color: "#808080" }}>また、EMV-3Dセキュア決済のためにメールアドレスの入力が必要です。ご了承ください。</p>
 
       {/* 処理中でも押せるようにする(カード入力画面を閉じて処理中のまま止まった場合の抜け道)。 */}
-      <button style={backBtnStyle} onClick={() => dispatch({ type: "GOTO", step: "paymentMethod" })}>
+      <button style={backBtnStyle} onClick={() => goto("paymentMethod")}>
         お支払い方法の選択に戻る
       </button>
 

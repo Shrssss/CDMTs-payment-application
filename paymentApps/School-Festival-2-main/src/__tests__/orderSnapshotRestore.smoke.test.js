@@ -4,6 +4,8 @@ global.IS_REACT_ACT_ENVIRONMENT = true;
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 
+import { MemoryRouter } from "react-router";
+
 import { App } from "../App";
 import { ORDER_HISTORY_CONFIG } from "../constants/config";
 
@@ -34,7 +36,7 @@ describe("title screen order history (localStorage)", () => {
   });
 
   test("履歴が無ければ一覧を出さない", () => {
-    act(() => root.render(<App />));
+    act(() => root.render(<MemoryRouter><App /></MemoryRouter>));
 
     expect(container.textContent).toContain("注文に進む");
     expect(container.textContent).not.toContain("これまでのご注文");
@@ -53,7 +55,7 @@ describe("title screen order history (localStorage)", () => {
     ];
     window.localStorage.setItem(ORDER_HISTORY_CONFIG.KEY, JSON.stringify(history));
 
-    act(() => root.render(<App />));
+    act(() => root.render(<MemoryRouter><App /></MemoryRouter>));
 
     expect(container.textContent).toContain("これまでのご注文");
     const buttons = historyButtons(container);
@@ -76,7 +78,7 @@ describe("title screen order history (localStorage)", () => {
       ])
     );
 
-    act(() => root.render(<App />));
+    act(() => root.render(<MemoryRouter><App /></MemoryRouter>));
     act(() => historyButtons(container)[1].click());
 
     expect(container.textContent).toContain("ご注文ありがとうございます");

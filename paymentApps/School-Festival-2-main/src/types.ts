@@ -10,14 +10,16 @@ export type ImagePathMap = Record<number, string>;
 export type SoldoutMap = Record<number, boolean>;
 
 export interface AppState {
-  step: Step;
   cart: Cart;
 }
 
+/**
+ * 画面遷移(URLの切り替え)。replace: true なら履歴を増やさない。
+ * search は画面に渡すクエリ(例: "?sid=0123456789abcdef")。
+ */
+export type Goto = (step: Step, options?: { replace?: boolean; search?: string }) => void;
+
 export type AppAction =
-  | { type: "GOTO"; step: Step }
-  | { type: "NEXT" }
-  | { type: "PREV" }
   | { type: "CHANGE_ITEM_QUANTITY"; itemId: number; delta: number }
   | { type: "CLEAR_TEMPORARY_DRINKS" }
   | { type: "REPLACE_CART"; cart: Cart }
@@ -90,6 +92,24 @@ export interface OrderSnapshot {
   reservedAtIso: string;
   orderId: string | number | null;
   itemsCart: Cart;
+  displayReserved: string | null;
+}
+
+/** 照合ID(SID)からバックエンドで復元した注文(GET /api/payments/return/{sid})。 */
+export interface PaymentReturnOrder {
+  orderId: number;
+  state: "WAITING" | "PAID";
+  /** 注文日時(バックエンドの LocalDateTime 文字列。タイムゾーンなし)。 */
+  createdAt: string;
+  /** 受取予定日時(同上)。 */
+  reservedAt: string;
+  cart: Cart;
+}
+
+/** タイトル画面に出す「支払いを確認できていない注文」。照会に失敗した場合は orderId 等が null。 */
+export interface PendingPaymentNotice {
+  sid: string;
+  orderId: number | null;
   displayReserved: string | null;
 }
 

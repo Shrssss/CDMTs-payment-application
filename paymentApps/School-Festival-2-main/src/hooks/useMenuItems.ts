@@ -1,4 +1,4 @@
-// 商品の価格・商品名・在庫状況をバックエンドから取得し、画像はローカルの素材を使うフック。
+// 商品(価格・商品名・画像パス)と在庫状況をバックエンドから取得して画面状態として保持するフック。
 // menuステップに入るたびに再取得し、最新の価格・在庫状況を反映する。
 //
 // USE_MOCK_MENUがオンの場合は、バックエンドへ一切接続せず
@@ -19,7 +19,7 @@ import { INITIAL_UI_STATE } from "../constants/initialState";
 import type { ImagePathMap, NameMap, PriceMap, SoldoutMap } from "../types";
 import type { Step } from "../constants/steps";
 
-export function useMenuItems(step: Step) {
+export function useMenuItems(step: Step | null) {
   // USE_MOCK_MENUがオンの場合は初期値からモック値を使い、
   // 初回描画時に価格未取得の一瞬の表示崩れ(フラッシュ)が起きないようにする。
   const [prices, setPrices] = useState<PriceMap>(USE_MOCK_MENU ? MOCK_MENU_PRICES : {});

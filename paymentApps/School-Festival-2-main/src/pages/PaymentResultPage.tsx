@@ -1,20 +1,17 @@
 // 決済結果と予約時刻の表示をまとめるページコンポーネント。
-import type { Dispatch, SetStateAction } from "react";
 import { formatReservedTimeHHmm, parseReservedToDate } from "../utils/orderUtils";
-import type { AppAction, PaymentState } from "../types";
+import { useAppContext } from "../context/AppContext";
 
-interface PaymentResultPageProps {
-  onRefreshPaymentStatus?: () => void;
-  /** 確認画面から抜けてタイトルへ戻る(保留注文を破棄する)。 */
-  onLeavePaymentResult?: () => void;
-  checkingPaymentStatus?: boolean;
-  paymentState: PaymentState;
-  selectedTime: string | null;
-  setPaymentState: Dispatch<SetStateAction<PaymentState>>;
-  dispatch: Dispatch<AppAction>;
-}
-
-export const PaymentResultPage = ({ paymentState, selectedTime, setPaymentState, dispatch, onRefreshPaymentStatus, onLeavePaymentResult, checkingPaymentStatus = false }: PaymentResultPageProps) => {
+export const PaymentResultPage = () => {
+  const {
+    paymentState,
+    selectedTime,
+    setPaymentState,
+    goto,
+    refreshPaymentStatus: onRefreshPaymentStatus,
+    leavePaymentResult: onLeavePaymentResult,
+    checkingPaymentStatus,
+  } = useAppContext();
   const resetOutcome = () => {
     setPaymentState((prev) => ({
       ...prev,
@@ -77,7 +74,7 @@ export const PaymentResultPage = ({ paymentState, selectedTime, setPaymentState,
           <div style={{ textAlign: "center", marginTop: 16 }}>
             <button
               style={{ width: 160, height: 44, fontSize: 18 }}
-              onClick={() => dispatch({ type: "GOTO", step: "numberTag" })}
+              onClick={() => goto("numberTag")}
             >
               番号札を表示
             </button>
@@ -122,7 +119,7 @@ export const PaymentResultPage = ({ paymentState, selectedTime, setPaymentState,
               }}
               onClick={() => {
                 resetOutcome();
-                dispatch({ type: "GOTO", step: "cart" });
+                goto("cart");
               }}
             >
               カートに戻る
@@ -131,7 +128,7 @@ export const PaymentResultPage = ({ paymentState, selectedTime, setPaymentState,
               style={{ width: 160, height: 44, fontSize: 18 }}
               onClick={() => {
                 resetOutcome();
-                dispatch({ type: "GOTO", step: "payment" });
+                goto("payment");
               }}
             >
               再試行

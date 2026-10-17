@@ -6,25 +6,29 @@ import { STEPS, type Step } from "../constants/steps";
 import { formatDisplayReserved } from "../utils/dateFormat";
 import { parseReservedToDate } from "../utils/orderUtils";
 import { orderSnapshotKey, readOrderHistory } from "../features/order/orderSnapshot";
-import type { AppAction, OrderSnapshot, PaymentState } from "../types";
+import type { AppAction, Goto, OrderSnapshot, PaymentState } from "../types";
 
 export function useOrderSnapshotRestore({
   step,
   dispatch,
+  goto,
   setPaymentState,
   setSelectedTime,
 }: {
-  step: Step;
+  step: Step | null;
   dispatch: Dispatch<AppAction>;
+  goto: Goto;
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
   setSelectedTime: Dispatch<SetStateAction<string | null>>;
 }) {
   const [savedOrders, setSavedOrders] = useState<OrderSnapshot[]>(() => readOrderHistory());
 
+  const reloadSavedOrders = useCallback(() => setSavedOrders(readOrderHistory()), []);
+
   // タイトルへ戻るたびに読み直し、直前に完了した注文も一覧に出す。
   useEffect(() => {
-    if (step === STEPS.TITLE) setSavedOrders(readOrderHistory());
-  }, [step]);
+    if (step === STEPS.TITLE) reloadSavedOrders();
+  }, [step, reloadSavedOrders]);
 
   const viewSavedOrder = useCallback((key: string) => {
     const saved = readOrderHistory().find((s) => orderSnapshotKey(s) === key);
@@ -50,8 +54,8 @@ export function useOrderSnapshotRestore({
         displayReserved: displayReserved || (reserved ? formatDisplayReserved(reserved) : null),
       },
     }));
-    dispatch({ type: "GOTO", step: STEPS.NUMBER_TAG });
-  }, [dispatch, setPaymentState, setSelectedTime]);
+    goto(STEPS.NUMBER_TAG);
+  }, [dispatch, goto, setPaymentState, setSelectedTime]);
 
-  return { savedOrders, viewSavedOrder };
+  return { savedOrders, reloadSavedOrders, viewSavedOrder };
 }

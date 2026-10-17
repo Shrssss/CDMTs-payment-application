@@ -4,7 +4,7 @@ import logoImg from "../image/logo.jpg";
 import { orderSnapshotKey } from "../features/order/orderSnapshot";
 import { formatDisplayReserved } from "../utils/dateFormat";
 import { parseReservedToDate } from "../utils/orderUtils";
-import type { OrderSnapshot } from "../types";
+import type { OrderSnapshot, PendingPaymentNotice } from "../types";
 
 interface TitleProps {
   onStart: () => void;
@@ -12,6 +12,9 @@ interface TitleProps {
   /** 注文履歴(新しい順)。 */
   savedOrders?: OrderSnapshot[];
   onViewSavedOrder?: (key: string) => void;
+  /** 支払いを確認できていない注文。 */
+  pendingPayments?: PendingPaymentNotice[];
+  onOpenPendingPayment?: (sid: string) => void;
 }
 
 // 履歴ボタンに出す受取日時。保存時の表示文字列を優先し、無ければ予約日時から作る。
@@ -21,7 +24,14 @@ const reservedLabel = (s: OrderSnapshot): string => {
   return d ? formatDisplayReserved(d) : "";
 };
 
-export const Title = ({ onStart, onOpenLegalNotice, savedOrders = [], onViewSavedOrder }: TitleProps) => {
+export const Title = ({
+  onStart,
+  onOpenLegalNotice,
+  savedOrders = [],
+  onViewSavedOrder,
+  pendingPayments = [],
+  onOpenPendingPayment,
+}: TitleProps) => {
   return (
     <div style={wrap}>
       <div style={card}>
@@ -37,6 +47,21 @@ export const Title = ({ onStart, onOpenLegalNotice, savedOrders = [], onViewSave
           やわらか角煮
         </h1>
         <p style={subtitle}>予約注文システム</p>
+
+        {pendingPayments.length > 0 && (
+          <section style={pendingBox} aria-label="支払いを確認できていないご注文">
+            <h2 style={pendingTitle}>支払いを確認できていないご注文があります</h2>
+            <p style={pendingText}>
+              お支払い済みの場合は、支払い状況を確認すると番号札を表示できます。再度のお支払いはしないでください。
+            </p>
+            {pendingPayments.map((p) => (
+              <button key={p.sid} style={savedOrderBtn} onClick={() => onOpenPendingPayment?.(p.sid)}>
+                {p.orderId != null ? `注文番号 ${p.orderId} の` : "ご注文の"}支払い状況を確認
+                {p.displayReserved && <span style={savedOrderSub}>{p.displayReserved} 受取</span>}
+              </button>
+            ))}
+          </section>
+        )}
 
         {/* メインボタン */}
         <button style={primaryBtn} onClick={onStart}>
@@ -165,6 +190,26 @@ const primaryBtn: CSSProperties = {
   background: "#ffe08a",
   width: "calc(100% - 60px)",
   cursor: "pointer",
+};
+
+const pendingBox: CSSProperties = {
+  margin: "0 0 16px 0",
+  padding: "12px",
+  background: "#fff6e0",
+  border: "2px solid #ff962d",
+  borderRadius: "12px",
+};
+
+const pendingTitle: CSSProperties = {
+  fontSize: "16px",
+  margin: "0 0 4px 0",
+  color: "#b45309",
+};
+
+const pendingText: CSSProperties = {
+  fontSize: "14px",
+  margin: "0 0 4px 0",
+  color: "#555",
 };
 
 const historyBox: CSSProperties = {
