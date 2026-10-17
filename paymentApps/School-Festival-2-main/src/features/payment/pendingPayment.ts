@@ -26,7 +26,7 @@ export function clearPendingPayment(): void {
   } catch { /* 使えない場合は残っていないので何もしない */ }
 }
 
-const PAYMENT_RETURN_PARAMS = ["paysys_return", "result", "SID", "ERROR"];
+const PAYMENT_RETURN_PARAMS = ["paysys_return", "result", "SID", "ERROR", "return_sid"];
 
 // Paysysからの戻りパラメータをURLから消す(履歴は増やさない)。
 export function clearPaymentReturnParams(): void {
@@ -57,7 +57,8 @@ export function getPaymentReturn(search: string, pending: PendingPayment | null)
   if (!method && !pending) return null;
   if (!pending) return { pending: null, error: "元の注文を復元できません。同じブラウザ・タブで開き、注文番号を係員にお伝えください。" };
   if ((method && method !== pending.method) ||
-      (params.has("SID") && params.get("SID") !== pending.sid)) {
+      (params.has("SID") && params.get("SID") !== pending.sid) ||
+      (params.has("return_sid") && params.get("return_sid") !== pending.sid)) {
     return { pending: null, error: "戻り先の取引情報が保存済み注文と一致しません。係員にご確認ください。" };
   }
   const incomplete = params.get("result") === "cancel" || params.get("result") === "error" || params.has("ERROR");

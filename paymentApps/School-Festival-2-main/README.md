@@ -58,8 +58,8 @@
 
 - ソースは基本的に `.ts` / `.tsx` です(`src/legacy/square/` のみ例外、上記「Squareコードの隔離について」参照)。
 - `npm start` / `npm run dev` は Vite の開発サーバーを起動します(デフォルトポート 3000)。
-- `npm run build` は `tsc --noEmit`(型チェックのみ、出力なし)→ `vite build` の順に実行します。型エラーがあるとビルドはそこで失敗します。
-- `npm run preview` はビルド成果物(`dist/`)をローカルで確認できます。
+- `npm run build` は型チェック後、Spring Boot が配信する `../src/main/resources/static/` に直接出力します。管理画面など既存の静的ファイルは残します。
+- `npm run preview` はこのビルド成果物をローカルで確認できます。
 - **テストは Vitest ではなく Jest のままです**(`babel-jest` + `@babel/preset-typescript` で型を単純に剥がして実行)。既存テストが `jest.resetModules()` と動的 `require()` を多用しており、Vitestへの書き換えはリスクが高いため、あえて据え置いています。
 - `import.meta.env.VITE_X` は `babel-plugin-transform-vite-meta-env` により、Jest実行時は `process.env.VITE_X` に変換されます。同じソースコードがVite(ブラウザ)とJest(Node)の両方で動く仕組みです。
 
@@ -75,6 +75,8 @@ npm start
 ```bash
 npm run build
 ```
+
+Spring Boot の JAR を配布するときは、このフロントのビルドを先に実行してから `paymentApps` で Maven のパッケージを作成してください。フロントのソースだけを更新しても配信画面には反映されません。
 
 テストは以下です。
 
@@ -169,6 +171,6 @@ npm test
 
 - メニューの価格・商品名・在庫状況はバックエンドの `GET /api/items/get/allItems` から取得します(`USE_MOCK_MENU=false` の場合)。画像はフロントエンド内の素材を使用します。
 - 予約時間の扱いはテスト時刻の有無で変わります。
-- ビルド成果物(`dist/`)は配布用であり、通常の開発ではソースと切り分けて扱うのが望ましいです(`.gitignore`済み)。
+- ビルド成果物は `../src/main/resources/static/` に出力され、Spring Boot の配布物に含まれます。
 - バックエンドへの要望・修正依頼は `docs/backend-requirements.md` を参照してください。
 - **後任フロントエンド開発者は、まず `docs/frontend-handover.md` を読んでください。** アプリの概要・設計・重要な定数・「どこを直せば何が変わるか」をまとめた仕様書です。特にPaySys決済の実装ガイドを重点的に記載しています。

@@ -13,6 +13,25 @@ function isValidAppId(id: unknown): id is string {
 }
 
 export const Api = {
+  async fetchPaymentReturnOrder(sid: string): Promise<{
+    orderId: number; state: "WAITING" | "PAID";
+    createdAt: string; reservedAt: string; cart: Record<string, number>;
+  }> {
+    if (!/^[0-9a-f]{16}$/.test(sid)) throw new Error("照合IDが不正です。");
+    const res = await fetch(`${apiUrl}/api/payments/return/${sid}`, {
+      cache: "no-store", headers: { Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error("注文情報を取得できませんでした。");
+    const data = await res.json();
+    if (!Number.isSafeInteger(data.orderId) || data.orderId <= 0 ||
+        !["WAITING", "PAID"].includes(data.state) ||
+        typeof data.createdAt !== "string" || typeof data.reservedAt !== "string" ||
+        !data.cart || typeof data.cart !== "object" || Array.isArray(data.cart) ||
+        !Object.values(data.cart).every(q => Number.isInteger(q) && Number(q) > 0)) {
+      throw new Error("注文情報の応答が不正です。");
+    }
+    return data;
+  },
   async fetchPaymentStatus(orderId: number): Promise<{ orderId: number; state: "WAITING" | "PAID" }> {
     const res = await fetch(`${apiUrl}/api/payments/${orderId}/status`, {
       cache: "no-store",

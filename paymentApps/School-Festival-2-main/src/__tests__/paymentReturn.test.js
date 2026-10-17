@@ -7,7 +7,7 @@ import { savePendingPayment, PENDING_PAYMENT_KEY } from "../features/payment/pen
 import { ORDER_HISTORY_CONFIG } from "../constants/config";
 import { Api } from "../services/apiService";
 
-jest.mock("../services/apiService", () => ({ Api: { fetchPaymentStatus: jest.fn() } }));
+jest.mock("../services/apiService", () => ({ Api: { fetchPaymentStatus: jest.fn(), fetchPaymentReturnOrder: jest.fn() } }));
 const pending = { orderId: 42, sid: "O16", method: "paypay", cart: { 10: 2 },
   reservedAtIso: "2026-10-12T04:00:00.000Z", createdAt: "2026-10-12T03:00:00.000Z" };
 let container, root, dispatch, setSelectedTime;
@@ -30,6 +30,34 @@ afterEach(() => {
 async function render() { await act(async () => root.render(<Harness />)); }
 const savedHistory = () => JSON.parse(localStorage.getItem(ORDER_HISTORY_CONFIG.KEY) || "[]");
 const buttonByText = text => Array.from(container.querySelectorAll("button")).find(b => b.textContent === text);
+
+test("別ブラウザの復帰でも照合IDから注文を復元し、決済済みなら履歴に保存する", async () => {
+  sessionStorage.clear();
+  history.replaceState(null, "", "/?paysys_return=paypay&result=ok&return_sid=0123456789abcdef");
+  Api.fetchPaymentReturnOrder.mockResolvedValue({
+    orderId: 42, state: "PAID", cart: { 10: 2 },
+    createdAt: "2026-10-12T12:00:00", reservedAt: "2026-10-12T13:00:00",
+  });
+  Api.fetchPaymentStatus.mockResolvedValue({ orderId: 42, state: "PAID" });
+  await render();
+  expect(Api.fetchPaymentReturnOrder).toHaveBeenCalledWith("0123456789abcdef");
+  expect(container.textContent).toContain("決済が完了しました");
+  expect(savedHistory()[0]).toMatchObject({ orderId: 42, itemsCart: { 10: 2 } });
+  expect(location.search).toBe("");
+});
+
+test("決済会社が独自の戻りパラメータを落としてもSIDから復元する", async () => {
+  sessionStorage.clear();
+  history.replaceState(null, "", "/?SID=0123456789abcdef");
+  Api.fetchPaymentReturnOrder.mockResolvedValue({
+    orderId: 42, state: "PAID", cart: { 10: 2 },
+    createdAt: "2026-10-12T12:00:00", reservedAt: "2026-10-12T13:00:00",
+  });
+  Api.fetchPaymentStatus.mockResolvedValue({ orderId: 42, state: "PAID" });
+  await render();
+  expect(Api.fetchPaymentReturnOrder).toHaveBeenCalledWith("0123456789abcdef");
+  expect(savedHistory()[0].orderId).toBe(42);
+});
 
 test("成功URLでもWAITINGは未完了、手動再取得でPAIDになって初めて保存と番号札へ進む", async () => {
   Api.fetchPaymentStatus.mockResolvedValueOnce({ state: "WAITING" }).mockResolvedValueOnce({ state: "PAID" });
