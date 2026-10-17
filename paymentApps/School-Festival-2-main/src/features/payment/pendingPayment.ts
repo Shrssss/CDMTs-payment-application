@@ -47,6 +47,25 @@ export function readPendingPayments(now: Date = new Date()): PendingPayment[] {
   }
 }
 
+export const STORAGE_UNAVAILABLE_MESSAGE =
+  "ブラウザの保存機能(Cookie／ローカルストレージ)が無効になっているため、この端末では決済できません。" +
+  "設定で有効にしてから再度お試しいただくか、店頭でご注文ください。";
+
+/**
+ * 保留中の照合IDを保存できる(localStorage に書き込める)か。
+ * Safariの「すべてのCookieをブロック」等では false。注文を作る前に確かめ、未払いの注文を残さないために使う。
+ */
+export function canSavePendingPayment(): boolean {
+  const probeKey = `${PENDING_PAYMENTS_KEY}_probe`;
+  try {
+    localStorage.setItem(probeKey, "1");
+    localStorage.removeItem(probeKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // 外部決済へ送り出す直前に呼ぶ。保存できなければ例外を投げ、呼び出し側は送り出しを止める。
 export function savePendingPayment(sid: string, now: Date = new Date()): void {
   if (!isValidSid(sid)) throw new Error("照合IDが不正です。");

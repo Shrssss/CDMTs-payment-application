@@ -9,7 +9,9 @@ import { Api } from "../services/apiService";
 import { parseReservedToDate } from "../utils/orderUtils";
 import { buildOrderItems } from "../utils/orderUtils";
 import { toLocalDateTimeString } from "../utils/dateFormat";
-import { savePendingPayment } from "../features/payment/pendingPayment";
+import {
+  canSavePendingPayment, savePendingPayment, STORAGE_UNAVAILABLE_MESSAGE,
+} from "../features/payment/pendingPayment";
 import { submitPaymentForm } from "../features/payment/submitPaymentForm";
 
 import { useState } from "react";
@@ -51,6 +53,12 @@ export function useCardPaymentFlow({
 
     if (USE_MOCK_PAYMENT) {
       await handlePay();
+      return;
+    }
+
+    // 照合IDを保存できない環境では、注文を作る前に止める(未払いの注文をDBに残さないため)。
+    if (!canSavePendingPayment()) {
+      alert(STORAGE_UNAVAILABLE_MESSAGE);
       return;
     }
 

@@ -89,6 +89,7 @@ flowchart TD
 
 - 外部決済へ送り出す直前に、照合ID(SID)と保存時刻だけを localStorage の `cm_pending_payments_v1` に保存します([`features/payment/pendingPayment.ts`](../src/features/payment/pendingPayment.ts))。注文内容は保存せず、必要なときに `GET /api/payments/return/{sid}` でバックエンドから取り直します。
 - 保存から12時間(`PENDING_PAYMENT_TTL_MS`)を過ぎたものは読み出し時に捨てます。
+- **localStorage に書き込めない環境(Safariの「すべてのCookieをブロック」等)では決済に進めません。** 決済方法の選択画面で案内を出してボタンを無効にし、カード・PayPayの送信処理でも注文を作る前に `canSavePendingPayment()` で確かめます。照合IDを残せないと、戻ってこなかったときに払った注文の番号札を出せず、また注文作成後に止まると未払いの注文がDBに残ってしまうためです(モック決済では確認しません)。
 - 支払済みを確認したら([`usePaymentReturn`](../src/hooks/usePaymentReturn.ts)の結果画面、またはタイトルでの照会)、注文履歴へ追加して保留から外します。
 - タイトル画面を開くと、[`usePendingPaymentNotices`](../src/hooks/usePendingPaymentNotices.ts)が保留中のSIDを照会します。支払済みなら黙って注文履歴へ追加し、未確認のものは「支払いを確認できていないご注文があります」と案内して、ボタンから結果画面(`#/payment/result?sid=...`)を開けるようにします。戻りURLを経ずに戻ってきた・タブを閉じてしまった場合でも、払った注文の番号札を出せるようにするためです。
 - 結果画面の「トップに戻る」は、最後に1回だけ照会してPAIDなら履歴へ残し、そのうえで保留中のSIDを消してタイトルへ戻ります(支払いをやめた注文が案内され続けないように)。

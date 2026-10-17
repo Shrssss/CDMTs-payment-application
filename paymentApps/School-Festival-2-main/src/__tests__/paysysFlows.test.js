@@ -5,7 +5,7 @@ import { useCardPaymentFlow } from "../hooks/useCardPaymentFlow";
 import { usePayPayPaymentFlow } from "../hooks/usePayPayPaymentFlow";
 import { Api } from "../services/apiService";
 import { submitPaymentForm } from "../features/payment/submitPaymentForm";
-import { readPendingPayments } from "../features/payment/pendingPayment";
+import { readPendingPayments, STORAGE_UNAVAILABLE_MESSAGE } from "../features/payment/pendingPayment";
 
 jest.mock("../constants/config", () => ({ USE_MOCK_PAYMENT: false }));
 jest.mock("../hooks/useMockPaymentFlow", () => ({ useMockPaymentFlow: () => ({ handlePay: jest.fn(), submitting: false }) }));
@@ -48,10 +48,12 @@ test.each(["card", "paypay"])("%sは実注文→準備→保存→POSTの順でS
   else expect(Api.preparePayPayPayment).toHaveBeenCalledWith({ orderId: 42 });
   expect(Api.chargeOrder).not.toHaveBeenCalled(); expect(Api.getSquareConfig).not.toHaveBeenCalled();
 });
-test.each(["card", "paypay"])("%sは保留保存不能時に外部POSTしない", async method => {
-  jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("full"); });
+test.each(["card", "paypay"])("%sは保留保存不能時に注文を作らず、外部POSTもしない", async method => {
+  jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("blocked"); });
   await act(async () => root.render(<Harness method={method} />));
   await act(async () => flow());
+  expect(Api.createOrder).not.toHaveBeenCalled();
+  expect(window.metapspayment.createTokenWin).not.toHaveBeenCalled();
   expect(submitPaymentForm).not.toHaveBeenCalled();
-  expect(window.alert).toHaveBeenCalled();
+  expect(window.alert).toHaveBeenCalledWith(STORAGE_UNAVAILABLE_MESSAGE);
 });

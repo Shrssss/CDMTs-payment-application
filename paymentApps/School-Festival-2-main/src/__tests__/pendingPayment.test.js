@@ -1,5 +1,5 @@
 import {
-  savePendingPayment, readPendingPayments, removePendingPayment, readPaymentReturnParams,
+  savePendingPayment, readPendingPayments, removePendingPayment, readPaymentReturnParams, canSavePendingPayment,
   PENDING_PAYMENTS_KEY, PENDING_PAYMENT_TTL_MS,
 } from "../features/payment/pendingPayment";
 import { Api } from "../services/apiService";
@@ -51,6 +51,13 @@ test("不正な照合IDは保存しない・壊れた値は読み飛ばす", () 
   expect(readPendingPayments(NOW)).toEqual([]);
   localStorage.setItem(PENDING_PAYMENTS_KEY, JSON.stringify([{ sid: "bad", savedAt: NOW.toISOString() }, { sid: SID_A }]));
   expect(readPendingPayments(NOW)).toEqual([]);
+});
+
+test("書き込めるかどうかを確かめ、確認用の値は残さない", () => {
+  expect(canSavePendingPayment()).toBe(true);
+  expect(localStorage.length).toBe(0);
+  jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("blocked"); });
+  expect(canSavePendingPayment()).toBe(false);
 });
 
 test("保存不能は送信元へ伝える(呼び出し側は外部決済へ送り出さない)", () => {
