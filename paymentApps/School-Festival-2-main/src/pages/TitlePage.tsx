@@ -3,7 +3,15 @@ import { Title } from "../components/Title";
 import { useAppContext } from "../context/AppContext";
 
 export const TitlePage = () => {
-  const { dispatch, next, openLegalNotice, savedOrders, viewSavedOrder } = useAppContext();
+  const {
+    dispatch,
+    next,
+    openLegalNotice,
+    savedOrders,
+    viewSavedOrder,
+    pendingPaymentNotices,
+    openPendingPayment,
+  } = useAppContext();
   return (
     <Title
       onStart={() => {
@@ -14,6 +22,8 @@ export const TitlePage = () => {
       onOpenLegalNotice={openLegalNotice}
       savedOrders={savedOrders}
       onViewSavedOrder={viewSavedOrder}
+      pendingPayments={pendingPaymentNotices}
+      onOpenPendingPayment={openPendingPayment}
     />
   );
 };

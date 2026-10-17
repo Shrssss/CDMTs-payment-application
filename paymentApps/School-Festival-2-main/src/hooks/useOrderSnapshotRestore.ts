@@ -23,10 +23,12 @@ export function useOrderSnapshotRestore({
 }) {
   const [savedOrders, setSavedOrders] = useState<OrderSnapshot[]>(() => readOrderHistory());
 
+  const reloadSavedOrders = useCallback(() => setSavedOrders(readOrderHistory()), []);
+
   // タイトルへ戻るたびに読み直し、直前に完了した注文も一覧に出す。
   useEffect(() => {
-    if (step === STEPS.TITLE) setSavedOrders(readOrderHistory());
-  }, [step]);
+    if (step === STEPS.TITLE) reloadSavedOrders();
+  }, [step, reloadSavedOrders]);
 
   const viewSavedOrder = useCallback((key: string) => {
     const saved = readOrderHistory().find((s) => orderSnapshotKey(s) === key);
@@ -55,5 +57,5 @@ export function useOrderSnapshotRestore({
     goto(STEPS.NUMBER_TAG);
   }, [dispatch, goto, setPaymentState, setSelectedTime]);
 
-  return { savedOrders, viewSavedOrder };
+  return { savedOrders, reloadSavedOrders, viewSavedOrder };
 }

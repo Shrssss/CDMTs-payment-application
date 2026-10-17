@@ -12,6 +12,7 @@ import type {
   NameMap,
   OrderSnapshot,
   PaymentState,
+  PendingPaymentNotice,
   PriceMap,
   SoldoutMap,
 } from "../types";
@@ -46,13 +47,19 @@ export interface AppContextValue {
   menuFetchError: boolean;
   refreshMenuItems: () => void;
 
-  // 決済(usePaymentReturn)
+  // 決済(usePaymentReturn / usePendingPaymentNotices)
   paymentState: PaymentState;
+  /** 決済結果画面で照会している注文の照合ID(URLの ?sid=)。無ければ null。 */
+  paymentResultSid: string | null;
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
   refreshPaymentStatus: () => void;
   /** 決済結果の確認画面から抜けてタイトルへ戻る(保留注文を破棄する)。 */
   leavePaymentResult: () => void;
   checkingPaymentStatus: boolean;
+  /** 支払いを確認できていない注文(タイトル画面で案内する)。 */
+  pendingPaymentNotices: PendingPaymentNotice[];
+  /** 支払いを確認できていない注文の決済結果画面を開く。 */
+  openPendingPayment: (sid: string) => void;
 
   // 注文履歴(useOrderSnapshotRestore)
   savedOrders: OrderSnapshot[];

@@ -5,7 +5,7 @@ import { useCardPaymentFlow } from "../hooks/useCardPaymentFlow";
 import { usePayPayPaymentFlow } from "../hooks/usePayPayPaymentFlow";
 import { Api } from "../services/apiService";
 import { submitPaymentForm } from "../features/payment/submitPaymentForm";
-import { readPendingPayment } from "../features/payment/pendingPayment";
+import { readPendingPayments } from "../features/payment/pendingPayment";
 
 jest.mock("../constants/config", () => ({ USE_MOCK_PAYMENT: false }));
 jest.mock("../hooks/useMockPaymentFlow", () => ({ useMockPaymentFlow: () => ({ handlePay: jest.fn(), submitting: false }) }));
@@ -16,7 +16,7 @@ jest.mock("../services/apiService", () => ({ Api: {
 jest.mock("../features/payment/submitPaymentForm", () => ({ submitPaymentForm: jest.fn() }));
 
 let container, root, flow;
-const prepared = { orderId: 42, sid: "O16", action: "https://example.invalid/pay", fields: {} };
+const prepared = { orderId: 42, sid: "0123456789abcdef", action: "https://example.invalid/pay", fields: {} };
 const cart = { 10: 1 };
 function Harness({ method }) {
   const props = { cart, selectedTime: "2026-10-12T13:00:00+09:00", goto: jest.fn(), setPaymentState: jest.fn() };
@@ -26,7 +26,7 @@ function Harness({ method }) {
   return null;
 }
 beforeEach(() => {
-  jest.clearAllMocks(); sessionStorage.clear();
+  jest.clearAllMocks(); localStorage.clear();
   container = document.createElement("div"); document.body.appendChild(container); root = createRoot(container);
   Api.createOrder.mockResolvedValue(42);
   Api.prepareCardPayment.mockResolvedValue(prepared); Api.preparePayPayPayment.mockResolvedValue(prepared);
@@ -38,7 +38,7 @@ afterEach(() => { act(() => root.unmount()); container.remove(); jest.restoreAll
 
 test.each(["card", "paypay"])("%sは実注文→準備→保存→POSTの順でSquareを呼ばない", async method => {
   submitPaymentForm.mockImplementation(() => {
-    expect(readPendingPayment()).toMatchObject({ orderId: 42, sid: "O16", method, cart });
+    expect(readPendingPayments().map(p => p.sid)).toEqual(["0123456789abcdef"]);
   });
   await act(async () => root.render(<Harness method={method} />));
   await act(async () => flow());

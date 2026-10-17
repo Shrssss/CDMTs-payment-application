@@ -114,10 +114,8 @@ export function useCardPaymentFlow({
           mail: email,
         });
 
-        savePendingPayment({
-          orderId, sid: prepared.sid, method: "card", cart,
-          reservedAtIso: reservedDate.toISOString(), createdAt: new Date().toISOString(),
-        });
+        // 戻ってこなかった場合でも後から照会できるよう、送り出す前に照合IDを残す。
+        savePendingPayment(prepared.sid);
         submitPaymentForm(prepared);
 
       } catch {

@@ -1,43 +1,75 @@
-import { savePendingPayment, readPendingPayment, getPaymentReturn, PENDING_PAYMENT_KEY } from "../features/payment/pendingPayment";
+import {
+  savePendingPayment, readPendingPayments, removePendingPayment, readPaymentReturnParams,
+  PENDING_PAYMENTS_KEY, PENDING_PAYMENT_TTL_MS,
+} from "../features/payment/pendingPayment";
 import { Api } from "../services/apiService";
 
-const pending = { orderId: 42, sid: "O16", method: "paypay", cart: { 10: 2 },
-  reservedAtIso: "2026-10-12T04:00:00.000Z", createdAt: "2026-10-12T03:00:00.000Z" };
+const SID_A = "0123456789abcdef";
+const SID_B = "fedcba9876543210";
+const NOW = new Date("2026-10-12T03:00:00.000Z");
+const later = (ms) => new Date(NOW.getTime() + ms);
 
-beforeEach(() => sessionStorage.clear());
+beforeEach(() => localStorage.clear());
 afterEach(() => jest.restoreAllMocks());
 
-test("保留注文のみを保存し、トークン・連絡先と完了注文を混ぜない", () => {
-  savePendingPayment({ ...pending, cardToken: "secret", mail: "private@example.com" });
-  expect(readPendingPayment()).toEqual(pending);
-  expect(sessionStorage.getItem(PENDING_PAYMENT_KEY)).not.toMatch(/secret|private/);
-  expect(sessionStorage.getItem("cm_order_v1")).toBeNull();
+test("照合IDと保存時刻だけを localStorage に保存し、新しい順に読み出す", () => {
+  savePendingPayment(SID_A, NOW);
+  savePendingPayment(SID_B, later(1000));
+  expect(readPendingPayments(later(2000))).toEqual([
+    { sid: SID_B, savedAt: later(1000).toISOString() },
+    { sid: SID_A, savedAt: NOW.toISOString() },
+  ]);
+  expect(Object.keys(JSON.parse(localStorage.getItem(PENDING_PAYMENTS_KEY))[0])).toEqual(["sid", "savedAt"]);
 });
-test("保存不能は送信元へ伝える", () => {
+
+test("同じ照合IDを保存し直すと1件にまとめ、保存時刻を更新する", () => {
+  savePendingPayment(SID_A, NOW);
+  savePendingPayment(SID_A, later(1000));
+  expect(readPendingPayments(later(2000))).toEqual([{ sid: SID_A, savedAt: later(1000).toISOString() }]);
+});
+
+test("期限切れは読み出し時に捨て、ストレージからも消す", () => {
+  savePendingPayment(SID_A, NOW);
+  savePendingPayment(SID_B, later(PENDING_PAYMENT_TTL_MS / 2));
+  expect(readPendingPayments(later(PENDING_PAYMENT_TTL_MS)).map((p) => p.sid)).toEqual([SID_B]);
+  expect(localStorage.getItem(PENDING_PAYMENTS_KEY)).not.toContain(SID_A);
+});
+
+test("removePendingPayment で指定した照合IDだけ消し、空になればキーごと消す", () => {
+  // removePendingPayment は実際の現在時刻で期限を判定するため、ここでは現在時刻で保存する。
+  savePendingPayment(SID_A);
+  savePendingPayment(SID_B);
+  removePendingPayment(SID_A);
+  expect(readPendingPayments().map((p) => p.sid)).toEqual([SID_B]);
+  removePendingPayment(SID_B);
+  expect(localStorage.getItem(PENDING_PAYMENTS_KEY)).toBeNull();
+});
+
+test("不正な照合IDは保存しない・壊れた値は読み飛ばす", () => {
+  expect(() => savePendingPayment("O16", NOW)).toThrow();
+  localStorage.setItem(PENDING_PAYMENTS_KEY, "{");
+  expect(readPendingPayments(NOW)).toEqual([]);
+  localStorage.setItem(PENDING_PAYMENTS_KEY, JSON.stringify([{ sid: "bad", savedAt: NOW.toISOString() }, { sid: SID_A }]));
+  expect(readPendingPayments(NOW)).toEqual([]);
+});
+
+test("保存不能は送信元へ伝える(呼び出し側は外部決済へ送り出さない)", () => {
   jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("full"); });
-  expect(() => savePendingPayment(pending)).toThrow("full");
+  expect(() => savePendingPayment(SID_A, NOW)).toThrow("full");
 });
-test("パラメータなしRTと再読み込みでも元の注文を復元する", () => {
-  expect(getPaymentReturn("?paysys_return=paypay&result=cancel", pending).pending).toEqual(pending);
-  expect(getPaymentReturn("", pending).pending).toEqual(pending);
+
+test("戻りURLから照合IDと未完了かどうかを読む", () => {
+  expect(readPaymentReturnParams(`?paysys_return=card&result=ok&return_sid=${SID_A}`)).toEqual({ sid: SID_A, incomplete: false });
+  expect(readPaymentReturnParams(`?paysys_return=paypay&result=cancel&return_sid=${SID_A}`)).toEqual({ sid: SID_A, incomplete: true });
+  // 決済会社が独自パラメータを落としても SID で受け付ける
+  expect(readPaymentReturnParams(`?SID=${SID_B}&ERROR=123`)).toEqual({ sid: SID_B, incomplete: true });
+  // return_sid が不正なら SID を使う
+  expect(readPaymentReturnParams(`?return_sid=bad&SID=${SID_B}`)).toEqual({ sid: SID_B, incomplete: false });
+  expect(readPaymentReturnParams("?paysys_return=card")).toEqual({ sid: null, incomplete: false });
+  expect(readPaymentReturnParams("")).toBeNull();
+  expect(readPaymentReturnParams("?utm_source=x")).toBeNull();
 });
-test("カード成功・ERROR復帰のどちらも保存済み注文を使う", () => {
-  const card = { ...pending, method: "card" };
-  expect(getPaymentReturn("?paysys_return=card&result=ok&SID=O16", card).pending).toEqual(card);
-  expect(getPaymentReturn("?paysys_return=card&ERROR=123", card).error).toBeTruthy();
-});
-test("SID不一致・方式不一致・保存欠落では照会対象を選ばない", () => {
-  expect(getPaymentReturn("?SID=OTHER", pending).pending).toBeNull();
-  expect(getPaymentReturn("?paysys_return=card", pending).pending).toBeNull();
-  expect(getPaymentReturn("?paysys_return=paypay", null).pending).toBeNull();
-  expect(getPaymentReturn("", null)).toBeNull();
-});
-test("壊れた保留データを復元しない", () => {
-  sessionStorage.setItem(PENDING_PAYMENT_KEY, "{");
-  expect(readPendingPayment()).toBeNull();
-  sessionStorage.setItem(PENDING_PAYMENT_KEY, JSON.stringify({ ...pending, orderId: -1 }));
-  expect(readPendingPayment()).toBeNull();
-});
+
 test("状態APIはキャッシュを使わず、注文番号と状態を検証する", async () => {
   global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ orderId: 42, state: "WAITING" }) });
   await expect(Api.fetchPaymentStatus(42)).resolves.toEqual({ orderId: 42, state: "WAITING" });

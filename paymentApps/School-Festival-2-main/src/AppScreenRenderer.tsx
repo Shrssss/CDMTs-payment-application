@@ -25,6 +25,7 @@ export const AppScreenRenderer = () => {
     selectedTime,
     currentTestTime,
     paymentState,
+    paymentResultSid,
     calculateDifferenceOfDrinks,
     calculateSumInMenu,
     calculateSumPrice,
@@ -34,7 +35,9 @@ export const AppScreenRenderer = () => {
   // 状態はメモリ上にしかないため、再読込するとここで手前の画面へ戻る。
   const { outcome } = paymentState;
   const hasProducts = calculateSumInMenu() > 0;
+  // 決済結果画面は、照合ID(?sid=)があればそこから復元できる。
   const hasOutcome =
+    paymentResultSid != null ||
     outcome.ok || outcome.orderId != null || outcome.error != null || outcome.status != null;
   const needsOrder: Step | null = hasProducts ? null : "menu";
   const needsReservation: Step | null = needsOrder ?? (selectedTime ? null : "time");

@@ -104,8 +104,9 @@ export function useAppFlow() {
   useLayoutEffect(() => {
     navigateRef.current = navigate;
   });
-  const goto = useCallback<Goto>((to, options) => {
-    navigateRef.current(STEP_PATHS[to], options);
+  const goto = useCallback<Goto>((to, options = {}) => {
+    const { search, replace } = options;
+    navigateRef.current({ pathname: STEP_PATHS[to], search }, { replace });
   }, []);
 
   const next = useCallback(() => {

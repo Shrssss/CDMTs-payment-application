@@ -3,7 +3,7 @@
 // Square 設定、売り切れ取得、注文作成、決済、注文取得をこの 1 ファイルに集約する。
 
 import { API_ENDPOINTS, apiUrl, SQUARE_FALLBACK_CONFIG } from "../constants/config";
-import type { MenuItemResponse, PaymentApiResponse, SquareConfig } from "../types";
+import type { MenuItemResponse, PaymentApiResponse, PaymentReturnOrder, SquareConfig } from "../types";
 import type { PaymentPrepareResponse } from "../types";
 
 function isValidAppId(id: unknown): id is string {
@@ -13,10 +13,7 @@ function isValidAppId(id: unknown): id is string {
 }
 
 export const Api = {
-  async fetchPaymentReturnOrder(sid: string): Promise<{
-    orderId: number; state: "WAITING" | "PAID";
-    createdAt: string; reservedAt: string; cart: Record<string, number>;
-  }> {
+  async fetchPaymentReturnOrder(sid: string): Promise<PaymentReturnOrder> {
     if (!/^[0-9a-f]{16}$/.test(sid)) throw new Error("照合IDが不正です。");
     const res = await fetch(`${apiUrl}/api/payments/return/${sid}`, {
       cache: "no-store", headers: { Accept: "application/json" },

@@ -61,7 +61,7 @@ flowchart TD
     P["context/AppProvider.tsx"] -->|"useAppFlow()"| B["step (URLから算出), cart, goto"]
     P -->|"useMenuItems()"| C["prices, itemNames, imagePaths, isSoldout"]
     P -->|"useOrderSummary()"| D["合計金額・個数の計算関数"]
-    P -->|"useOrderSnapshotRestore() / usePaymentReturn()"| E["注文履歴・決済結果"]
+    P -->|"useOrderSnapshotRestore() / usePaymentReturn() / usePendingPaymentNotices()"| E["注文履歴・決済結果・未確認の注文"]
     B --> X["AppContext"]
     C --> X
     D --> X
@@ -80,15 +80,18 @@ flowchart TD
 
 ### 注文履歴(タイトル画面の「これまでのご注文」)
 
-- 決済完了(`usePaymentReturn`で状態がPAIDになった時、またはモック決済の成功時)に、注文を localStorage の `cm_order_history_v1` へ追記します(`features/order/orderSnapshot.ts`の`appendOrderHistory`)。
+- 決済完了(`usePaymentReturn`や`usePendingPaymentNotices`で状態がPAIDになった時、またはモック決済の成功時)に、注文を localStorage の `cm_order_history_v1` へ追記します(`features/order/orderSnapshot.ts`の`appendOrderHistory`)。
 - 履歴は**上書きも削除もしません**。予約時刻を過ぎた注文も残り、タイトル画面に新しい順で全件並びます。同じ注文(`orderId`+`createdAt`)の再保存だけは1件にまとめます。
 - 旧形式の `cm_order_v1`(最新1件のみ)が残っていれば一覧に含めます。旧キー自体も消しません。
 - 番号札画面の「タイトルに戻る」で一覧へ戻れます。「注文に進む」は毎回カートを空にしてから始めます。
 
-### 決済が未完了のまま戻ってきた場合
+### 支払いを確認できていない注文(保留中の照合ID)
 
-- Paysysから戻ると、`usePaymentReturn`がsessionStorageの保留注文(`cm_pending_payment_v1`)を使って支払い状況を照会し、「決済結果を確認中」画面を出します。
-- この画面の「トップに戻る」は、最後に1回だけ照会してPAIDなら履歴へ残し、そのうえで保留注文とURLの戻りパラメータを消してタイトルへ戻ります。キャンセル・失敗の後でも、同じタブで次の注文ができます。
+- 外部決済へ送り出す直前に、照合ID(SID)と保存時刻だけを localStorage の `cm_pending_payments_v1` に保存します([`features/payment/pendingPayment.ts`](../src/features/payment/pendingPayment.ts))。注文内容は保存せず、必要なときに `GET /api/payments/return/{sid}` でバックエンドから取り直します。
+- 保存から12時間(`PENDING_PAYMENT_TTL_MS`)を過ぎたものは読み出し時に捨てます。
+- 支払済みを確認したら([`usePaymentReturn`](../src/hooks/usePaymentReturn.ts)の結果画面、またはタイトルでの照会)、注文履歴へ追加して保留から外します。
+- タイトル画面を開くと、[`usePendingPaymentNotices`](../src/hooks/usePendingPaymentNotices.ts)が保留中のSIDを照会します。支払済みなら黙って注文履歴へ追加し、未確認のものは「支払いを確認できていないご注文があります」と案内して、ボタンから結果画面(`#/payment/result?sid=...`)を開けるようにします。戻りURLを経ずに戻ってきた・タブを閉じてしまった場合でも、払った注文の番号札を出せるようにするためです。
+- 結果画面の「トップに戻る」は、最後に1回だけ照会してPAIDなら履歴へ残し、そのうえで保留中のSIDを消してタイトルへ戻ります(支払いをやめた注文が案内され続けないように)。
 - 決済方法・カード・PayPayの各画面には戻るボタンがあり、「処理中...」のまま止まっても抜けられます。
 
 ---
@@ -126,7 +129,13 @@ flowchart LR
 
 ### 4-3. 決済代行(Paysys)から戻ってきたとき
 
-Paysys の戻り先 URL はバックエンドの `application.yaml`(`paysys.return-paths`)で決まり、`/?paysys_return=card&result=ok&return_sid=...` のように**ハッシュを持ちません**。そのため、まずタイトル(`#/`)に着地します。そこで [`usePaymentReturn.ts`](../src/hooks/usePaymentReturn.ts) が URL のクエリを読み、注文を復元してから `goto("paymentResult", { replace: true })` で決済結果画面へ移します。
+Paysys の戻り先 URL はバックエンドの `application.yaml`(`paysys.return-paths`)で決まり、`/?paysys_return=card&result=ok&return_sid=...` のように**ハッシュを持ちません**。そのため、まずタイトル(`#/`)に着地します。そこで [`usePaymentReturn.ts`](../src/hooks/usePaymentReturn.ts) が次のように処理します。
+
+1. URL のクエリから照合ID(`return_sid`、なければ `SID`)を読み、戻りパラメータを URL から消す。
+2. `goto("paymentResult", { replace: true, search: "?sid=..." })` で決済結果画面(`#/payment/result?sid=...`)へ移る。キャンセル・エラーで戻ってきた場合は `&incomplete=1` を付ける。
+3. 結果画面では、URL の `sid` で `GET /api/payments/return/{sid}` を呼び、注文内容(カート・予約時刻)と支払い状況(`PAID`/`WAITING`)を取り直して表示する。
+
+結果画面の内容は URL の `sid` だけで復元できるので、再読込しても同じ画面を出し直せます。
 
 ### 4-4. URL を直接開いたとき(ガード)
 
@@ -136,7 +145,7 @@ Paysys の戻り先 URL はバックエンドの `application.yaml`(`paysys.retu
 |---|---|---|
 | `drink` / `cart` / `time` | 商品が選ばれていない | `menu` |
 | `paymentMethod` / `payment` / `paymentPaypay` | 商品なし / 予約時刻が未設定 | `menu` / `time` |
-| `paymentResult` | 決済結果がない | `title` |
+| `paymentResult` | 決済結果がなく、URL に `?sid=` もない | `title` |
 | `numberTag` | 支払済みでない | `title` |
 | 上記以外の URL | — | `title` |
 
@@ -210,6 +219,7 @@ type Cart = Record<number, number>;  // 商品ID/ドリンク種別ID → 個数
 | `API_ENDPOINTS` | バックエンドAPIのパス一覧 |
 | `RESERVATION_CONFIG` | 予約受付の開始オフセット・最終受付時刻(17:10)・時刻の刻み幅 |
 | `ORDER_HISTORY_CONFIG` | 注文履歴(localStorage)のキー名。決済完了した注文を配列で積み、上書き・削除はしない |
+| (`features/payment/pendingPayment.ts`) `PENDING_PAYMENTS_KEY` / `PENDING_PAYMENT_TTL_MS` | 保留中の照合ID(localStorage)のキー名と有効期限(12時間) |
 | `ORDER_SNAPSHOT_CONFIG` | 旧形式(最新1件のみ)のキー名。新規保存には使わず、読み出し時に履歴へ含めるのと legacy/square 用に残している |
 | `USE_MOCK_PAYMENT` | ⚠️ 決済のモックスイッチ。詳細はセクション8 |
 | `USE_MOCK_MENU` | メニュー(価格・商品名・画像)のモックスイッチ |
