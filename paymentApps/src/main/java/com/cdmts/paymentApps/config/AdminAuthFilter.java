@@ -55,6 +55,7 @@ public class AdminAuthFilter extends OncePerRequestFilter {
 			new Rule("POST", "/api/payments/paysys/card/notify"),
 			new Rule("POST", "/api/payments/paysys/paypay/notify"),
 			new Rule("GET",  "/api/payments/*/status"),
+			new Rule("GET",  "/api/payments/return/*"),
 			new Rule("POST", "/api/payments/create/**"),
 			new Rule("POST", "/api/admin/login"),
 			new Rule("POST", "/api/admin/logout"),

@@ -22,6 +22,8 @@ class DemoApplicationTests {
 	void contextLoads() {
 		assertEquals(HttpStatus.BAD_REQUEST,
             http.getForEntity("/api/payments/0/status", String.class).getStatusCode());
+		assertEquals(HttpStatus.BAD_REQUEST,
+            http.getForEntity("/api/payments/return/invalid", String.class).getStatusCode());
 	}
 
 }

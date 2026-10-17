@@ -54,7 +54,7 @@ export function readPendingPayment(): PendingPayment | null {
 export function getPaymentReturn(search: string, pending: PendingPayment | null) {
   const params = new URLSearchParams(search);
   const method = params.get("paysys_return");
-  if (!method && !pending) return null;
+  if (!method && !pending && !params.has("return_sid") && !params.has("SID")) return null;
   if (!pending) return { pending: null, error: "元の注文を復元できません。同じブラウザ・タブで開き、注文番号を係員にお伝えください。" };
   if ((method && method !== pending.method) ||
       (params.has("SID") && params.get("SID") !== pending.sid) ||
