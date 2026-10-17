@@ -37,11 +37,12 @@ describe("nextStepOf / prevStepOf", () => {
     expect(nextStepOf(null, {})).toBeNull();
   });
 
-  test("フッターの「戻る」は drink/cart→menu、time→cart", () => {
+  test("フッターの「戻る」は menu→title、drink/cart→menu、time→cart", () => {
+    expect(prevStepOf("menu")).toBe("title");
     expect(prevStepOf("drink")).toBe("menu");
     expect(prevStepOf("cart")).toBe("menu");
     expect(prevStepOf("time")).toBe("cart");
-    expect(prevStepOf("menu")).toBeNull();
+    expect(prevStepOf("title")).toBeNull();
   });
 });
 
@@ -167,6 +168,15 @@ describe("useAppFlow hook (next/prev/addItems/removeItems)", () => {
 
     expect(getCaptured().step).toBe("menu");
     expect(getCaptured().state.cart[91]).toBe(0);
+  });
+
+  test("prev() from menu returns to the title", () => {
+    const getCaptured = renderHarness();
+
+    act(() => getCaptured().goto("menu"));
+    act(() => getCaptured().prev());
+
+    expect(getCaptured().step).toBe("title");
   });
 
   test("addItems/removeItems change quantity through CHANGE_ITEM_QUANTITY", () => {

@@ -80,6 +80,9 @@ export const nextStepOf = (step: Step | null, cart: Cart): Step | null => {
 // フッターの「戻る」の行き先。
 export const prevStepOf = (step: Step | null): Step | null => {
   switch (step) {
+    case "menu":
+      // カートはそのまま残すが、タイトルの「注文に進む」で空にしてから始まる。
+      return "title";
     case "drink":
     case "cart":
       return "menu";

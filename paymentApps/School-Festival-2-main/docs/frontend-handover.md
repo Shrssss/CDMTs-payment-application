@@ -126,6 +126,7 @@ flowchart LR
 ```
 
 - タイトルの「注文に進む」とフッターの「次へ」「戻る」の行き先は、[`useAppFlow.ts`](../src/hooks/useAppFlow.ts) の `nextStepOf()` / `prevStepOf()` に表として書いてあります。
+  - フッターの「戻る」は、`menu`→`title`、`drink`/`cart`→`menu`(このときドリンクの選択は消す)、`time`→`cart` です。
 - 決済方法の選択以降は、各ページのボタンが `goto()` で直接遷移します。
 
 ### 4-3. 決済代行(Paysys)から戻ってきたとき
