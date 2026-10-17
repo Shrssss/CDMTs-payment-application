@@ -33,8 +33,9 @@
 
 ```
 src/
-├── App.tsx                 # ルートコンポーネント。状態管理フックを呼び出し、画面全体を組み立てる
-├── AppScreenRenderer.tsx   # 現在のステップに応じてページを出し分ける
+├── App.tsx                 # ルートコンポーネント。AppProvider で包み、画面全体のレイアウトを組み立てる
+├── context/                # AppContext(全ページで共有する状態と操作)と、それを組み立てる AppProvider
+├── AppScreenRenderer.tsx   # URL(ルーティング)に応じてページを出し分ける
 ├── pages/                  # 画面単位のコンポーネント(1画面 = 1ファイル)
 ├── components/             # 複数の画面で使い回す部品(ボタン、カード等)
 ├── hooks/                  # 状態管理・副作用を担うReactフック
@@ -56,20 +57,26 @@ src/
 
 ```mermaid
 flowchart TD
-    A["App.tsx"] -->|"useAppFlow()"| B["state (step, cart)"]
-    A -->|"useMenuItems()"| C["prices, itemNames, imagePaths, isSoldout"]
-    A -->|"useOrderSummary()"| D["合計金額・個数の計算関数"]
-    A -->|"useOrderSnapshotRestore()"| E["注文履歴の一覧と番号札の復元"]
-    B --> F["AppScreenRenderer.tsx"]
-    C --> F
-    D --> F
-    F -->|"stepに応じて出し分け"| G["pages/*.tsx (1画面1ファイル)"]
-    G --> H["components/*.tsx (再利用部品)"]
+    R["HashRouter (index.tsx)"] -->|"URL (#/menu 等)"| P
+    P["context/AppProvider.tsx"] -->|"useAppFlow()"| B["step (URLから算出), cart, goto"]
+    P -->|"useMenuItems()"| C["prices, itemNames, imagePaths, isSoldout"]
+    P -->|"useOrderSummary()"| D["合計金額・個数の計算関数"]
+    P -->|"useOrderSnapshotRestore() / usePaymentReturn()"| E["注文履歴・決済結果"]
+    B --> X["AppContext"]
+    C --> X
+    D --> X
+    E --> X
+    X -->|"useAppContext()"| F["AppScreenRenderer.tsx (ルーティング・フッター)"]
+    X -->|"useAppContext()"| G["pages/*.tsx (1画面1ファイル)"]
+    F -->|"<Routes> で URL ごとに出し分け"| G
+    G -->|"props"| H["components/*.tsx (再利用部品)"]
 ```
 
-`App.tsx`が状態管理フック(`useAppFlow`等)を呼び出し、結果をpropsとして`AppScreenRenderer.tsx`→各`pages/`コンポーネントへ渡していきます。Reduxのような外部の状態管理ライブラリは使っていません。React標準の`useReducer`/`useState`で足りる規模だと判断した設計です。
+[`context/AppProvider.tsx`](../src/context/AppProvider.tsx)が状態管理フック(`useAppFlow`等)を呼び出し、結果を[`AppContext`](../src/context/AppContext.ts)として配ります。**各ページは props を受け取らず、`useAppContext()` で必要な値だけを取り出します**(例: `const { cart, addItems } = useAppContext();`)。一方 `components/` の再利用部品は Context を読まず、ページから props で受け取ります(どこからでも使い回せ、テストもしやすいため)。Reduxのような外部の状態管理ライブラリは使っていません。React標準の`useReducer`/`useState`/Contextで足りる規模だと判断した設計です。
 
-> **豆知識(Reactの`useReducer`とは)**: 「今の状態」と「何が起きたか(アクション)」を受け取って「次の状態」を返す関数(この場合は[`screenState`](../src/hooks/useAppFlow.ts))を1つ書いておくと、Reactがその関数を使って状態を管理してくれる仕組みです。`dispatch({type: "NEXT"})`のように「何が起きたか」を送ると、`screenState`関数が次の状態を計算してくれます。Reduxの考え方をReact標準機能だけで実現したもの、とイメージすると分かりやすいです。
+ページのテストでは [`test-utils/appContext.tsx`](../src/test-utils/appContext.tsx) の `TestAppProvider` で包み、必要な値だけを渡します(例: `<TestAppProvider value={{ menuFetchError: true }}><MenuPage /></TestAppProvider>`)。
+
+> **豆知識(Reactの`useReducer`とは)**: 「今の状態」と「何が起きたか(アクション)」を受け取って「次の状態」を返す関数(この場合はカートを扱う[`cartReducer`](../src/hooks/useAppFlow.ts))を1つ書いておくと、Reactがその関数を使って状態を管理してくれる仕組みです。`dispatch({type: "CHANGE_ITEM_QUANTITY", ...})`のように「何が起きたか」を送ると、`cartReducer`関数が次の状態を計算してくれます。Reduxの考え方をReact標準機能だけで実現したもの、とイメージすると分かりやすいです。
 
 ### 注文履歴(タイトル画面の「これまでのご注文」)
 
@@ -88,35 +95,66 @@ flowchart TD
 
 ## 4. 画面遷移の仕組み
 
-[`src/hooks/useAppFlow.ts`](../src/hooks/useAppFlow.ts)が画面遷移とカート状態を管理しています。
+画面の切り替えは [react-router](https://reactrouter.com/) の **HashRouter** で行います。**今どの画面にいるかは URL で決まります**(例: `https://.../#/menu`)。ブラウザの戻る/進むもそのまま使えます。
 
-### 4-1. `Step`型と画面の順序
+### 4-1. 画面と URL の対応
 
-[`src/constants/steps.ts`](../src/constants/steps.ts)の`STEPS`定数が全画面の名前を定義し、`STEPS_ARRAY`(`Object.values(STEPS)`)の**並び順がそのまま画面遷移の順序**になります。
+[`src/constants/steps.ts`](../src/constants/steps.ts) の `STEPS` が全画面の名前、`STEP_PATHS` が各画面の URL です(一覧はセクション7)。現在の画面名は `useAppFlow()` が URL から `stepFromPath()` で求め、`step` として返します。
 
-```ts
-STEPS_ARRAY = ["title", "menu", "drink", "cart", "time",
-  "paymentMethod", "payment", "paymentPaypay", "paymentResult", "numberTag"]
+画面を移るときは `goto("paymentMethod")` のように画面名を渡します(ページでは `useAppContext()` から取り出します)。`goto(step, { replace: true })` にすると履歴を増やしません。
+
+### 4-2. 遷移図
+
+```mermaid
+flowchart LR
+    title -->|注文に進む| menu
+    menu -->|次へ: ドリンク付き商品あり| drink
+    menu -->|次へ: なし| cart
+    drink --> cart --> time -->|注文確定| paymentMethod
+    paymentMethod --> payment["payment (カード)"]
+    paymentMethod --> paymentPaypay
+    payment -->|Paysysへ移動し、戻ってくる| paymentResult
+    paymentPaypay -->|Paysysへ移動し、戻ってくる| paymentResult
+    paymentResult -->|番号札を表示| numberTag
+    paymentResult -->|カートに戻る / 再試行| cart
+    numberTag -->|タイトルに戻る| title
+    title -->|これまでのご注文| numberTag
 ```
 
-`dispatch({type: "NEXT"})`は配列のインデックスを1つ進めるだけ、`PREV`は1つ戻すだけです。**画面を追加・入れ替えたい場合は、基本的にこの配列の順序を変えるだけで対応できます**(表示するページ自体は[`AppScreenRenderer.tsx`](../src/AppScreenRenderer.tsx)に追加が必要、セクション7参照)。
+- タイトルの「注文に進む」とフッターの「次へ」「戻る」の行き先は、[`useAppFlow.ts`](../src/hooks/useAppFlow.ts) の `nextStepOf()` / `prevStepOf()` に表として書いてあります。
+- 決済方法の選択以降は、各ページのボタンが `goto()` で直接遷移します。
 
-### 4-2. `AppState`(画面全体の状態)
+### 4-3. 決済代行(Paysys)から戻ってきたとき
+
+Paysys の戻り先 URL はバックエンドの `application.yaml`(`paysys.return-paths`)で決まり、`/?paysys_return=card&result=ok&return_sid=...` のように**ハッシュを持ちません**。そのため、まずタイトル(`#/`)に着地します。そこで [`usePaymentReturn.ts`](../src/hooks/usePaymentReturn.ts) が URL のクエリを読み、注文を復元してから `goto("paymentResult", { replace: true })` で決済結果画面へ移します。
+
+### 4-4. URL を直接開いたとき(ガード)
+
+カートや決済結果はメモリ上にしかないため、再読込やブラウザの戻るで「必要な状態がない画面」を開くことがあります。[`AppScreenRenderer.tsx`](../src/AppScreenRenderer.tsx) の各 `<Route>` で次のように手前の画面へ戻します。
+
+| 開いた画面 | 条件 | 戻し先 |
+|---|---|---|
+| `drink` / `cart` / `time` | 商品が選ばれていない | `menu` |
+| `paymentMethod` / `payment` / `paymentPaypay` | 商品なし / 予約時刻が未設定 | `menu` / `time` |
+| `paymentResult` | 決済結果がない | `title` |
+| `numberTag` | 支払済みでない | `title` |
+| 上記以外の URL | — | `title` |
+
+### 4-5. `AppState`(カートの状態)
 
 ```ts
 interface AppState {
-  step: Step;   // 今どの画面にいるか
   cart: Cart;   // カートの中身(後述)
 }
 ```
 
-### 4-3. フッター(次へ/戻るボタン)の表示・無効化ルール
+### 4-6. フッター(次へ/戻るボタン)の表示・無効化ルール
 
 どの画面でフッターを出すか、次へボタンを無効化する条件、ボタンの文言は、[`src/constants/stepRules.ts`](../src/constants/stepRules.ts)の`STEP_RULES`という1つのオブジェクトに集約しています。画面ごとの判定ロジックを`Footer.tsx`や各ページに書き散らさず、ここ一箇所を見れば全ステップのルールが分かるようにしているのが設計意図です。**フッターの挙動を変えたいときは、まずここを見てください。**
 
-### 4-4. 予約時刻(`selectedTime`)
+### 4-7. 予約時刻(`selectedTime`)
 
-`useAppFlow`の外側、`App.tsx`で別の`useState`として管理しています(`AppState`には含まれません)。予約時刻は`time`画面でしか変わらず、カートとライフサイクルが違うための意図的な分離です。値は`"HH:mm"`形式の文字列、または(localStorageから復元した場合は)ISO形式の文字列です。
+`useAppFlow`の中で、カート(`AppState`)とは別の`useState`として管理しています(`AppState`には含まれません)。予約時刻は`time`画面でしか変わらず、カートとライフサイクルが違うための意図的な分離です。値は`"HH:mm"`形式の文字列、または(localStorageから復元した場合は)ISO形式の文字列です。
 
 ---
 
@@ -184,20 +222,20 @@ type Cart = Record<number, number>;  // 商品ID/ドリンク種別ID → 個数
 
 ## 7. 画面(ページ)一覧
 
-| ステップ名 | ファイル | 内容 |
-|---|---|---|
-| `title` | [`pages/TitlePage.tsx`](../src/pages/TitlePage.tsx) | タイトル画面 |
-| `menu` | [`pages/MenuPage.tsx`](../src/pages/MenuPage.tsx) | 商品選択 |
-| `drink` | [`pages/DrinkPage.tsx`](../src/pages/DrinkPage.tsx) | ドリンク選択 |
-| `cart` | [`pages/CartPage.tsx`](../src/pages/CartPage.tsx) | カート確認 |
-| `time` | [`pages/TimePage.tsx`](../src/pages/TimePage.tsx) | 予約時刻選択 |
-| `paymentMethod` | [`pages/PaymentMethodPage.tsx`](../src/pages/PaymentMethodPage.tsx) | 決済方法選択 |
-| `payment` | [`pages/PaymentPage.tsx`](../src/pages/PaymentPage.tsx) | カード決済画面 |
-| `paymentPaypay` | [`pages/PaymentPayPayPage.tsx`](../src/pages/PaymentPayPayPage.tsx) | PayPay決済画面 |
-| `paymentResult` | [`pages/PaymentResultPage.tsx`](../src/pages/PaymentResultPage.tsx) | 決済結果 |
-| `numberTag` | [`pages/NumberTagPage.tsx`](../src/pages/NumberTagPage.tsx) | 番号札表示 |
+| ステップ名 | URL | ファイル | 内容 |
+|---|---|---|---|
+| `title` | `#/` | [`pages/TitlePage.tsx`](../src/pages/TitlePage.tsx) | タイトル画面 |
+| `menu` | `#/menu` | [`pages/MenuPage.tsx`](../src/pages/MenuPage.tsx) | 商品選択 |
+| `drink` | `#/drink` | [`pages/DrinkPage.tsx`](../src/pages/DrinkPage.tsx) | ドリンク選択 |
+| `cart` | `#/cart` | [`pages/CartPage.tsx`](../src/pages/CartPage.tsx) | カート確認 |
+| `time` | `#/time` | [`pages/TimePage.tsx`](../src/pages/TimePage.tsx) | 予約時刻選択 |
+| `paymentMethod` | `#/payment` | [`pages/PaymentMethodPage.tsx`](../src/pages/PaymentMethodPage.tsx) | 決済方法選択 |
+| `payment` | `#/payment/card` | [`pages/PaymentPage.tsx`](../src/pages/PaymentPage.tsx) | カード決済画面 |
+| `paymentPaypay` | `#/payment/paypay` | [`pages/PaymentPayPayPage.tsx`](../src/pages/PaymentPayPayPage.tsx) | PayPay決済画面 |
+| `paymentResult` | `#/payment/result` | [`pages/PaymentResultPage.tsx`](../src/pages/PaymentResultPage.tsx) | 決済結果 |
+| `numberTag` | `#/number-tag` | [`pages/NumberTagPage.tsx`](../src/pages/NumberTagPage.tsx) | 番号札表示 |
 
-どのステップでどのページを描画するかは[`src/AppScreenRenderer.tsx`](../src/AppScreenRenderer.tsx)の`renderPage()`関数(switch文)で決まります。**新しい画面を追加する場合は、(1)`steps.ts`の`STEPS`に追加、(2)`pages/`に新しいファイルを作成、(3)`AppScreenRenderer.tsx`のswitch文に分岐を追加、(4)必要なら`stepRules.ts`にフッターのルールを追加、の4点セットです。**
+どの URL でどのページを描画するかは[`src/AppScreenRenderer.tsx`](../src/AppScreenRenderer.tsx)の`<Routes>`で決まります。**新しい画面を追加する場合は、(1)`steps.ts`の`STEPS`と`STEP_PATHS`に追加、(2)`pages/`に新しいファイルを作成(必要な値は`useAppContext()`から取る)、(3)`AppScreenRenderer.tsx`に`<Route>`を追加(必要ならガードも)、(4)フッターから行き来するなら`useAppFlow.ts`の`nextStepOf`/`prevStepOf`に追加、(5)必要なら`stepRules.ts`にフッターのルールを追加、の5点です。**
 
 ---
 
@@ -212,7 +250,7 @@ sequenceDiagram
     participant U as 客(ブラウザ)
     participant P as PaymentPage.tsx
     participant H as useMockPaymentFlow
-    participant S as setPaymentState (App.tsxのstate)
+    participant S as setPaymentState (AppProviderのstate)
 
     U->>P: 「決済ページへ進む」ボタンを押す
     P->>H: handlePay() を呼ぶ

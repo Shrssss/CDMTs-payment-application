@@ -19,7 +19,7 @@ import { INITIAL_UI_STATE } from "../constants/initialState";
 import type { ImagePathMap, NameMap, PriceMap, SoldoutMap } from "../types";
 import type { Step } from "../constants/steps";
 
-export function useMenuItems(step: Step) {
+export function useMenuItems(step: Step | null) {
   // USE_MOCK_MENUがオンの場合は初期値からモック値を使い、
   // 初回描画時に価格未取得の一瞬の表示崩れ(フラッシュ)が起きないようにする。
   const [prices, setPrices] = useState<PriceMap>(USE_MOCK_MENU ? MOCK_MENU_PRICES : {});

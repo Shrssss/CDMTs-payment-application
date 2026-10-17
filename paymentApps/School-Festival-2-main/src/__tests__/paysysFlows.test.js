@@ -19,7 +19,7 @@ let container, root, flow;
 const prepared = { orderId: 42, sid: "O16", action: "https://example.invalid/pay", fields: {} };
 const cart = { 10: 1 };
 function Harness({ method }) {
-  const props = { cart, selectedTime: "2026-10-12T13:00:00+09:00", dispatch: jest.fn(), setPaymentState: jest.fn() };
+  const props = { cart, selectedTime: "2026-10-12T13:00:00+09:00", goto: jest.fn(), setPaymentState: jest.fn() };
   const card = useCardPaymentFlow({ ...props, email: "test@example.com" });
   const paypay = usePayPayPaymentFlow(props);
   flow = method === "card" ? card.handlePayWithCard : paypay.handlePayWithPayPay;

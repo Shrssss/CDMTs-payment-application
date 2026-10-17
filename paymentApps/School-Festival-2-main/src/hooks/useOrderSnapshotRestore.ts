@@ -6,16 +6,18 @@ import { STEPS, type Step } from "../constants/steps";
 import { formatDisplayReserved } from "../utils/dateFormat";
 import { parseReservedToDate } from "../utils/orderUtils";
 import { orderSnapshotKey, readOrderHistory } from "../features/order/orderSnapshot";
-import type { AppAction, OrderSnapshot, PaymentState } from "../types";
+import type { AppAction, Goto, OrderSnapshot, PaymentState } from "../types";
 
 export function useOrderSnapshotRestore({
   step,
   dispatch,
+  goto,
   setPaymentState,
   setSelectedTime,
 }: {
-  step: Step;
+  step: Step | null;
   dispatch: Dispatch<AppAction>;
+  goto: Goto;
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
   setSelectedTime: Dispatch<SetStateAction<string | null>>;
 }) {
@@ -50,8 +52,8 @@ export function useOrderSnapshotRestore({
         displayReserved: displayReserved || (reserved ? formatDisplayReserved(reserved) : null),
       },
     }));
-    dispatch({ type: "GOTO", step: STEPS.NUMBER_TAG });
-  }, [dispatch, setPaymentState, setSelectedTime]);
+    goto(STEPS.NUMBER_TAG);
+  }, [dispatch, goto, setPaymentState, setSelectedTime]);
 
   return { savedOrders, viewSavedOrder };
 }

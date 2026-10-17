@@ -10,14 +10,13 @@ export type ImagePathMap = Record<number, string>;
 export type SoldoutMap = Record<number, boolean>;
 
 export interface AppState {
-  step: Step;
   cart: Cart;
 }
 
+/** 画面遷移(URLの切り替え)。replace: true なら履歴を増やさない。 */
+export type Goto = (step: Step, options?: { replace?: boolean }) => void;
+
 export type AppAction =
-  | { type: "GOTO"; step: Step }
-  | { type: "NEXT" }
-  | { type: "PREV" }
   | { type: "CHANGE_ITEM_QUANTITY"; itemId: number; delta: number }
   | { type: "CLEAR_TEMPORARY_DRINKS" }
   | { type: "REPLACE_CART"; cart: Cart }

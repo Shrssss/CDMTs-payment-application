@@ -3,6 +3,7 @@ import { act, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { usePaymentReturn } from "../hooks/usePaymentReturn";
 import { PaymentResultPage } from "../pages/PaymentResultPage";
+import { TestAppProvider } from "../test-utils/appContext";
 import { savePendingPayment, PENDING_PAYMENT_KEY } from "../features/payment/pendingPayment";
 import { ORDER_HISTORY_CONFIG } from "../constants/config";
 import { Api } from "../services/apiService";
@@ -10,19 +11,23 @@ import { Api } from "../services/apiService";
 jest.mock("../services/apiService", () => ({ Api: { fetchPaymentStatus: jest.fn(), fetchPaymentReturnOrder: jest.fn() } }));
 const pending = { orderId: 42, sid: "O16", method: "paypay", cart: { 10: 2 },
   reservedAtIso: "2026-10-12T04:00:00.000Z", createdAt: "2026-10-12T03:00:00.000Z" };
-let container, root, dispatch, setSelectedTime;
+let container, root, dispatch, goto, setSelectedTime;
 function Harness() {
   const [paymentState, setPaymentState] = useState({ outcome: { ok: false } });
-  const { refreshPaymentStatus, leavePaymentResult, checking } = usePaymentReturn({ dispatch, setPaymentState, setSelectedTime });
-  return <PaymentResultPage paymentState={paymentState} setPaymentState={setPaymentState} dispatch={dispatch}
-    onRefreshPaymentStatus={refreshPaymentStatus} onLeavePaymentResult={leavePaymentResult} checkingPaymentStatus={checking} />;
+  const { refreshPaymentStatus, leavePaymentResult, checking } = usePaymentReturn({ dispatch, goto, setPaymentState, setSelectedTime });
+  return (
+    <TestAppProvider value={{ paymentState, setPaymentState, goto, refreshPaymentStatus,
+      leavePaymentResult, checkingPaymentStatus: checking }}>
+      <PaymentResultPage />
+    </TestAppProvider>
+  );
 }
 beforeEach(() => {
   sessionStorage.clear(); localStorage.clear(); jest.clearAllMocks();
   history.replaceState(null, "", "/?paysys_return=paypay&result=ok&SID=O16");
   savePendingPayment(pending);
   container = document.createElement("div"); document.body.appendChild(container);
-  root = createRoot(container); dispatch = jest.fn(); setSelectedTime = jest.fn();
+  root = createRoot(container); dispatch = jest.fn(); goto = jest.fn(); setSelectedTime = jest.fn();
 });
 afterEach(() => {
   act(() => root.unmount()); container.remove(); jest.restoreAllMocks();
@@ -68,6 +73,7 @@ test("成功URLでもWAITINGは未完了、手動再取得でPAIDになって初
   expect(savedHistory()).toEqual([]);
   expect(dispatch).toHaveBeenCalledWith({ type: "REPLACE_CART", cart: pending.cart });
   expect(setSelectedTime).toHaveBeenCalledWith(pending.reservedAtIso);
+  expect(goto).toHaveBeenCalledWith("paymentResult", { replace: true });
   await act(async () => container.querySelector("button").click());
   expect(container.textContent).toContain("決済が完了しました");
   expect(container.textContent).toContain("42");
@@ -76,7 +82,7 @@ test("成功URLでもWAITINGは未完了、手動再取得でPAIDになって初
   expect(sessionStorage.getItem(PENDING_PAYMENT_KEY)).toBeNull();
   expect(location.search).toBe("");
   act(() => container.querySelector("button").click());
-  expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "numberTag" });
+  expect(goto).toHaveBeenCalledWith("numberTag");
 });
 test("通信失敗は待機を維持し、再取得で回復できる", async () => {
   Api.fetchPaymentStatus.mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce({ state: "PAID" });
@@ -129,11 +135,11 @@ test("キャンセル復帰で未払いのままでも、トップに戻れば�
   expect(location.search).toBe("");
   expect(savedHistory()).toEqual([]);
   expect(dispatch).toHaveBeenCalledWith({ type: "RESET_CART" });
-  expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "title" });
+  expect(goto).toHaveBeenCalledWith("title");
   // 同じタブで開き直しても、もう決済結果画面へは飛ばない
-  act(() => root.unmount()); root = createRoot(container); dispatch.mockClear();
+  act(() => root.unmount()); root = createRoot(container); goto.mockClear();
   await render();
-  expect(dispatch).not.toHaveBeenCalledWith({ type: "GOTO", step: "paymentResult" });
+  expect(goto).not.toHaveBeenCalledWith("paymentResult", expect.anything());
 });
 test("トップに戻る直前の照会で支払済みなら注文履歴に残す", async () => {
   Api.fetchPaymentStatus.mockResolvedValueOnce({ state: "WAITING" }).mockResolvedValueOnce({ state: "PAID" });
@@ -151,7 +157,7 @@ test("照会中で応答が返らなくてもトップに戻れる", async () =>
     act(() => { leaving = buttonByText("トップに戻る").click(); });
     await act(async () => { jest.advanceTimersByTime(5000); });
     await act(async () => { await leaving; });
-    expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "title" });
+    expect(goto).toHaveBeenCalledWith("title");
     expect(sessionStorage.getItem(PENDING_PAYMENT_KEY)).toBeNull();
   } finally {
     jest.useRealTimers();

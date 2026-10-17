@@ -1,17 +1,16 @@
 // 番号札の表示内容を組み立てるページコンポーネント。
 import { Order } from "../components/Order";
-import type { Cart, NameMap, PaymentState, PriceMap } from "../types";
+import { useAppContext } from "../context/AppContext";
+import { INITIAL_PAYMENT_STATE } from "../constants/initialState";
 
-interface NumberTagPageProps {
-  cart: Cart;
-  price: PriceMap;
-  names: NameMap;
-  paymentState: PaymentState;
+export const NumberTagPage = () => {
+  const { cart, prices: price, itemNames: names, paymentState, setPaymentState, dispatch, goto } = useAppContext();
   /** タイトル(注文履歴の一覧・新しい注文)へ戻る。 */
-  onBackToTitle?: () => void;
-}
-
-export const NumberTagPage = ({ cart, price, names, paymentState, onBackToTitle }: NumberTagPageProps) => {
+  const onBackToTitle = () => {
+    setPaymentState((prev) => ({ ...prev, outcome: INITIAL_PAYMENT_STATE.outcome }));
+    dispatch({ type: "RESET_CART" });
+    goto("title");
+  };
   return (
     <>
       <p
@@ -49,13 +48,11 @@ export const NumberTagPage = ({ cart, price, names, paymentState, onBackToTitle 
         </p>
       )}
       <Order cart={cart} price={price} names={names} />
-      {onBackToTitle && (
-        <div style={{ textAlign: "center", margin: "16px 0" }}>
-          <button style={{ width: 200, height: 44, fontSize: 16 }} onClick={onBackToTitle}>
-            タイトルに戻る
-          </button>
-        </div>
-      )}
+      <div style={{ textAlign: "center", margin: "16px 0" }}>
+        <button style={{ width: 200, height: 44, fontSize: 16 }} onClick={onBackToTitle}>
+          タイトルに戻る
+        </button>
+      </div>
     </>
   );
 };

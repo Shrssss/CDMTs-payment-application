@@ -29,10 +29,11 @@ export function clearPendingPayment(): void {
 const PAYMENT_RETURN_PARAMS = ["paysys_return", "result", "SID", "ERROR", "return_sid"];
 
 // Paysysからの戻りパラメータをURLから消す(履歴は増やさない)。
+// 画面を表すハッシュ(#/payment/result 等)と react-router の履歴状態はそのまま残す。
 export function clearPaymentReturnParams(): void {
   const url = new URL(window.location.href);
   PAYMENT_RETURN_PARAMS.forEach(key => url.searchParams.delete(key));
-  window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+  window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
 }
 
 export function readPendingPayment(): PendingPayment | null {

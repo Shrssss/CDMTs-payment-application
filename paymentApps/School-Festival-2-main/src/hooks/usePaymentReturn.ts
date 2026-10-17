@@ -7,7 +7,7 @@ import { appendOrderHistory, buildOrderSnapshot } from "../features/order/orderS
 import { INITIAL_PAYMENT_STATE } from "../constants/initialState";
 import { Api } from "../services/apiService";
 import { formatDisplayReserved } from "../utils/dateFormat";
-import type { AppAction, PaymentState } from "../types";
+import type { AppAction, Goto, PaymentState } from "../types";
 
 // 「トップに戻る」時の最終照会の待ち時間上限。通信が返らなくても抜けられることを優先する。
 const LEAVE_STATUS_TIMEOUT_MS = 5000;
@@ -29,8 +29,9 @@ function saveToHistory(pending: PendingPayment): void {
   }));
 }
 
-export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }: {
+export function usePaymentReturn({ dispatch, goto, setPaymentState, setSelectedTime }: {
   dispatch: Dispatch<AppAction>;
+  goto: Goto;
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
   setSelectedTime: Dispatch<SetStateAction<string | null>>;
 }) {
@@ -70,7 +71,7 @@ export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }:
         ok: false, status: "UNRESOLVED", orderId: null, error: returned.error,
         receiptUrl: null, displayReserved: null,
       } }));
-      dispatch({ type: "GOTO", step: "paymentResult" });
+      goto("paymentResult", { replace: true });
       return;
     }
     busy.current = true;
@@ -83,7 +84,7 @@ export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }:
       displayReserved: formatDisplayReserved(new Date(pending.reservedAtIso)),
     };
     setPaymentState(prev => ({ ...prev, outcome }));
-    dispatch({ type: "GOTO", step: "paymentResult" });
+    goto("paymentResult", { replace: true });
     try {
       const result = await Api.fetchPaymentStatus(pending.orderId);
       if (result.state === "PAID") {
@@ -106,7 +107,7 @@ export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }:
       busy.current = false;
       setChecking(false);
     }
-  }, [returned, dispatch, setPaymentState, setSelectedTime]);
+  }, [returned, dispatch, goto, setPaymentState, setSelectedTime]);
 
   // 決済結果の確認画面(WAITING/UNRESOLVED)から抜けてタイトルへ戻る。
   // 保留注文とURLの戻りパラメータを消すので、同じタブで再読込しても結果画面へ戻されない。
@@ -137,11 +138,11 @@ export function usePaymentReturn({ dispatch, setPaymentState, setSelectedTime }:
       setPaymentState(prev => ({ ...prev, outcome: INITIAL_PAYMENT_STATE.outcome }));
       setSelectedTime(null);
       dispatch({ type: "RESET_CART" });
-      dispatch({ type: "GOTO", step: "title" });
+      goto("title");
     } finally {
       leaving.current = false;
     }
-  }, [dispatch, returned, setPaymentState, setSelectedTime]);
+  }, [dispatch, goto, returned, setPaymentState, setSelectedTime]);
 
   useEffect(() => { void refreshPaymentStatus(); }, [refreshPaymentStatus]);
   return { refreshPaymentStatus, leavePaymentResult, checking };

@@ -1,21 +1,19 @@
 // タイトル画面全体を組み立てるページコンポーネント。
 import { Title } from "../components/Title";
-import type { OrderSnapshot } from "../types";
+import { useAppContext } from "../context/AppContext";
 
-interface TitlePageProps {
-  onStart: () => void;
-  onOpenLegalNotice: () => void;
-  savedOrders?: OrderSnapshot[];
-  onViewSavedOrder?: (key: string) => void;
-}
-
-export const TitlePage = ({ onStart, onOpenLegalNotice, savedOrders, onViewSavedOrder }: TitlePageProps) => {
+export const TitlePage = () => {
+  const { dispatch, next, openLegalNotice, savedOrders, viewSavedOrder } = useAppContext();
   return (
     <Title
-      onStart={onStart}
-      onOpenLegalNotice={onOpenLegalNotice}
+      onStart={() => {
+        // 過去の注文を表示した後でも、新しい注文は空のカートから始める。
+        dispatch({ type: "RESET_CART" });
+        next();
+      }}
+      onOpenLegalNotice={openLegalNotice}
       savedOrders={savedOrders}
-      onViewSavedOrder={onViewSavedOrder}
+      onViewSavedOrder={viewSavedOrder}
     />
   );
 };

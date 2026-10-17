@@ -3,21 +3,14 @@
 import { Menu } from "../components/Menu";
 import { StepPageLayout } from "../components/StepPageLayout";
 import { PRODUCT_CATEGORIES } from "../constants/items";
-import type { Cart, ImagePathMap, NameMap, SoldoutMap } from "../types";
+import { useAppContext } from "../context/AppContext";
 
 const { COLA, ORANGE, CIDER, OOLONG } = PRODUCT_CATEGORIES;
 
-interface DrinkPageProps {
-  itemNames: NameMap;
-  imagePaths: ImagePathMap;
-  cart: Cart;
-  addItems: (id: number) => void;
-  removeItems: (id: number) => void;
-  difference: number;
-  isSoldout: SoldoutMap;
-}
-
-export const DrinkPage = ({ itemNames, imagePaths, cart, addItems, removeItems, difference, isSoldout }: DrinkPageProps) => {
+export const DrinkPage = () => {
+  const { itemNames, imagePaths, cart, addItems, removeItems, isSoldout, calculateDifferenceOfDrinks } =
+    useAppContext();
+  const difference = calculateDifferenceOfDrinks();
   return (
     <StepPageLayout>
       <p

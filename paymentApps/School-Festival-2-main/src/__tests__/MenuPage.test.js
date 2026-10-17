@@ -5,6 +5,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 
 import { MenuPage } from "../pages/MenuPage";
+import { TestAppProvider } from "../test-utils/appContext";
 
 describe("MenuPage", () => {
   let container;
@@ -18,8 +19,15 @@ describe("MenuPage", () => {
     addItems: () => {},
     removeItems: () => {},
     isSoldout: {},
-    fetchError: false,
+    menuFetchError: false,
   };
+
+  const renderMenu = (overrides = {}) =>
+    root.render(
+      <TestAppProvider value={{ ...baseProps, ...overrides }}>
+        <MenuPage />
+      </TestAppProvider>
+    );
 
   beforeEach(() => {
     container = document.createElement("div");
@@ -35,7 +43,7 @@ describe("MenuPage", () => {
 
   test("fetchError=falseの場合、商品グリッドを表示する", () => {
     act(() => {
-      root.render(<MenuPage {...baseProps} />);
+      renderMenu();
     });
 
     expect(container.textContent).toContain("角煮 単品");
@@ -45,7 +53,7 @@ describe("MenuPage", () => {
 
   test("fetchError=trueの場合、エラー表示に切り替わり商品グリッドは表示しない", () => {
     act(() => {
-      root.render(<MenuPage {...baseProps} fetchError={true} />);
+      renderMenu({ menuFetchError: true });
     });
 
     expect(container.textContent).toContain("メニューを取得できませんでした");
@@ -55,7 +63,7 @@ describe("MenuPage", () => {
   test("onRetryが渡されている場合、再読み込みボタンをクリックするとonRetryが呼ばれる", () => {
     const onRetry = jest.fn();
     act(() => {
-      root.render(<MenuPage {...baseProps} fetchError={true} onRetry={onRetry} />);
+      renderMenu({ menuFetchError: true, refreshMenuItems: onRetry });
     });
 
     const button = Array.from(container.querySelectorAll("button")).find(
@@ -65,13 +73,5 @@ describe("MenuPage", () => {
 
     act(() => button.click());
     expect(onRetry).toHaveBeenCalledTimes(1);
-  });
-
-  test("onRetryが渡されていない場合、再読み込みボタンは表示しない", () => {
-    act(() => {
-      root.render(<MenuPage {...baseProps} fetchError={true} />);
-    });
-
-    expect(container.querySelector("button")).toBeNull();
   });
 });

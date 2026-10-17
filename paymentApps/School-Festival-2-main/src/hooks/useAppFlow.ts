@@ -1,13 +1,13 @@
-// 画面遷移とカート状態を管理し、各画面操作に必要な dispatch を返すフック。
-import { useCallback, useReducer, useState } from "react";
+// 画面遷移とカート状態を管理し、各画面操作に必要な dispatch / goto を返すフック。
+// 現在の画面は URL(react-router)から決まる。カートは useReducer で保持する。
+import { useCallback, useLayoutEffect, useReducer, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 
 import { INITIAL_APP_STATE, INITIAL_UI_STATE } from "../constants/initialState";
 import { DRINK_TYPE_IDS } from "../constants/items";
-import { STEPS_ARRAY, type Step } from "../constants/steps";
+import { STEP_PATHS, stepFromPath, type Step } from "../constants/steps";
 import { canProceedFromMenu } from "../features/order/orderEligibility";
-import type { AppAction, AppState, Cart } from "../types";
-
-const steps: Step[] = STEPS_ARRAY;
+import type { AppAction, AppState, Cart, Goto } from "../types";
 
 const applyItemQuantityDelta = (state: AppState, itemId: number, delta: number): AppState => {
   const currentCount = state.cart[itemId] || 0;
@@ -33,29 +33,8 @@ const applyItemQuantityDelta = (state: AppState, itemId: number, delta: number):
   };
 };
 
-export const screenState = (state: AppState, action: AppAction): AppState => {
+export const cartReducer = (state: AppState, action: AppAction): AppState => {
   switch (action.type) {
-    case "GOTO":
-      if (!steps.includes(action.step)) return state;
-      return { ...state, step: action.step };
-    case "NEXT": {
-      const currentIndex = steps.indexOf(state.step);
-      if (currentIndex === -1) return state;
-      if (currentIndex < steps.length - 1) {
-        const nextStep = steps[currentIndex + 1];
-        return { ...state, step: nextStep };
-      }
-      return state;
-    }
-    case "PREV": {
-      const currentIndex = steps.indexOf(state.step);
-      if (currentIndex === -1) return state;
-      if (currentIndex > 0) {
-        const prevStep = steps[currentIndex - 1];
-        return { ...state, step: prevStep };
-      }
-      return state;
-    }
     case "CHANGE_ITEM_QUANTITY": {
       const { itemId, delta } = action;
       return applyItemQuantityDelta(state, itemId, delta);
@@ -78,34 +57,69 @@ export const screenState = (state: AppState, action: AppAction): AppState => {
   }
 };
 
+// タイトルの「注文に進む」とフッターの「次へ」の行き先。
+// 決済方法の選択以降は、各ページのボタンが goto で直接遷移する。
+export const nextStepOf = (step: Step | null, cart: Cart): Step | null => {
+  switch (step) {
+    case "title":
+      return "menu";
+    case "menu":
+      // ドリンクを伴う商品があればドリンク選択へ、なければカートへ直行する。
+      return canProceedFromMenu(cart) ? "drink" : "cart";
+    case "drink":
+      return "cart";
+    case "cart":
+      return "time";
+    case "time":
+      return "paymentMethod";
+    default:
+      return null;
+  }
+};
+
+// フッターの「戻る」の行き先。
+export const prevStepOf = (step: Step | null): Step | null => {
+  switch (step) {
+    case "drink":
+    case "cart":
+      return "menu";
+    case "time":
+      return "cart";
+    default:
+      return null;
+  }
+};
+
 export function useAppFlow() {
-  const [state, dispatch] = useReducer(screenState, INITIAL_APP_STATE);
+  const [state, dispatch] = useReducer(cartReducer, INITIAL_APP_STATE);
   const [selectedTime, setSelectedTime] = useState<string | null>(
     INITIAL_UI_STATE.selectedTime
   );
+  const navigate = useNavigate();
+  const step = stepFromPath(useLocation().pathname);
 
-  const goto = useCallback((step: Step) => {
-    dispatch({ type: "GOTO", step });
+  // useNavigate() の関数は URL が変わるたびに作り直される。goto を依存に持つ useEffect
+  // (usePaymentReturn の自動照会など)が画面遷移のたびに再実行されないよう、goto 自体は固定する。
+  const navigateRef = useRef(navigate);
+  useLayoutEffect(() => {
+    navigateRef.current = navigate;
+  });
+  const goto = useCallback<Goto>((to, options) => {
+    navigateRef.current(STEP_PATHS[to], options);
   }, []);
 
   const next = useCallback(() => {
-    if (state.step === "menu") {
-      if (!canProceedFromMenu(state.cart)) {
-        dispatch({ type: "GOTO", step: "cart" });
-        return;
-      }
-    }
-    dispatch({ type: "NEXT" });
-  }, [state.step, state.cart]);
+    const to = nextStepOf(step, state.cart);
+    if (to) goto(to);
+  }, [step, state.cart, goto]);
 
   const prev = useCallback(() => {
-    if (state.step === "cart") {
-      dispatch({ type: "CLEAR_TEMPORARY_DRINKS" });
-      dispatch({ type: "GOTO", step: "menu" });
-      return;
-    }
-    dispatch({ type: "PREV" });
-  }, [state.step]);
+    const to = prevStepOf(step);
+    if (!to) return;
+    // メニューへ戻るときは、選び直しで数が合わなくなるドリンク選択をいったん消す。
+    if (step === "cart") dispatch({ type: "CLEAR_TEMPORARY_DRINKS" });
+    goto(to);
+  }, [step, goto]);
 
   const addItems = useCallback((itemId: number) => {
     dispatch({ type: "CHANGE_ITEM_QUANTITY", itemId, delta: 1 });
@@ -116,6 +130,7 @@ export function useAppFlow() {
   }, []);
 
   return {
+    step,
     state,
     dispatch,
     goto,

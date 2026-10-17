@@ -1,15 +1,10 @@
 // カート内容と合計金額を表示するページコンポーネント。
 import { Order } from "../components/Order";
 import { StepPageLayout } from "../components/StepPageLayout";
-import type { Cart, NameMap, PriceMap } from "../types";
+import { useAppContext } from "../context/AppContext";
 
-interface CartPageProps {
-  cart: Cart;
-  price: PriceMap;
-  names: NameMap;
-}
-
-export const CartPage = ({ cart, price, names }: CartPageProps) => {
+export const CartPage = () => {
+  const { cart, prices: price, itemNames: names } = useAppContext();
   return (
     <StepPageLayout>
       <p

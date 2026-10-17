@@ -1,32 +1,28 @@
 // 決済方法（クレジットカード / PayPay）を選択するモック画面。
-import type { CSSProperties, Dispatch } from "react";
-import type { AppAction } from "../types";
+import type { CSSProperties } from "react";
+import { useAppContext } from "../context/AppContext";
 
-interface PaymentMethodPageProps {
-  dispatch: Dispatch<AppAction>;
-  onOpenLegalNotice: () => void;
-}
-
-export const PaymentMethodPage = ({ dispatch, onOpenLegalNotice }: PaymentMethodPageProps) => {
+export const PaymentMethodPage = () => {
+  const { goto, openLegalNotice: onOpenLegalNotice } = useAppContext();
   return (
     <div style={{ padding: "12px 10px" }}>
       <p style={{ margin: "6px 10px" }}>お支払い方法を選択してください</p>
 
       <button
         style={methodBtnStyle}
-        onClick={() => dispatch({ type: "GOTO", step: "payment" })}
+        onClick={() => goto("payment")}
       >
         クレジットカードで支払う
       </button>
 
       <button
         style={{ ...methodBtnStyle, backgroundColor: "#ffe6a8" }}
-        onClick={() => dispatch({ type: "GOTO", step: "paymentPaypay" })}
+        onClick={() => goto("paymentPaypay")}
       >
         PayPayで支払う
       </button>
 
-      <button style={backBtnStyle} onClick={() => dispatch({ type: "GOTO", step: "time" })}>
+      <button style={backBtnStyle} onClick={() => goto("time")}>
         予約時間の選択に戻る
       </button>
 

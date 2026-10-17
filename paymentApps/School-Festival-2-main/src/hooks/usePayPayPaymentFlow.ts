@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from "react";
 
 import { useMockPaymentFlow } from "./useMockPaymentFlow";
 import { MOCK_PAYPAY_ORDER_ID } from "../constants/mocks/paypayPaymentMock";
-import type { AppAction, Cart, PaymentState } from "../types";
+import type { Cart, Goto, PaymentState } from "../types";
 import { USE_MOCK_PAYMENT } from "../constants/config";
 import { Api } from "../services/apiService";
 import { parseReservedToDate } from "../utils/orderUtils";
@@ -17,18 +17,18 @@ import { useState } from "react";
 export function usePayPayPaymentFlow({
   cart,
   selectedTime,
-  dispatch,
+  goto,
   setPaymentState,
 }: {
   cart: Cart;
   selectedTime: string | null;
-  dispatch: Dispatch<AppAction>;
+  goto: Goto;
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
 }) {
   const { handlePay, submitting: mockSubmitting } = useMockPaymentFlow({
     cart,
     selectedTime,
-    dispatch,
+    goto,
     setPaymentState,
     mockOrderId: MOCK_PAYPAY_ORDER_ID,
     notImplementedMessage:
