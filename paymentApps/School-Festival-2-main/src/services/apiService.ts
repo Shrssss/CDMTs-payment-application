@@ -152,20 +152,16 @@ export const Api = {
   // 送るボディは backend の OrderCreateRequest DTO に合わせる必要あり。
   // orderDate（作成日時）, reservedTime（LocalDateTime形式）, items（[{itemId,quantity}]）,
   // servingStatus（@NotNull、初期値0=調理待ち）, paymentStatus（@NotNull、初期値false=未決済）を送る。
-  // drinkCounts（ドリンク種別ごとの合計数、{drinkId: count}）は
-  // docs/backend-requirements.md 5番で提案中の新フィールド。
-  // バックエンド側がまだ対応していない場合、この項目は無視される想定。
+  // ドリンク種別も items の明細(itemId 91-94)として送る(buildOrderItems参照)。
   // レスポンスは素の Long（例: 42）がそのまま返る。
   async createOrder({
     items,
-    drinkCounts = {},
     orderDate,
     reservedTime,
     servingStatus = 0,
     paymentStatus = false,
   }: {
     items: { itemId: number; quantity: number }[];
-    drinkCounts?: Record<number, number>;
     orderDate: string;
     reservedTime: string;
     servingStatus?: number;
@@ -175,7 +171,6 @@ export const Api = {
       orderDate, // LocalDateTime-ish string "yyyy-MM-dd'T'HH:mm:ss"
       reservedTime, // LocalDateTime-ish string
       items, // array of { itemId, quantity } filtered by buildOrderItems on frontend
-      drinkCounts, // { drinkId: count } ドリンク割り振りはバックエンドが行う想定
       servingStatus,
       paymentStatus,
     };
@@ -216,7 +211,7 @@ export const Api = {
   },
 
   // ⚠️ 現状どこからも呼ばれていない(未使用)。「注文を確認する」機能は現状
-  // localStorageの注文履歴ベースで、このAPIを経由しない(src/features/order/orderSnapshot.ts
+  // localStorageベースで、このAPIを経由しない(src/features/order/orderSnapshot.ts
   // 参照)。パス(単数形"order"。ORDER_CREATE/ORDER_GET以外のエンドポイントは
   // すべて複数形"orders")もバックエンドの実装に対して未検証のままの想定であり、
   // このコメントの元ネタである仕様書上の記載を鵜呑みにしているだけの状態。

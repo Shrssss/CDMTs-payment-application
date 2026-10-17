@@ -55,7 +55,6 @@ export interface PaymentPrepareResponse {
 /** buildOrderItems() が組み立てる、バックエンドへ送る注文データの形。 */
 export interface OrderItemsPayload {
   items: { itemId: number; quantity: number }[];
-  drinkCounts: Record<number, number>;
 }
 
 /** ⚠️ 未使用(Square廃止に伴い隔離)。GET /api/square/config のレスポンス形。 */

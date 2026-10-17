@@ -3,24 +3,17 @@ import { PRODUCT_CATEGORY_IDS, DRINK_TYPE_IDS } from "../constants/items";
 import type { Cart, OrderItemsPayload } from "../types";
 
 // バックエンドへ送る注文データを組み立てる。
-// 商品ID(itemId)とドリンク種別ID(drinkId)は合成しない(docs/backend-requirements.md
-// 5番参照)。items はカテゴリ別の生の数量、drinkCounts はドリンク種別ごとの
-// 合計数(どのカテゴリに属するかは紐付けない生データ)。割り振り計算はバックエンドが行う。
+// バックエンドの設計(ORDER_ITEM_TABLE は itemId と quantity のみ)に合わせ、
+// 商品カテゴリもドリンク種別も同じ {itemId, quantity} の明細として送る。
+// ドリンク種別(91-94)は ITEM_TABLE に価格0円の商品として登録されている前提
+// (未登録だと外部キー制約で注文作成が失敗し、0円でないと料金が二重に加算される)。
 export const buildOrderItems = (cart: Cart): OrderItemsPayload => {
-  const items = PRODUCT_CATEGORY_IDS.map((itemId) => ({
+  const items = [...PRODUCT_CATEGORY_IDS, ...DRINK_TYPE_IDS].map((itemId) => ({
     itemId,
     quantity: Number(cart[itemId]) || 0,
   })).filter(({ quantity }) => quantity > 0);
 
-  const drinkCounts: Record<number, number> = {};
-  for (const drinkId of DRINK_TYPE_IDS) {
-    const quantity = Number(cart[drinkId]) || 0;
-    if (quantity > 0) {
-      drinkCounts[drinkId] = quantity;
-    }
-  }
-
-  return { items, drinkCounts };
+  return { items };
 };
 
 /** Date → "HH:mm"（予約なしは null） */
