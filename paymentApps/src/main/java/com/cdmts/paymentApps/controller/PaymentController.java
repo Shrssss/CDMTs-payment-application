@@ -66,6 +66,12 @@ public class PaymentController {
 				.body(paymentService.getPaymentStatus(orderId));
 	}
 
+	@GetMapping("/payments/return/{sid}")
+	public ResponseEntity<PaymentService.PaymentReturnOrder> getPaymentReturnOrder(@PathVariable String sid) {
+		return ResponseEntity.ok().header("Cache-Control", "no-store")
+				.body(paymentService.getPaymentReturnOrder(sid));
+	}
+
 	/** sourceIdで決済リクエストを作成する */
 	@PostMapping("/payments/create/{orderId}/{sourceId}")
 	public PaymentResponse createPayment(@PathVariable Long orderId,@PathVariable String sourceId) {
