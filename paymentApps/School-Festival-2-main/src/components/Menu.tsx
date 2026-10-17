@@ -7,7 +7,7 @@ interface MenuProps {
   itemPrice?: number;
   itemName?: string;
   count: number;
-  image?: string;
+  image: string;
   id: number;
   add: (id: number) => void;
   remove: (id: number) => void;
@@ -50,12 +50,7 @@ export const Menu = (props: MenuProps) => {
     <div style={containerStyle}>
       {count > 0 && <div style={badgeStyle}>{count}</div>}
       <div style={imageBoxStyle}>
-        {image ? (
-          <img src={image} alt={itemName} style={imgTagStyle} />
-        ) : (
-          <div style={imagePlaceholderStyle} />
-        )}
-
+        <img src={image} alt={itemName} style={imgTagStyle} />
         {isSoldout && (
           <div style={soldoutOverlayStyle}>
             <span style={soldoutTextStyle}>SOLD OUT</span>
@@ -137,11 +132,6 @@ const imgTagStyle: CSSProperties = {
   height: "100%",
   display: "block",
   objectFit: "cover",
-};
-
-const imagePlaceholderStyle: CSSProperties = {
-  width: "100%",
-  height: "100%",
 };
 
 const badgeStyle: CSSProperties = {
