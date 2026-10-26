@@ -1,10 +1,8 @@
-// アプリ起動時に使う画面状態と決済状態の初期値を定義するファイル。
-import { STEPS } from "./steps";
+// アプリ起動時に使うカート・決済状態の初期値を定義するファイル。
 import { CART_INITIAL } from "./items";
 import type { AppState, PaymentState, SoldoutMap } from "../types";
 
 export const INITIAL_APP_STATE: AppState = {
-  step: STEPS.TITLE,
   cart: CART_INITIAL,
 };
 

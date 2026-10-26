@@ -1,38 +1,27 @@
 // メニュー画面全体を組み立て、商品カードを並べるページコンポーネント。
-// 商品画像はバックエンドのimagePathから取得する(未取得時はMenu.tsxがプレースホルダーを表示する)。
+// 商品画像はフロントエンド内の画像を使用する(画像がない場合はMenu.tsxがプレースホルダーを表示する)。
 // fetchErrorがtrueの場合(ネットワーク不調時)は、商品グリッドの代わりに
 // 「メニューを取得できませんでした」を表示する。
 import type { CSSProperties } from "react";
 import { Menu } from "../components/Menu";
 import { StepPageLayout } from "../components/StepPageLayout";
 import { PRODUCT_CATEGORIES } from "../constants/items";
-import type { Cart, ImagePathMap, NameMap, PriceMap, SoldoutMap } from "../types";
+import { useAppContext } from "../context/AppContext";
 
 const { PORK_SINGLE, PORK_SINGLE_LARGE, DRINK_SINGLE, PORK_DRINK_SET, PORK_DRINK_SET_LARGE } = PRODUCT_CATEGORIES;
 
-interface MenuPageProps {
-  prices: PriceMap;
-  itemNames: NameMap;
-  imagePaths: ImagePathMap;
-  cart: Cart;
-  addItems: (id: number) => void;
-  removeItems: (id: number) => void;
-  isSoldout: SoldoutMap;
-  fetchError: boolean;
-  onRetry?: () => void;
-}
-
-export const MenuPage = ({
-  prices,
-  itemNames,
-  imagePaths,
-  cart,
-  addItems,
-  removeItems,
-  isSoldout,
-  fetchError,
-  onRetry,
-}: MenuPageProps) => {
+export const MenuPage = () => {
+  const {
+    prices,
+    itemNames,
+    imagePaths,
+    cart,
+    addItems,
+    removeItems,
+    isSoldout,
+    menuFetchError: fetchError,
+    refreshMenuItems: onRetry,
+  } = useAppContext();
   if (fetchError) {
     return (
       <StepPageLayout>
@@ -41,11 +30,9 @@ export const MenuPage = ({
           <p style={errorSubTextStyle}>
             通信状況をご確認の上、もう一度お試しください。
           </p>
-          {onRetry && (
-            <button style={retryButtonStyle} onClick={onRetry}>
-              再読み込み
-            </button>
-          )}
+          <button style={retryButtonStyle} onClick={onRetry}>
+            再読み込み
+          </button>
         </div>
       </StepPageLayout>
     );
@@ -66,6 +53,7 @@ export const MenuPage = ({
             remove={removeItems}
             image={imagePaths[PORK_DRINK_SET]}
             isSoldout={isSoldout[PORK_DRINK_SET]}
+            isDrink={false}
           />
           <Menu
             borderColor={"2px solid #ffbf7f"}
@@ -78,6 +66,7 @@ export const MenuPage = ({
             remove={removeItems}
             image={imagePaths[PORK_DRINK_SET_LARGE]}
             isSoldout={isSoldout[PORK_DRINK_SET_LARGE]}
+            isDrink={false}
           />
         </div>
         <div className="list-row">
@@ -92,6 +81,7 @@ export const MenuPage = ({
             remove={removeItems}
             image={imagePaths[PORK_SINGLE]}
             isSoldout={isSoldout[PORK_SINGLE]}
+            isDrink={false}
           />
           <Menu
             borderColor={"2px solid #ffbf7f"}
@@ -104,6 +94,7 @@ export const MenuPage = ({
             remove={removeItems}
             image={imagePaths[PORK_SINGLE_LARGE]}
             isSoldout={isSoldout[PORK_SINGLE_LARGE]}
+            isDrink={false}
           />
         </div>
         <div className="list-row">
@@ -118,6 +109,7 @@ export const MenuPage = ({
             remove={removeItems}
             image={imagePaths[DRINK_SINGLE]}
             isSoldout={isSoldout[DRINK_SINGLE]}
+            isDrink={false}
           />
         </div>
       </div>

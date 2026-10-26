@@ -1,12 +1,11 @@
 // 方式別フックからモック有効時に使う共通処理。旧注文作成のみの分岐は互換のため保持。
 import { useCallback, useState, type Dispatch, type SetStateAction } from "react";
 
-import { ORDER_SNAPSHOT_CONFIG, USE_MOCK_PAYMENT } from "../constants/config";
-import { buildOrderSnapshot } from "../features/order/orderSnapshot";
+import { USE_MOCK_PAYMENT } from "../constants/config";
+import { appendOrderHistory, buildOrderSnapshot } from "../features/order/orderSnapshot";
 import { formatDisplayReserved } from "../utils/dateFormat";
-import { setLocalStorageJSON } from "../utils/localStorage";
 import { parseReservedToDate, buildOrderItems } from "../utils/orderUtils";
-import type { AppAction, Cart, PaymentState, } from "../types";
+import type { Cart, Goto, PaymentState, } from "../types";
 import { Api } from "../services/apiService";
 import { toLocalDateTimeString } from "../utils/dateFormat";
 
@@ -14,7 +13,7 @@ import { toLocalDateTimeString } from "../utils/dateFormat";
 export interface UseMockPaymentFlowParams {
   cart: Cart;
   selectedTime: string | null;
-  dispatch: Dispatch<AppAction>;
+  goto: Goto;
   setPaymentState: Dispatch<SetStateAction<PaymentState>>;
   // paymentMethod: PaymentMethod;
   /** USE_MOCK_PAYMENTがオンの場合に使う決め打ちの注文ID(決済手段ごとに異なる)。 */
@@ -26,7 +25,7 @@ export interface UseMockPaymentFlowParams {
 export function useMockPaymentFlow({
   cart,
   selectedTime,
-  dispatch,
+  goto,
   setPaymentState,
   // paymentMethod,
   mockOrderId,
@@ -48,16 +47,19 @@ export function useMockPaymentFlow({
 
     try {
     if (USE_MOCK_PAYMENT) {
-      setLocalStorageJSON(
-        ORDER_SNAPSHOT_CONFIG.KEY,
-        buildOrderSnapshot({
-          createdAtIso,
-          reservedAtIso,
-          orderId: mockOrderId,
-          itemsCart: cart,
-          displayReserved,
-        })
-      );
+      try {
+        appendOrderHistory(
+          buildOrderSnapshot({
+            createdAtIso,
+            reservedAtIso,
+            orderId: mockOrderId,
+            itemsCart: cart,
+            displayReserved,
+          })
+        );
+      } catch {
+        // プライベートブラウジング等でlocalStorageが使えない場合は保存せずに続行する
+      }
       setPaymentState((prev) => ({
         ...prev,
         outcome: {
@@ -108,8 +110,8 @@ export function useMockPaymentFlow({
         setSubmitting(false);
 
     }
-    dispatch({ type: "GOTO", step: "paymentResult" });
-  }, [cart, selectedTime, dispatch, setPaymentState, mockOrderId, notImplementedMessage]);
+    goto("paymentResult");
+  }, [cart, selectedTime, goto, setPaymentState, mockOrderId, notImplementedMessage]);
 
   return { handlePay, submitting };
 }

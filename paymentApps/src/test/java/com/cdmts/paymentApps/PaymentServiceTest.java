@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,11 +50,31 @@ class PaymentServiceTest {
     @InjectMocks
     private PaymentService paymentService;
 
+    @Test
+    void returnSidRestoresPaidOrderWithoutBrowserStorage() {
+        String sid = "0123456789abcdef";
+        Order order = new Order();
+        order.setOrderId(42L);
+        order.setPaymentStatus(true);
+        order.setOrderDate(LocalDateTime.of(2026, 10, 17, 10, 0));
+        order.setReservedTime(LocalDateTime.of(2026, 10, 17, 10, 30));
+        OrderItem item = new OrderItem();
+        item.setItemId(10L);
+        item.setQuantity(2);
+        when(paymentMapper.selectOrderBySid(sid)).thenReturn(order);
+        when(orderItemMapper.selectOrderItemsByOrderId(42L)).thenReturn(List.of(item));
+
+        var result = paymentService.getPaymentReturnOrder(sid);
+        assertEquals(42L, result.orderId());
+        assertEquals("PAID", result.state());
+        assertEquals(Integer.valueOf(2), result.cart().get(10L));
+        verifyNoInteractions(squareClient);
+    }
+
     //  注文の合計金額を計算するテスト
     @Test
     void preparePaymentReturnsCalculatedAmount() {
         Long orderId = 123L;
-        String sid = "O3f";
 
         ReflectionTestUtils.setField(paymentService, "paymentActionUrl", "https://www.testpayment.com/settle");
 
@@ -86,20 +109,20 @@ class PaymentServiceTest {
         when(itemMapper.selectItemsByItemIds(List.of(10L, 20L)))
                 .thenReturn(List.of(firstItem, secondItem));
 
-        when(paymentMapper.updateSidByOrderId(orderId, sid)).thenReturn(1);
+        when(paymentMapper.updateSidByOrderId(org.mockito.ArgumentMatchers.eq(orderId), anyString())).thenReturn(1);
 
         OrderPaymentResponse response =
                 paymentService.preparePayment(orderId);
 
         assertEquals(orderId, response.getOrderId());
-        assertEquals(sid, response.getSid());
+        assertTrue(response.getSid().matches("[0-9a-f]{16}"));
         assertEquals(Long.valueOf(1100L), response.getAmount());
         assertEquals("1100", response.getFields().get("K1"));
         assertEquals(
                 "https://www.testpayment.com/settle",
                 response.getAction());
 
-        verify(paymentMapper).updateSidByOrderId(orderId, sid);
+        verify(paymentMapper).updateSidByOrderId(orderId, response.getSid());
         verifyNoInteractions(squareClient);
     }
 
@@ -107,7 +130,6 @@ class PaymentServiceTest {
     @Test
     void InvalidAmountThrowsException() {
         Long orderId = 123L;
-        String sid = "O3f";
 
         Order order = new Order();
         order.setOrderId(orderId);
@@ -150,7 +172,6 @@ class PaymentServiceTest {
     @Test
     void preparePaymentThrowsWhenSidCannotBeSaved() {
         Long orderId = 123L;
-        String sid = "O3f";
 
         Order order = new Order();
         order.setOrderId(orderId);
@@ -171,12 +192,12 @@ class PaymentServiceTest {
                 .thenReturn(List.of(orderItem));
         when(itemMapper.selectItemsByItemIds(List.of(10L)))
                 .thenReturn(List.of(item));
-        when(paymentMapper.updateSidByOrderId(orderId, sid)).thenReturn(0);
+        when(paymentMapper.updateSidByOrderId(org.mockito.ArgumentMatchers.eq(orderId), anyString())).thenReturn(0);
 
         assertThrows(IllegalStateException.class,
                 () -> paymentService.preparePayment(orderId));
 
-        verify(paymentMapper).updateSidByOrderId(orderId, sid);
+        verify(paymentMapper).updateSidByOrderId(org.mockito.ArgumentMatchers.eq(orderId), anyString());
         verifyNoInteractions(squareClient);
     }
 }

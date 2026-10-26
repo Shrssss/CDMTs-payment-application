@@ -1,23 +1,16 @@
 // ドリンク選択画面。商品画像はバックエンドのimagePathから取得する
-// (未取得時はMenu.tsxがプレースホルダーを表示する)。
+// 画像取得失敗時はimgタグデフォルトの見た目にする（お客さんが不具合があることを理解するため）
 import { Menu } from "../components/Menu";
 import { StepPageLayout } from "../components/StepPageLayout";
 import { PRODUCT_CATEGORIES } from "../constants/items";
-import type { Cart, ImagePathMap, NameMap, SoldoutMap } from "../types";
+import { useAppContext } from "../context/AppContext";
 
 const { COLA, ORANGE, CIDER, OOLONG } = PRODUCT_CATEGORIES;
 
-interface DrinkPageProps {
-  itemNames: NameMap;
-  imagePaths: ImagePathMap;
-  cart: Cart;
-  addItems: (id: number) => void;
-  removeItems: (id: number) => void;
-  difference: number;
-  isSoldout: SoldoutMap;
-}
-
-export const DrinkPage = ({ itemNames, imagePaths, cart, addItems, removeItems, difference, isSoldout }: DrinkPageProps) => {
+export const DrinkPage = () => {
+  const { itemNames, imagePaths, cart, addItems, removeItems, isSoldout, calculateDifferenceOfDrinks } =
+    useAppContext();
+  const difference = calculateDifferenceOfDrinks();
   return (
     <StepPageLayout>
       <p
@@ -82,6 +75,7 @@ export const DrinkPage = ({ itemNames, imagePaths, cart, addItems, removeItems, 
             isDrinkScreen={true}
             image={imagePaths[COLA]}
             isSoldout={isSoldout[COLA]}
+            isDrink
           />
           <Menu
             borderColor={"2px solid #7fbfff"}
@@ -95,6 +89,7 @@ export const DrinkPage = ({ itemNames, imagePaths, cart, addItems, removeItems, 
             isDrinkScreen={true}
             image={imagePaths[ORANGE]}
             isSoldout={isSoldout[ORANGE]}
+            isDrink
           />
         </div>
         <div className="list-row">
@@ -110,6 +105,7 @@ export const DrinkPage = ({ itemNames, imagePaths, cart, addItems, removeItems, 
             isDrinkScreen={true}
             image={imagePaths[CIDER]}
             isSoldout={isSoldout[CIDER]}
+            isDrink
           />
           <Menu
             borderColor={"2px solid #7fbfff"}
@@ -123,6 +119,7 @@ export const DrinkPage = ({ itemNames, imagePaths, cart, addItems, removeItems, 
             isDrinkScreen={true}
             image={imagePaths[OOLONG]}
             isSoldout={isSoldout[OOLONG]}
+            isDrink
           />
         </div>
       </div>

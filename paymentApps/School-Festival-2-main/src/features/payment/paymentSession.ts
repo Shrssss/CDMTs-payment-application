@@ -10,7 +10,6 @@ const generateMockOrderId = (): string => "MOCK-" + Math.floor(Math.random() * 1
 
 export type CreateOrderFn = (args: {
   items: { itemId: number; quantity: number }[];
-  drinkCounts: Record<number, number>;
   orderDate: string;
   reservedTime: string;
 }) => Promise<string | number>;
@@ -32,7 +31,7 @@ export async function createPaymentOrder({
   createOrder,
   createdAtIso = new Date().toISOString(),
 }: CreatePaymentOrderParams) {
-  const { items, drinkCounts } = buildOrderItems(cart);
+  const { items } = buildOrderItems(cart);
   if (items.length === 0) throw new Error("カートが空です");
 
   const reservedDate = parseReservedToDate(selectedTime);
@@ -49,7 +48,6 @@ export async function createPaymentOrder({
     const reservedLocal = toLocalDateTimeString(reservedDate);
     const orderResp = await createOrder({
       items,
-      drinkCounts,
       orderDate: orderDateLocal,
       reservedTime: reservedLocal,
     });
@@ -65,7 +63,6 @@ export async function createPaymentOrder({
     reservedDate,
     reservedAtIso,
     items,
-    drinkCounts,
     amount,
   };
 }

@@ -4,7 +4,7 @@
 // テストごとに読み直す(useMenuItems.test.jsと同じパターン)。
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
-import { ORDER_SNAPSHOT_CONFIG } from "../constants/config";
+import { ORDER_HISTORY_CONFIG } from "../constants/config";
 
 describe("useMockPaymentFlow", () => {
   const originalEnv = { ...process.env };
@@ -49,13 +49,13 @@ describe("useMockPaymentFlow", () => {
 
   test("モックオンの場合、注文成功として扱いスナップショットを保存する", async () => {
     process.env.VITE_USE_MOCK_PAYMENT = "true";
-    const dispatch = jest.fn();
+    const goto = jest.fn();
     const setPaymentState = jest.fn();
 
     await renderAndSubmit({
       cart: { 10: 1 },
       selectedTime: "12:30",
-      dispatch,
+      goto,
       setPaymentState,
       mockOrderId: "MOCK-ORDER-1",
       notImplementedMessage: "未実装です",
@@ -70,24 +70,25 @@ describe("useMockPaymentFlow", () => {
       expect.objectContaining({ ok: true, orderId: "MOCK-ORDER-1", error: null })
     );
 
-    expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "paymentResult" });
+    expect(goto).toHaveBeenCalledWith("paymentResult");
 
-    const saved = JSON.parse(window.localStorage.getItem(ORDER_SNAPSHOT_CONFIG.KEY));
-    expect(saved.orderId).toBe("MOCK-ORDER-1");
-    expect(saved.itemsCart).toEqual({ 10: 1 });
+    const saved = JSON.parse(window.localStorage.getItem(ORDER_HISTORY_CONFIG.KEY));
+    expect(saved).toHaveLength(1);
+    expect(saved[0].orderId).toBe("MOCK-ORDER-1");
+    expect(saved[0].itemsCart).toEqual({ 10: 1 });
   });
 
   test("共通フックの旧実通信分岐は注文作成後も支払済みとして保存しない", async () => {
     process.env.VITE_USE_MOCK_PAYMENT = "false";
     const { Api } = require("../services/apiService");
     const createOrder = jest.spyOn(Api, "createOrder").mockResolvedValue(42);
-    const dispatch = jest.fn();
+    const goto = jest.fn();
     const setPaymentState = jest.fn();
 
     await renderAndSubmit({
       cart: { 10: 1 },
       selectedTime: "12:30",
-      dispatch,
+      goto,
       setPaymentState,
       mockOrderId: "MOCK-ORDER-1",
       notImplementedMessage: "カード決済は未実装です",
@@ -104,21 +105,21 @@ describe("useMockPaymentFlow", () => {
       items: [{ itemId: 10, quantity: 1 }], servingStatus: 0, paymentStatus: false,
     }));
 
-    expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "paymentResult" });
+    expect(goto).toHaveBeenCalledWith("paymentResult");
     // 未実装エラーなので、localStorageへは何も保存しない
-    expect(window.localStorage.getItem(ORDER_SNAPSHOT_CONFIG.KEY)).toBeNull();
+    expect(window.localStorage.getItem(ORDER_HISTORY_CONFIG.KEY)).toBeNull();
   });
 
   test("予約時刻が不正な場合はalertを出して何もせず終了する", async () => {
     process.env.VITE_USE_MOCK_PAYMENT = "true";
-    const dispatch = jest.fn();
+    const goto = jest.fn();
     const setPaymentState = jest.fn();
     const alertSpy = jest.spyOn(window, "alert").mockImplementation(() => {});
 
     await renderAndSubmit({
       cart: { 10: 1 },
       selectedTime: null,
-      dispatch,
+      goto,
       setPaymentState,
       mockOrderId: "MOCK-ORDER-1",
       notImplementedMessage: "未実装です",
@@ -126,7 +127,7 @@ describe("useMockPaymentFlow", () => {
 
     expect(alertSpy).toHaveBeenCalledWith("予約時刻が不正です");
     expect(setPaymentState).not.toHaveBeenCalled();
-    expect(dispatch).not.toHaveBeenCalled();
+    expect(goto).not.toHaveBeenCalled();
 
     alertSpy.mockRestore();
   });

@@ -2,6 +2,7 @@
 // Vite(devサーバー・本番ビルド)とは独立して、テストのみJest+Babelで実行する。
 module.exports = {
   testEnvironment: "jsdom",
+  setupFiles: ["<rootDir>/src/test-utils/jestSetup.cjs"],
   roots: ["<rootDir>/src"],
   testMatch: ["**/__tests__/**/*.test.[jt]s?(x)"],
   transform: {

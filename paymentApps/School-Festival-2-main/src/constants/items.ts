@@ -1,10 +1,9 @@
 // 商品 ID・カート初期値をまとめるファイル。
 //
 // 商品ID(itemId)とドリンク種別ID(drinkId)は合成しない(旧: セットID+ドリンク
-// オフセットでIDを合成するgetDrinkBreakdownId方式は廃止した)。カテゴリ別の
-// 個数とドリンク種別ごとの合計数は、それぞれ別のフィールドとして持ち回す。
-// どのカテゴリにどのドリンクを割り振るかの計算はバックエンドが行う
-// (docs/backend-requirements.md 5番参照)。
+// オフセットでIDを合成するgetDrinkBreakdownId方式は廃止した)。注文作成時は
+// カテゴリ別の個数もドリンク種別ごとの個数も、同じ {itemId, quantity} の
+// 明細として送る(utils/orderUtils.ts の buildOrderItems 参照)。
 import type { Cart } from "../types";
 
 export const PRODUCT_CATEGORIES = {

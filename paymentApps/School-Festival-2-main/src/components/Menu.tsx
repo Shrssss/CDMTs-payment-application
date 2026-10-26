@@ -7,13 +7,14 @@ interface MenuProps {
   itemPrice?: number;
   itemName?: string;
   count: number;
-  image?: string;
+  image: string;
   id: number;
   add: (id: number) => void;
   remove: (id: number) => void;
   difference?: number;
   isDrinkScreen?: boolean;
   isSoldout?: boolean;
+  isDrink:boolean;
 }
 
 export const Menu = (props: MenuProps) => {
@@ -30,6 +31,7 @@ export const Menu = (props: MenuProps) => {
     difference = 0,
     isDrinkScreen = false,
     isSoldout,
+    isDrink
   } = props;
 
   // 無効条件
@@ -48,12 +50,7 @@ export const Menu = (props: MenuProps) => {
     <div style={containerStyle}>
       {count > 0 && <div style={badgeStyle}>{count}</div>}
       <div style={imageBoxStyle}>
-        {image ? (
-          <img src={image} alt={itemName} style={imgTagStyle} />
-        ) : (
-          <div style={imagePlaceholderStyle} />
-        )}
-
+        <img src={image} alt={itemName} style={imgTagStyle} />
         {isSoldout && (
           <div style={soldoutOverlayStyle}>
             <span style={soldoutTextStyle}>SOLD OUT</span>
@@ -68,7 +65,7 @@ export const Menu = (props: MenuProps) => {
           fontSize: "20px",
         }}
       >
-        {isSoldout ? "売り切れ" : itemPrice}
+        {!isDrink && <>&yen;</>}{isSoldout ? "売り切れ" : itemPrice}
       </p>
       <p style={{ margin: "2px" }}>{itemName}</p>
       <div style={{ margin: "0px" }}>
@@ -135,11 +132,6 @@ const imgTagStyle: CSSProperties = {
   height: "100%",
   display: "block",
   objectFit: "cover",
-};
-
-const imagePlaceholderStyle: CSSProperties = {
-  width: "100%",
-  height: "100%",
 };
 
 const badgeStyle: CSSProperties = {

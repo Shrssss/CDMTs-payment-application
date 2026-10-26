@@ -6,6 +6,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 
 import { PaymentResultPage } from "../pages/PaymentResultPage";
+import { TestAppProvider } from "../test-utils/appContext";
 
 describe("PaymentResultPage", () => {
   let container;
@@ -24,20 +25,16 @@ describe("PaymentResultPage", () => {
   });
 
   const render = (paymentState, extra = {}) => {
-    const dispatch = jest.fn();
+    const goto = jest.fn();
     const setPaymentState = jest.fn();
     act(() => {
       root.render(
-        <PaymentResultPage
-          paymentState={paymentState}
-          selectedTime={null}
-          setPaymentState={setPaymentState}
-          dispatch={dispatch}
-          {...extra}
-        />
+        <TestAppProvider value={{ paymentState, selectedTime: null, setPaymentState, goto, ...extra }}>
+          <PaymentResultPage />
+        </TestAppProvider>
       );
     });
-    return { dispatch, setPaymentState };
+    return { goto, setPaymentState };
   };
 
   test("成功時: 注文番号を表示し、receiptUrlがあればレシートリンクを表示する", () => {
@@ -67,7 +64,7 @@ describe("PaymentResultPage", () => {
   });
 
   test("成功時: 「番号札を表示」ボタンでnumberTagへ遷移する", () => {
-    const { dispatch } = render({
+    const { goto } = render({
       outcome: { ok: true, orderId: "ORDER-123", error: null, receiptUrl: null, displayReserved: "12:30" },
     });
 
@@ -76,7 +73,7 @@ describe("PaymentResultPage", () => {
     );
     act(() => button.click());
 
-    expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "numberTag" });
+    expect(goto).toHaveBeenCalledWith("numberTag");
   });
 
   test("失敗時: orderIdがあれば予約時刻を表示する(現状のモック実装では未到達だが、" +
@@ -100,7 +97,7 @@ describe("PaymentResultPage", () => {
   });
 
   test("失敗時: 「カートに戻る」でoutcomeをリセットしcartへ、「再試行」でpaymentへ遷移する", () => {
-    const { dispatch, setPaymentState } = render({
+    const { goto, setPaymentState } = render({
       outcome: { ok: false, orderId: null, error: "err", receiptUrl: null, displayReserved: null },
     });
 
@@ -108,19 +105,34 @@ describe("PaymentResultPage", () => {
       (b) => b.textContent === "カートに戻る"
     );
     act(() => backButton.click());
-    expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "cart" });
+    expect(goto).toHaveBeenCalledWith("cart");
     expect(setPaymentState).toHaveBeenCalledTimes(1);
 
     const retryButton = Array.from(container.querySelectorAll("button")).find(
       (b) => b.textContent === "再試行"
     );
     act(() => retryButton.click());
-    expect(dispatch).toHaveBeenCalledWith({ type: "GOTO", step: "payment" });
+    expect(goto).toHaveBeenCalledWith("payment");
     expect(setPaymentState).toHaveBeenCalledTimes(2);
 
     // resetOutcomeが渡すupdater関数が、outcomeを未実行状態に戻すことを確認
     const updater = setPaymentState.mock.calls[0][0];
     const result = updater({ billingInfo: {}, outcome: { ok: true, orderId: "X", error: null, receiptUrl: null, displayReserved: null } });
     expect(result.outcome).toEqual({ ok: false, orderId: null, error: null, receiptUrl: null, displayReserved: null });
+  });
+
+  test("確認中(WAITING)と確認不能(UNRESOLVED)の画面に「トップに戻る」を出し、押すとonLeavePaymentResultを呼ぶ", () => {
+    for (const status of ["WAITING", "UNRESOLVED"]) {
+      const onLeavePaymentResult = jest.fn();
+      render(
+        { outcome: { ok: false, status, orderId: 42, error: null, receiptUrl: null, displayReserved: null } },
+        { leavePaymentResult: onLeavePaymentResult, refreshPaymentStatus: () => {}, checkingPaymentStatus: true }
+      );
+      const leave = Array.from(container.querySelectorAll("button")).find((b) => b.textContent === "トップに戻る");
+      // 照会中でも押せる
+      expect(leave.disabled).toBe(false);
+      act(() => leave.click());
+      expect(onLeavePaymentResult).toHaveBeenCalledTimes(1);
+    }
   });
 });

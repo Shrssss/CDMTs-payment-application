@@ -2,8 +2,8 @@
 // フロントからバックエンドへ送る API 通信だけをまとめるラッパー。
 // Square 設定、売り切れ取得、注文作成、決済、注文取得をこの 1 ファイルに集約する。
 
-import { API_ENDPOINTS, SQUARE_FALLBACK_CONFIG } from "../constants/config";
-import type { MenuItemResponse, PaymentApiResponse, SquareConfig } from "../types";
+import { API_ENDPOINTS, apiUrl, SQUARE_FALLBACK_CONFIG } from "../constants/config";
+import type { MenuItemResponse, PaymentApiResponse, PaymentReturnOrder, SquareConfig } from "../types";
 import type { PaymentPrepareResponse } from "../types";
 
 function isValidAppId(id: unknown): id is string {
@@ -13,8 +13,24 @@ function isValidAppId(id: unknown): id is string {
 }
 
 export const Api = {
+  async fetchPaymentReturnOrder(sid: string): Promise<PaymentReturnOrder> {
+    if (!/^[0-9a-f]{16}$/.test(sid)) throw new Error("照合IDが不正です。");
+    const res = await fetch(`${apiUrl}/api/payments/return/${sid}`, {
+      cache: "no-store", headers: { Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error("注文情報を取得できませんでした。");
+    const data = await res.json();
+    if (!Number.isSafeInteger(data.orderId) || data.orderId <= 0 ||
+        !["WAITING", "PAID"].includes(data.state) ||
+        typeof data.createdAt !== "string" || typeof data.reservedAt !== "string" ||
+        !data.cart || typeof data.cart !== "object" || Array.isArray(data.cart) ||
+        !Object.values(data.cart).every(q => Number.isInteger(q) && Number(q) > 0)) {
+      throw new Error("注文情報の応答が不正です。");
+    }
+    return data;
+  },
   async fetchPaymentStatus(orderId: number): Promise<{ orderId: number; state: "WAITING" | "PAID" }> {
-    const res = await fetch(`/api/payments/${orderId}/status`, {
+    const res = await fetch(`${apiUrl}/api/payments/${orderId}/status`, {
       cache: "no-store",
       headers: { Accept: "application/json" },
     });
@@ -152,20 +168,16 @@ export const Api = {
   // 送るボディは backend の OrderCreateRequest DTO に合わせる必要あり。
   // orderDate（作成日時）, reservedTime（LocalDateTime形式）, items（[{itemId,quantity}]）,
   // servingStatus（@NotNull、初期値0=調理待ち）, paymentStatus（@NotNull、初期値false=未決済）を送る。
-  // drinkCounts（ドリンク種別ごとの合計数、{drinkId: count}）は
-  // docs/backend-requirements.md 5番で提案中の新フィールド。
-  // バックエンド側がまだ対応していない場合、この項目は無視される想定。
+  // ドリンク種別も items の明細(itemId 91-94)として送る(buildOrderItems参照)。
   // レスポンスは素の Long（例: 42）がそのまま返る。
   async createOrder({
     items,
-    drinkCounts = {},
     orderDate,
     reservedTime,
     servingStatus = 0,
     paymentStatus = false,
   }: {
     items: { itemId: number; quantity: number }[];
-    drinkCounts?: Record<number, number>;
     orderDate: string;
     reservedTime: string;
     servingStatus?: number;
@@ -175,7 +187,6 @@ export const Api = {
       orderDate, // LocalDateTime-ish string "yyyy-MM-dd'T'HH:mm:ss"
       reservedTime, // LocalDateTime-ish string
       items, // array of { itemId, quantity } filtered by buildOrderItems on frontend
-      drinkCounts, // { drinkId: count } ドリンク割り振りはバックエンドが行う想定
       servingStatus,
       paymentStatus,
     };

@@ -1,49 +1,108 @@
-import type { Cart, PaymentMethod } from "../../types";
+// 決済代行(Paysys)へ送り出したが、まだ支払済みを確認できていない注文の照合ID(SID)を扱う。
+// 注文内容はバックエンドから SID で取り直すため、ここには SID と保存時刻だけを持つ。
+// localStorage に置くので、別タブで戻ってきた場合や、タブを閉じた後に開き直した場合でも拾える。
+// 期限(PENDING_PAYMENT_TTL_MS)を過ぎたものは読み出し時に捨てる。
 
-export const PENDING_PAYMENT_KEY = "cm_pending_payment_v1";
+export const PENDING_PAYMENTS_KEY = "cm_pending_payments_v1";
+/** これより古い保留中のSIDは捨てる(屋台は当日中に受け取るため)。 */
+export const PENDING_PAYMENT_TTL_MS = 12 * 60 * 60 * 1000;
 
 export interface PendingPayment {
-  orderId: number;
   sid: string;
-  method: PaymentMethod;
-  cart: Cart;
-  reservedAtIso: string;
-  createdAt: string;
+  /** 保存した日時(ISO形式)。期限の判定に使う。 */
+  savedAt: string;
 }
 
-// 保存できなければ外部送信を止める。カードトークン・連絡先は保存しない。
-export function savePendingPayment(pending: PendingPayment): void {
-  const { orderId, sid, method, cart, reservedAtIso, createdAt } = pending;
-  sessionStorage.setItem(PENDING_PAYMENT_KEY, JSON.stringify({
-    orderId, sid, method, cart, reservedAtIso, createdAt,
-  }));
-}
+const SID_PATTERN = /^[0-9a-f]{16}$/;
 
-export function readPendingPayment(): PendingPayment | null {
+export const isValidSid = (sid: unknown): sid is string =>
+  typeof sid === "string" && SID_PATTERN.test(sid);
+
+const isPendingPayment = (value: unknown): value is PendingPayment => {
+  const v = value as PendingPayment | null;
+  return !!v && isValidSid(v.sid) &&
+    typeof v.savedAt === "string" && Number.isFinite(Date.parse(v.savedAt));
+};
+
+const writePendingPayments = (list: PendingPayment[]): void => {
+  if (list.length === 0) localStorage.removeItem(PENDING_PAYMENTS_KEY);
+  else localStorage.setItem(PENDING_PAYMENTS_KEY, JSON.stringify(list));
+};
+
+/** 期限内の保留中SIDを新しい順で返す。期限切れ・壊れた値はここで取り除く。 */
+export function readPendingPayments(now: Date = new Date()): PendingPayment[] {
   try {
-    const value = JSON.parse(sessionStorage.getItem(PENDING_PAYMENT_KEY) || "null");
-    if (!value || !Number.isSafeInteger(value.orderId) || value.orderId <= 0 ||
-      typeof value.sid !== "string" || !/^[A-Za-z0-9]{1,16}$/.test(value.sid) ||
-      !["card", "paypay"].includes(value.method) ||
-      typeof value.reservedAtIso !== "string" || !Number.isFinite(Date.parse(value.reservedAtIso)) ||
-      typeof value.createdAt !== "string" || !Number.isFinite(Date.parse(value.createdAt)) ||
-      !value.cart || typeof value.cart !== "object" || Array.isArray(value.cart) ||
-      !Object.values(value.cart).every(q => Number.isInteger(q) && Number(q) >= 0)) return null;
-    return value;
+    const raw: unknown = JSON.parse(localStorage.getItem(PENDING_PAYMENTS_KEY) || "[]");
+    const list = Array.isArray(raw) ? raw : [];
+    const alive = list
+      .filter(isPendingPayment)
+      .filter((p) => now.getTime() - Date.parse(p.savedAt) < PENDING_PAYMENT_TTL_MS)
+      .sort((a, b) => Date.parse(b.savedAt) - Date.parse(a.savedAt));
+    if (alive.length !== list.length) {
+      try { writePendingPayments(alive); } catch { /* 掃除できなくても読み出しは続ける */ }
+    }
+    return alive;
   } catch {
-    return null;
+    return [];
   }
 }
 
-export function getPaymentReturn(search: string, pending: PendingPayment | null) {
-  const params = new URLSearchParams(search);
-  const method = params.get("paysys_return");
-  if (!method && !pending) return null;
-  if (!pending) return { pending: null, error: "元の注文を復元できません。同じブラウザ・タブで開き、注文番号を係員にお伝えください。" };
-  if ((method && method !== pending.method) ||
-      (params.has("SID") && params.get("SID") !== pending.sid)) {
-    return { pending: null, error: "戻り先の取引情報が保存済み注文と一致しません。係員にご確認ください。" };
+export const STORAGE_UNAVAILABLE_MESSAGE =
+  "ブラウザの保存機能(Cookie／ローカルストレージ)が無効になっているため、この端末では決済できません。" +
+  "設定で有効にしてから再度お試しいただくか、店頭でご注文ください。";
+
+/**
+ * 保留中の照合IDを保存できる(localStorage に書き込める)か。
+ * Safariの「すべてのCookieをブロック」等では false。注文を作る前に確かめ、未払いの注文を残さないために使う。
+ */
+export function canSavePendingPayment(): boolean {
+  const probeKey = `${PENDING_PAYMENTS_KEY}_probe`;
+  try {
+    localStorage.setItem(probeKey, "1");
+    localStorage.removeItem(probeKey);
+    return true;
+  } catch {
+    return false;
   }
-  const incomplete = params.get("result") === "cancel" || params.get("result") === "error" || params.has("ERROR");
-  return { pending, error: incomplete ? "決済手続きが完了していない可能性があります。支払い状況を確認してください。" : null };
+}
+
+// 外部決済へ送り出す直前に呼ぶ。保存できなければ例外を投げ、呼び出し側は送り出しを止める。
+export function savePendingPayment(sid: string, now: Date = new Date()): void {
+  if (!isValidSid(sid)) throw new Error("照合IDが不正です。");
+  const others = readPendingPayments(now).filter((p) => p.sid !== sid);
+  writePendingPayments([{ sid, savedAt: now.toISOString() }, ...others]);
+}
+
+// 支払済みを確認したとき、または利用者が確認をやめてトップへ戻ったときに呼ぶ。
+export function removePendingPayment(sid: string): void {
+  try {
+    writePendingPayments(readPendingPayments().filter((p) => p.sid !== sid));
+  } catch { /* 使えない場合は残っていないので何もしない */ }
+}
+
+const PAYMENT_RETURN_PARAMS = ["paysys_return", "result", "SID", "ERROR", "return_sid"];
+
+export interface PaymentReturnParams {
+  /** 戻りURLの照合ID。読み取れなければ null。 */
+  sid: string | null;
+  /** キャンセル・エラーで戻ってきた(支払いが完了していない可能性がある)。 */
+  incomplete: boolean;
+}
+
+/** Paysysからの戻りURLのクエリを読む。戻りパラメータが1つも無ければ null。 */
+export function readPaymentReturnParams(search: string): PaymentReturnParams | null {
+  const params = new URLSearchParams(search);
+  if (!PAYMENT_RETURN_PARAMS.some((key) => params.has(key))) return null;
+  // バックエンドが付ける return_sid を優先し、決済会社が付ける SID でも受け付ける。
+  const sid = [params.get("return_sid"), params.get("SID")].find(isValidSid) ?? null;
+  const result = params.get("result");
+  return { sid, incomplete: result === "cancel" || result === "error" || params.has("ERROR") };
+}
+
+// Paysysからの戻りパラメータをURLから消す(履歴は増やさない)。
+// 画面を表すハッシュ(#/payment/result 等)と react-router の履歴状態はそのまま残す。
+export function clearPaymentReturnParams(): void {
+  const url = new URL(window.location.href);
+  PAYMENT_RETURN_PARAMS.forEach(key => url.searchParams.delete(key));
+  window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
 }

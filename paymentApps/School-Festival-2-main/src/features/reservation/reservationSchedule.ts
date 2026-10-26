@@ -2,6 +2,8 @@
 
 export interface ReservationConfig {
   START_OFFSET_MINUTES: number;
+  FIRST_ORDER_HOUR: number;
+  FIRST_ORDER_MINUTE: number;
   LAST_ORDER_HOUR: number;
   LAST_ORDER_MINUTE: number;
   INTERVAL_MINUTES: number;
@@ -50,6 +52,25 @@ export function generateTimeOptions(
   startTime.setMinutes(roundedMinutes);
   startTime.setSeconds(0, 0);
   startTime.setMilliseconds(0);
+
+  // 受け取り開始時刻(FIRST_ORDER_HOUR:FIRST_ORDER_MINUTE)より前の候補は出さない。
+  // 開始前にアクセスした場合も、候補は受け取り開始時刻から並べる。
+  const firstOrderTime = new Date(now);
+  firstOrderTime.setHours(
+    reservationConfig.FIRST_ORDER_HOUR,
+    reservationConfig.FIRST_ORDER_MINUTE,
+    0,
+    0
+  );
+  if (startTime < firstOrderTime) {
+    startTime.setTime(firstOrderTime.getTime());
+  }
+
+  // 候補の value は日付を持たない "HH:mm" なので、日付をまたいだ候補(深夜の
+  // アクセスで翌日の時刻になるもの)は出さない。
+  if (startTime.toDateString() !== now.toDateString()) {
+    return [];
+  }
 
   const options: TimeOption[] = [];
   let currentTime = startTime;

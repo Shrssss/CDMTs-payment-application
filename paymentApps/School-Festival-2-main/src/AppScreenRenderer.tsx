@@ -1,5 +1,7 @@
-// 現在の画面状態に応じて各ページコンポーネントを切り替えて描画する補助コンポーネント。
-import type { Dispatch, SetStateAction } from "react";
+// URL と各ページコンポーネントの対応(ルーティング)をまとめるコンポーネント。
+// URL の一覧は constants/steps.ts の STEP_PATHS。各ページは必要な状態を useAppContext() から読む。
+import type { ReactElement } from "react";
+import { Navigate, Route, Routes } from "react-router";
 import { Footer } from "./components/Footer";
 import { TitlePage } from "./pages/TitlePage";
 import { MenuPage } from "./pages/MenuPage";
@@ -12,218 +14,54 @@ import { PaymentPayPayPage } from "./pages/PaymentPayPayPage";
 import { PaymentResultPage } from "./pages/PaymentResultPage";
 import { NumberTagPage } from "./pages/NumberTagPage";
 import { shouldShowFooter } from "./constants/stepRules";
-import type { Step } from "./constants/steps";
-import type {
-  AppAction,
-  Cart,
-  ImagePathMap,
-  NameMap,
-  PaymentState,
-  PriceMap,
-  SoldoutMap,
-} from "./types";
+import { STEP_PATHS, type Step } from "./constants/steps";
+import { useAppContext } from "./context/AppContext";
 
-interface AppScreenRendererProps {
-  onRefreshPaymentStatus?: () => void;
-  checkingPaymentStatus?: boolean;
-  step: Step;
-  next: () => void;
-  prev: () => void;
-  cart: Cart;
-  addItems: (id: number) => void;
-  removeItems: (id: number) => void;
-  prices: PriceMap;
-  itemNames: NameMap;
-  imagePaths: ImagePathMap;
-  isSoldout: SoldoutMap;
-  menuFetchError: boolean;
-  onRetryMenuFetch: () => void;
-  calculateDifferenceOfDrinks: () => number;
-  calculateSumInMenu: () => number;
-  calculateSumPrice: () => number;
-  selectedTime: string | null;
-  setSelectedTime: Dispatch<SetStateAction<string | null>>;
-  currentTestTime: Date | false;
-  paymentState: PaymentState;
-  setPaymentState: Dispatch<SetStateAction<PaymentState>>;
-  dispatch: Dispatch<AppAction>;
-  onOpenLegalNotice: () => void;
-  hasSavedOrder: boolean;
-  onViewSavedOrder: () => void;
-}
+export const AppScreenRenderer = () => {
+  const {
+    step,
+    next,
+    prev,
+    selectedTime,
+    currentTestTime,
+    paymentState,
+    paymentResultSid,
+    calculateDifferenceOfDrinks,
+    calculateSumInMenu,
+    calculateSumPrice,
+  } = useAppContext();
 
-type RenderPageProps = Omit<AppScreenRendererProps, "prev" | "calculateSumInMenu" | "calculateSumPrice">;
+  // URLを直接開いた・ブラウザの戻るで来た等で、その画面に必要な状態がないときの戻し先。
+  // 状態はメモリ上にしかないため、再読込するとここで手前の画面へ戻る。
+  const { outcome } = paymentState;
+  const hasProducts = calculateSumInMenu() > 0;
+  // 決済結果画面は、照合ID(?sid=)があればそこから復元できる。
+  const hasOutcome =
+    paymentResultSid != null ||
+    outcome.ok || outcome.orderId != null || outcome.error != null || outcome.status != null;
+  const needsOrder: Step | null = hasProducts ? null : "menu";
+  const needsReservation: Step | null = needsOrder ?? (selectedTime ? null : "time");
 
-const renderPage = ({
-  onRefreshPaymentStatus,
-  checkingPaymentStatus,
-  step,
-  next,
-  cart,
-  addItems,
-  removeItems,
-  prices,
-  itemNames,
-  imagePaths,
-  isSoldout,
-  menuFetchError,
-  onRetryMenuFetch,
-  calculateDifferenceOfDrinks,
-  selectedTime,
-  setSelectedTime,
-  currentTestTime,
-  paymentState,
-  setPaymentState,
-  dispatch,
-  onOpenLegalNotice,
-  hasSavedOrder,
-  onViewSavedOrder,
-}: RenderPageProps) => {
-  switch (step) {
-    case "title":
-      return (
-        <TitlePage
-          onStart={next}
-          onOpenLegalNotice={onOpenLegalNotice}
-          hasSavedOrder={hasSavedOrder}
-          onViewSavedOrder={onViewSavedOrder}
-        />
-      );
-    case "menu":
-      return (
-        <MenuPage
-          prices={prices}
-          itemNames={itemNames}
-          imagePaths={imagePaths}
-          cart={cart}
-          addItems={addItems}
-          removeItems={removeItems}
-          isSoldout={isSoldout}
-          fetchError={menuFetchError}
-          onRetry={onRetryMenuFetch}
-        />
-      );
-    case "drink":
-      return (
-        <DrinkPage
-          itemNames={itemNames}
-          imagePaths={imagePaths}
-          cart={cart}
-          addItems={addItems}
-          removeItems={removeItems}
-          difference={calculateDifferenceOfDrinks()}
-          isSoldout={isSoldout}
-        />
-      );
-    case "cart":
-      return <CartPage cart={cart} price={prices} names={itemNames} />;
-    case "time":
-      return <TimePage onTimeChange={setSelectedTime} testTime={currentTestTime || null} />;
-    case "paymentMethod":
-      return <PaymentMethodPage dispatch={dispatch} onOpenLegalNotice={onOpenLegalNotice} />;
-    case "payment":
-      return (
-        <PaymentPage
-          dispatch={dispatch}
-          setPaymentState={setPaymentState}
-          selectedTime={selectedTime}
-          cart={cart}
-          onOpenLegalNotice={onOpenLegalNotice}
-        />
-      );
-    case "paymentPaypay":
-      return (
-        <PaymentPayPayPage
-          dispatch={dispatch}
-          setPaymentState={setPaymentState}
-          selectedTime={selectedTime}
-          cart={cart}
-          onOpenLegalNotice={onOpenLegalNotice}
-        />
-      );
-    case "paymentResult":
-      return (
-        <PaymentResultPage
-          onRefreshPaymentStatus={onRefreshPaymentStatus}
-          checkingPaymentStatus={checkingPaymentStatus}
-          paymentState={paymentState}
-          selectedTime={selectedTime}
-          setPaymentState={setPaymentState}
-          dispatch={dispatch}
-        />
-      );
-    case "numberTag":
-      return (
-        <NumberTagPage
-          cart={cart}
-          price={prices}
-          names={itemNames}
-          paymentState={paymentState}
-        />
-      );
-    default:
-      return null;
-  }
-};
+  const guard = (redirect: Step | null, page: ReactElement) =>
+    redirect ? <Navigate to={STEP_PATHS[redirect]} replace /> : page;
 
-export const AppScreenRenderer = ({
-  onRefreshPaymentStatus,
-  checkingPaymentStatus,
-  // 現在の画面状態に応じて各ページコンポーネントを切り替えて描画する補助コンポーネント。
-  step,
-  next,
-  prev,
-  cart,
-  addItems,
-  removeItems,
-  prices,
-  itemNames,
-  imagePaths,
-  isSoldout,
-  menuFetchError,
-  onRetryMenuFetch,
-  calculateDifferenceOfDrinks,
-  calculateSumInMenu,
-  calculateSumPrice,
-  selectedTime,
-  setSelectedTime,
-  currentTestTime,
-  paymentState,
-  setPaymentState,
-  dispatch,
-  onOpenLegalNotice,
-  hasSavedOrder,
-  onViewSavedOrder,
-}: AppScreenRendererProps) => {
   return (
     <>
-      {renderPage({
-        onRefreshPaymentStatus,
-        checkingPaymentStatus,
-        step,
-        next,
-        cart,
-        addItems,
-        removeItems,
-        prices,
-        itemNames,
-        imagePaths,
-        isSoldout,
-        menuFetchError,
-        onRetryMenuFetch,
-        calculateDifferenceOfDrinks,
-        selectedTime,
-        setSelectedTime,
-        currentTestTime,
-        paymentState,
-        setPaymentState,
-        dispatch,
-        onOpenLegalNotice,
-        hasSavedOrder,
-        onViewSavedOrder,
-      })}
+      <Routes>
+        <Route path={STEP_PATHS.title} element={<TitlePage />} />
+        <Route path={STEP_PATHS.menu} element={<MenuPage />} />
+        <Route path={STEP_PATHS.drink} element={guard(needsOrder, <DrinkPage />)} />
+        <Route path={STEP_PATHS.cart} element={guard(needsOrder, <CartPage />)} />
+        <Route path={STEP_PATHS.time} element={guard(needsOrder, <TimePage />)} />
+        <Route path={STEP_PATHS.paymentMethod} element={guard(needsReservation, <PaymentMethodPage />)} />
+        <Route path={STEP_PATHS.payment} element={guard(needsReservation, <PaymentPage />)} />
+        <Route path={STEP_PATHS.paymentPaypay} element={guard(needsReservation, <PaymentPayPayPage />)} />
+        <Route path={STEP_PATHS.paymentResult} element={guard(hasOutcome ? null : "title", <PaymentResultPage />)} />
+        <Route path={STEP_PATHS.numberTag} element={guard(outcome.ok ? null : "title", <NumberTagPage />)} />
+        <Route path="*" element={<Navigate to={STEP_PATHS.title} replace />} />
+      </Routes>
 
-      {shouldShowFooter(step) && (
+      {step && shouldShowFooter(step) && (
         <footer>
           <Footer
             sumPrice={calculateSumPrice()}

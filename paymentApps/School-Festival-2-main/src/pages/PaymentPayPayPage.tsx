@@ -1,27 +1,14 @@
 // PayPay決済画面。usePayPayPaymentFlowフックが送信・結果更新を担う。
-import type { CSSProperties, Dispatch, SetStateAction } from "react";
+import type { CSSProperties } from "react";
 import { usePayPayPaymentFlow } from "../hooks/usePayPayPaymentFlow";
-import type { AppAction, Cart, PaymentState } from "../types";
+import { useAppContext } from "../context/AppContext";
 
-interface PaymentPayPayPageProps {
-  dispatch: Dispatch<AppAction>;
-  setPaymentState: Dispatch<SetStateAction<PaymentState>>;
-  selectedTime: string | null;
-  cart: Cart;
-  onOpenLegalNotice: () => void;
-}
-
-export const PaymentPayPayPage = ({
-  dispatch,
-  setPaymentState,
-  selectedTime,
-  cart,
-  onOpenLegalNotice,
-}: PaymentPayPayPageProps) => {
+export const PaymentPayPayPage = () => {
+  const { goto, setPaymentState, selectedTime, cart, openLegalNotice: onOpenLegalNotice } = useAppContext();
   const { handlePayWithPayPay, submitting } = usePayPayPaymentFlow({
     cart,
     selectedTime,
-    dispatch,
+    goto,
     setPaymentState,
   });
 
@@ -39,6 +26,11 @@ export const PaymentPayPayPage = ({
 
       <p style={{ color: "#808080" }}>この決済は外部決済サービス「PayPay」によって行われます</p>
       <p style={{ color: "#808080" }}>決済には数秒〜数十秒ほど時間がかかる場合があります。</p>
+
+      {/* 処理中でも押せるようにする(処理中のまま止まった場合の抜け道)。 */}
+      <button style={backBtnStyle} onClick={() => goto("paymentMethod")}>
+        お支払い方法の選択に戻る
+      </button>
 
       <p style={{ textAlign: "center", marginTop: "16px" }}>
         <button style={legalLinkStyle} onClick={onOpenLegalNotice}>
@@ -70,4 +62,16 @@ const legalLinkStyle: CSSProperties = {
   fontSize: "14px",
   cursor: "pointer",
   padding: 0,
+};
+
+const backBtnStyle: CSSProperties = {
+  display: "block",
+  width: "100%",
+  height: "44px",
+  fontSize: "16px",
+  borderRadius: "8px",
+  border: "2px solid #888",
+  backgroundColor: "#f4f4f4",
+  margin: "12px 0",
+  cursor: "pointer",
 };

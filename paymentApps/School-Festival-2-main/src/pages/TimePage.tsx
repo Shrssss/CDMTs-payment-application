@@ -1,13 +1,11 @@
 // 予約時刻の選択画面を組み立てるページコンポーネント。
 import { TimeSelect } from "../components/TimeSelect";
 import { StepPageLayout } from "../components/StepPageLayout";
+import { useAppContext } from "../context/AppContext";
 
-interface TimePageProps {
-  onTimeChange?: (value: string) => void;
-  testTime?: Date | null;
-}
-
-export const TimePage = ({ onTimeChange, testTime }: TimePageProps) => {
+export const TimePage = () => {
+  const { setSelectedTime: onTimeChange, currentTestTime } = useAppContext();
+  const testTime = currentTestTime || null;
   return (
     <StepPageLayout spacerHeight="0px">
       <div className="reservation-page-wrapper">
