@@ -1,4 +1,6 @@
-# CODE MATES Payment-Order Application バックエンド仕様書
+# OUT DATED
+
+CODE MATES Payment-Order Application バックエンド仕様書
 
 - 対象: `paymentApps`（Spring Boot / MyBatis / MySQL / Square API）
 - バージョン: 1.0
